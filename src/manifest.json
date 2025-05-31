@@ -11,19 +11,25 @@
     "https://*.zillow.com/*"
   ],
   "background": {
-    "service_worker": "background/background.js",
+    "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["https://*.zillow.com/*"],
-      "js": ["content/content.js"],
+      "js": ["ABCcontent.js"],
       "css": ["content/styles.css"]
     }
   ],
   "icons": {
-    "16": "../public/icons/icon16.png",
-    "48": "../public/icons/icon48.png",
-    "128": "../public/icons/icon128.png"
-  }
+    "16": "public/icons/icon16.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["data/hud_rental_data.json"],
+      "matches": ["https://*.zillow.com/*"]
+    }
+  ]
 } 
