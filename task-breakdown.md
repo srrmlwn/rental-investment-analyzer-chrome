@@ -37,17 +37,17 @@
 - [x] Set up content script injection logic
 - [x] Create DOM utility functions
 
-### 2.2 Data Extraction Service 🔴
-- [ ] Implement property data extraction
-  - [ ] Price
-  - [ ] Bedrooms/Bathrooms
-  - [ ] Square footage
-  - [ ] Property type
-  - [ ] Location data
-- [ ] Create data validation layer
-- [ ] Implement error handling
-- [ ] Add data transformation utilities
-- [ ] Create data extraction tests
+### 2.2 Data Extraction Service 🟢
+- [x] Implement property data extraction
+  - [x] Price
+  - [x] Bedrooms/Bathrooms
+  - [x] Square footage
+  - [x] Property type
+  - [x] Location data
+- [x] Create data validation layer
+- [x] Implement error handling
+- [x] Add data transformation utilities
+- [x] Create data extraction tests
 
 ### 2.3 HUD Data Integration 🔴
 - [ ] Process and optimize HUD dataset
@@ -168,9 +168,9 @@
 
 ## Progress Tracking
 - Total Tasks: 85
-- Completed: 21
+- Completed: 26
 - In Progress: 0
-- Not Started: 64
+- Not Started: 59
 - Blocked: 0
 
 Last Updated: 2024-03-19
@@ -180,6 +180,7 @@ Last Updated: 2024-03-19
 - Completed Phase 1.2 Chrome Extension Basics
 - Completed Phase 1.3 Data Infrastructure
 - Completed Phase 2.1 Zillow Page Integration (research, selectors, page detection, content script injection, and DOM utilities)
+- Completed Phase 2.2 Data Extraction Service (property data extraction, validation, error handling, transformation, and tests)
 - Added ESLint and Prettier configurations
 - Created basic project structure with placeholder files
 - Set up webpack and Jest configurations
