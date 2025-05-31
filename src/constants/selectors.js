@@ -11,7 +11,8 @@ const SELECTORS = {
     
     // Property Details
     PROPERTY_TYPE: 'meta[property="og:description"]', // Extract from meta description
-    SQUARE_FEET: '[data-testid="bed-bath-sqft-fact-container"] span:first-child',
+    SQUARE_FEET: '[data-testid="bed-bath-sqft-facts"] [data-testid="bed-bath-sqft-fact-container"] span:first-child',
+    SQUARE_FEET_CONTAINER: '[data-testid="bed-bath-sqft-facts"] [data-testid="bed-bath-sqft-fact-container"]',
     
     // Rental Estimate
     RENT_ZESTIMATE: '[data-testid="rent-zestimate"]',

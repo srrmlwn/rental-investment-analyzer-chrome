@@ -191,14 +191,18 @@ class DataExtractor {
         }
 
         // Fallback to DOM
-        const sqftElement = document.querySelector(SELECTORS.SQUARE_FEET);
-        if (sqftElement) {
-            console.log('🔍 Found square footage element:', sqftElement.textContent);
-            // The element contains just the number, so we can parse it directly
-            const sqft = parseInt(sqftElement.textContent.replace(/,/g, ''));
-            if (!isNaN(sqft)) {
-                console.log('✅ Extracted square footage from DOM:', sqft);
-                return sqft;
+        const containers = document.querySelectorAll(SELECTORS.SQUARE_FEET_CONTAINER);
+        for (const container of containers) {
+            const descriptionText = container.querySelector('span:last-child')?.textContent;
+            if (descriptionText === 'sqft') {
+                const valueText = container.querySelector('span:first-child')?.textContent;
+                if (valueText) {
+                    const sqft = parseInt(valueText.replace(/,/g, ''));
+                    if (!isNaN(sqft)) {
+                        console.log('✅ Extracted square footage from DOM:', sqft);
+                        return sqft;
+                    }
+                }
             }
         }
 
