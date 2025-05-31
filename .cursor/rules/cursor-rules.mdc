@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Rules for Rental Investment Analyzer Chrome Extension
+
+## 1. Project Context
+- This is a Chrome extension for analyzing rental investment properties on Zillow.
+- The extension extracts property data, estimates rental income (using HUD data), and calculates investment metrics (cap rate, cash flow, etc.).
+- The project uses a modular structure: `src/` contains content scripts, background scripts, services, utils, and constants.
+
+## 2. File/Directory Priorities
+- Always keep the following files in context for architectural and requirements reference:
+  - `README.md`
+  - `tech-architecture.md`
+  - `product-specs.md`
+  - `idea.md`
+- For code context, prioritize:
+  - `src/constants/selectors.js`
+  - `src/services/dataExtractor.js`
+  - Any file in `src/content/`, `src/background/`, `src/services/`, `src/utils/`, and `src/constants/`
+
+## 3. Data Extraction & Business Logic
+- Data extraction logic is in `src/services/dataExtractor.js` and uses selectors from `src/constants/selectors.js`.
+- HUD data is (or will be) stored in `src/data/hud_rental_data.json` and accessed via a service.
+- Business logic for analysis is in `src/services/propertyAnalyzer.js`.
+
+## 4. Workflow Reminders
+- When starting a new chat, always:
+  1. Reference the latest `tech-architecture.md` and `README.md` for project goals and structure.
+  2. Check for updates in `src/constants/selectors.js` and `src/services/dataExtractor.js` for data extraction logic.
+  3. If working on UI, check `src/content/sidebar.js` and related files.
+  4. If working on HUD data, check `src/data/hud_rental_data.json` and related service files.
+
+## 5. Git & Collaboration
+- All changes should be committed with clear messages.
+- Use feature branches for new features or major changes.
+- Keep `.gitignore` and `package.json` up to date.
+
+## 6. Testing
+- Unit tests are in `tests/unit/`
+- Integration tests are in `tests/integration/`
+- Use `npm run test` to run all tests.
+
+## 7. Build & Run
+- Use `npm run build` to build the extension.
+- Use `npm run dev` for development with hot reload (if configured).
+- Load the extension from the `dist/` directory in Chrome.
+
+## 8. General
+- Always clarify requirements or context if unsure.
+- Maintain modularity and separation of concerns in code.
+- Document new features or changes in `README.md` and/or `tech-architecture.md`.
