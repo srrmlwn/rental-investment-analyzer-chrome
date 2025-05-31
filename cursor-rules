@@ -1,0 +1,38 @@
+# Cursor Rules for Rental Investment Analyzer Chrome Extension
+
+## 1. Project Context
+// ... existing content ...
+
+## 2. File/Directory Priorities
+- Always keep the following files in context for architectural and requirements reference:
+  - `README.md`
+  - `tech-architecture.md`
+  - `product-specs.md`
+  - `idea.md`
+  - `task-breakdown.md`  # Added task breakdown to priority files
+- For code context, prioritize:
+  - `src/constants/selectors.js`
+  - `src/services/dataExtractor.js`
+  - Any file in `src/content/`, `src/background/`, `src/services/`, `src/utils/`, and `src/constants/`
+
+## 3. Task Management
+- Always update `task-breakdown.md` when:
+  - Starting a new feature
+  - Completing a task
+  - Identifying new requirements
+  - Changing task priorities
+  - Adding dependencies
+- Task breakdown format:
+  - Use clear, hierarchical structure
+  - Include status, priority, and dependencies
+  - Break down complex tasks into subtasks
+  - Mark completed items with [x]
+  - Keep future tasks section updated
+- When implementing features:
+  1. Check task-breakdown.md for existing tasks
+  2. Update task status as work progresses
+  3. Add new subtasks as they are identified
+  4. Document any blockers or dependencies
+
+## 4. Data Extraction & Business Logic
+// ... rest of existing content ... 
