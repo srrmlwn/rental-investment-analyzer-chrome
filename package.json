@@ -8,7 +8,10 @@
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
     "lint": "eslint src/**/*.js",
-    "format": "prettier --write \"src/**/*.{js,json,css,html}\""
+    "format": "prettier --write \"src/**/*.{js,json,css,html}\"",
+    "generate-icons": "node scripts/generate-icons.js",
+    "convert-hud-data": "node scripts/convert-hud-data.js",
+    "prebuild": "npm run generate-icons && npm run convert-hud-data"
   },
   "keywords": [
     "chrome-extension",
@@ -27,7 +30,9 @@
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
+    "sharp": "^0.33.2",
     "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "xlsx": "^0.18.5"
   }
 } 
