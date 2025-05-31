@@ -4,13 +4,23 @@ A Chrome extension that helps real estate investors analyze rental properties on
 
 ## Features
 
-- Extracts property data from Zillow listings
-- Calculates potential rental income using HUD data
-- Analyzes cash flow based on user-configurable parameters
-- Provides investment metrics like cap rate and cash-on-cash return
-- Works offline with bundled HUD rental data
+### Core Features (Implemented)
+- 🟢 Property data extraction from Zillow listings
+- 🟢 Rental income estimation with HUD data fallback
+- 🟢 Cash flow analysis with configurable parameters
+- 🟢 Investment metrics (cap rate, cash-on-cash return)
+- 🟢 Material Design UI with responsive sidebar
+- 🟢 Configuration management with Chrome storage
+- 🟢 Offline operation with bundled HUD data
 
-## Development Setup
+### Coming Soon
+- 🟡 Improved UI/UX with collapsible sections
+- 🟡 Enhanced error handling and loading states
+- 🟡 Keyboard shortcuts and accessibility features
+- 🟡 Performance optimizations
+- 🟡 Unit and integration tests
+
+## Quick Start
 
 1. Clone the repository:
    ```bash
@@ -30,33 +40,79 @@ A Chrome extension that helps real estate investors analyze rental properties on
 
 4. Load the extension in Chrome:
    - Open Chrome and go to `chrome://extensions/`
-   - Enable "Developer mode"
+   - Enable "Developer mode" (top right)
    - Click "Load unpacked"
    - Select the `dist` directory from this project
 
+5. Visit a Zillow property listing page to see the analyzer in action!
+
 ## Development
 
+### Available Scripts
 - `npm run dev` - Start development mode with watch
 - `npm run build` - Build for production
 - `npm run test` - Run tests
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
+- `npm run generate-icons` - Generate extension icons
 
-## Project Structure
-
+### Project Structure
 ```
 rental-investment-analyzer/
-├── src/                    # Source code
-│   ├── manifest.json      # Chrome extension manifest
-│   ├── content/           # Content scripts
-│   ├── background/        # Background scripts
-│   ├── services/          # Business logic
-│   ├── utils/             # Utility functions
-│   └── constants/         # Constants and configs
-├── public/                # Static assets
-├── tests/                 # Test files
-└── dist/                  # Built extension
+├── docs/                   # Documentation
+│   ├── architecture/      # Technical architecture docs
+│   ├── specs/            # Product specifications
+│   └── tasks/            # Task breakdown and tracking
+├── src/                   # Source code
+│   ├── manifest.json     # Chrome extension manifest
+│   ├── content/          # Content scripts
+│   │   ├── content.js    # Main content script
+│   │   ├── sidebar.js    # Sidebar UI management
+│   │   └── styles.css    # UI styles
+│   ├── background/       # Background scripts
+│   ├── services/         # Business logic
+│   │   ├── dataExtractor.js    # Zillow data extraction
+│   │   ├── rentalEstimator.js  # Rental estimation
+│   │   ├── cashFlowAnalyzer.js # Investment analysis
+│   │   └── configManager.js    # User configuration
+│   ├── utils/            # Utility functions
+│   └── constants/        # Constants and configs
+├── public/               # Static assets
+│   └── icons/           # Extension icons
+├── tests/               # Test files
+│   ├── unit/           # Unit tests
+│   └── integration/    # Integration tests
+├── scripts/            # Build and utility scripts
+└── dist/               # Built extension
 ```
+
+### Key Components
+1. **Data Extraction**
+   - Extracts property details from Zillow listings
+   - Uses HUD data for rental estimates when Zestimate is unavailable
+   - Validates and processes all input data
+
+2. **Analysis Engine**
+   - Calculates monthly and annual cash flow
+   - Computes key investment metrics
+   - Handles all financial calculations with proper validation
+
+3. **Configuration Management**
+   - User-configurable investment parameters
+   - Persistent settings via Chrome storage
+   - Default values for quick analysis
+
+4. **User Interface**
+   - Material Design implementation
+   - Responsive sidebar layout
+   - Clear metrics display with visual indicators
+   - Configuration panel for custom analysis
+
+## Documentation
+- [Technical Architecture](docs/architecture/tech-architecture.md)
+- [Product Specifications](docs/specs/product-specs.md)
+- [Task Breakdown](docs/tasks/task-breakdown.md)
+- [Development Guide](docs/development.md)
 
 ## Contributing
 
@@ -68,4 +124,9 @@ rental-investment-analyzer/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Status
+- Current Phase: 4 (UI Refinement)
+- Completed Features: 35/85
+- Next Focus: Sidebar enhancement and UX improvements 

@@ -372,6 +372,114 @@
   margin: 16px 0;
 }
 
+/* Configuration Panel */
+.ria-config-panel {
+    padding: 16px;
+    background-color: var(--md-surface);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.ria-config-panel.hidden {
+    display: none;
+}
+
+.ria-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ria-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ria-form-group label {
+    font-size: 0.9em;
+    color: var(--md-on-surface-variant);
+}
+
+.ria-form-group input {
+    padding: 8px 12px;
+    border: 1px solid var(--md-outline);
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: var(--md-surface);
+    color: var(--md-on-surface);
+}
+
+.ria-form-group input:focus {
+    outline: none;
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 2px var(--md-primary-container);
+}
+
+.ria-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Cash Flow Analysis */
+.ria-cash-flow-analysis {
+    margin-top: 16px;
+}
+
+.ria-card {
+    background-color: var(--md-surface);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.ria-card h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.1em;
+    color: var(--md-on-surface);
+}
+
+.ria-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ria-card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.ria-text-success {
+    color: var(--md-tertiary);
+}
+
+.ria-text-error {
+    color: var(--md-error);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .ria-sidebar {
+        width: 100%;
+        right: 0;
+    }
+
+    .ria-form-actions {
+        flex-direction: column;
+    }
+
+    .ria-form-actions button {
+        width: 100%;
+    }
+}
+
 /* Task Breakdown for Future Implementation:
  * TODO: Floating Button Implementation
  * 1. Research and implement proper modal detection and handling

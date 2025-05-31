@@ -4,6 +4,8 @@
 import { DataExtractor } from '../services/dataExtractor.js';
 import { SELECTORS } from '../constants/selectors.js';
 import rentalEstimator from '../services/rentalEstimator.js';
+import configManager from '../services/configManager.js';
+import cashFlowAnalyzer from '../services/cashFlowAnalyzer.js';
 
 class Sidebar {
     constructor() {
@@ -42,6 +44,8 @@ class Sidebar {
                 this.loadPropertyData();
             }, 0);
         }
+
+        this.isConfigPanelVisible = false;
     }
 
     detectListingPage() {
@@ -241,6 +245,47 @@ class Sidebar {
                         Loading property data...
                     </div>
                 </div>
+                <div class="ria-config-panel hidden">
+                    <h3 class="ria-text-primary">Investment Settings</h3>
+                    <form id="ria-config-form" class="ria-form">
+                        <div class="ria-form-group">
+                            <label for="mortgageRate">Mortgage Rate (%)</label>
+                            <input type="number" id="mortgageRate" name="mortgageRate" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="downPaymentPercent">Down Payment (%)</label>
+                            <input type="number" id="downPaymentPercent" name="downPaymentPercent" step="1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="propertyManagementFee">Property Management Fee (%)</label>
+                            <input type="number" id="propertyManagementFee" name="propertyManagementFee" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="maintenanceReserve">Maintenance Reserve (%)</label>
+                            <input type="number" id="maintenanceReserve" name="maintenanceReserve" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="insuranceRate">Insurance Rate (%)</label>
+                            <input type="number" id="insuranceRate" name="insuranceRate" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="propertyTaxRate">Property Tax Rate (%)</label>
+                            <input type="number" id="propertyTaxRate" name="propertyTaxRate" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="hoaFees">Monthly HOA Fees ($)</label>
+                            <input type="number" id="hoaFees" name="hoaFees" step="1" min="0" required>
+                        </div>
+                        <div class="ria-form-group">
+                            <label for="vacancyRate">Vacancy Rate (%)</label>
+                            <input type="number" id="vacancyRate" name="vacancyRate" step="0.1" min="0" max="100" required>
+                        </div>
+                        <div class="ria-form-actions">
+                            <button type="submit" class="ria-btn ria-btn-primary">Save Settings</button>
+                            <button type="button" class="ria-btn ria-btn-secondary" id="ria-reset-config">Reset to Defaults</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="ria-cash-flow-analysis">
                     <h3 class="ria-text-primary">Cash Flow Analysis</h3>
                     <div class="ria-loading">Analysis coming soon...</div>
@@ -277,6 +322,8 @@ class Sidebar {
         const closeBtn = sidebar.querySelector('.ria-close-btn');
         const refreshBtn = sidebar.querySelector('#ria-refresh-btn');
         const configBtn = sidebar.querySelector('#ria-config-btn');
+        const configForm = sidebar.querySelector('#ria-config-form');
+        const resetConfigBtn = sidebar.querySelector('#ria-reset-config');
 
         if (closeBtn) {
             closeBtn.onclick = () => this.hide();
@@ -294,12 +341,33 @@ class Sidebar {
         }
 
         if (configBtn) {
-            configBtn.onclick = () => {
-                console.log('[RIA] Config button clicked');
-                this.showConfigPanel();
+            configBtn.onclick = () => this.toggleConfigPanel();
+        }
+
+        if (configForm) {
+            configForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(configForm);
+                const config = {};
+                for (const [key, value] of formData.entries()) {
+                    config[key] = parseFloat(value);
+                }
+                const success = await configManager.saveConfig(config);
+                if (success) {
+                    this.loadPropertyData();
+                    this.toggleConfigPanel();
+                }
             };
-        } else {
-            console.error('[RIA] Config button not found');
+        }
+
+        if (resetConfigBtn) {
+            resetConfigBtn.onclick = async () => {
+                const success = await configManager.resetToDefaults();
+                if (success) {
+                    this.loadConfigValues();
+                    this.loadPropertyData();
+                }
+            };
         }
 
         console.log('[RIA] Event listeners added successfully');
@@ -351,9 +419,28 @@ class Sidebar {
         }
     }
 
-    showConfigPanel() {
-        // TODO: Implement configuration panel
-        console.log('Configuration panel coming soon...');
+    toggleConfigPanel() {
+        const configPanel = document.querySelector('.ria-config-panel');
+        if (configPanel) {
+            this.isConfigPanelVisible = !this.isConfigPanelVisible;
+            configPanel.classList.toggle('hidden');
+            if (this.isConfigPanelVisible) {
+                this.loadConfigValues();
+            }
+        }
+    }
+
+    loadConfigValues() {
+        const config = configManager.getConfig();
+        const form = document.getElementById('ria-config-form');
+        if (form) {
+            for (const [key, value] of Object.entries(config)) {
+                const input = form.elements[key];
+                if (input) {
+                    input.value = value;
+                }
+            }
+        }
     }
 
     async loadPropertyData() {
@@ -374,7 +461,13 @@ class Sidebar {
             const rentalEstimate = await rentalEstimator.getRentalEstimate(propertyData);
             console.log('[RIA] Rental estimate:', rentalEstimate);
             
+            // Analyze property
+            const analysis = cashFlowAnalyzer.analyzeProperty(propertyData, rentalEstimate);
+            console.log('[RIA] Property analysis:', analysis);
+            
+            // Update UI with property data and analysis
             this.updatePropertyData(this.formatPropertyData(propertyData, rentalEstimate));
+            this.updateCashFlowAnalysis(this.formatCashFlowAnalysis(analysis));
         } catch (error) {
             console.error('[RIA] Error loading property data:', error);
             this.updatePropertyData(`
@@ -432,6 +525,102 @@ class Sidebar {
                     </svg>
                     Not Available Yet
                 </div>
+            </div>
+        `;
+    }
+
+    formatCashFlowAnalysis(analysis) {
+        const { expenses, income, metrics, rentSource } = analysis;
+        const { formatCurrency, formatPercentage } = cashFlowAnalyzer;
+
+        return `
+            <div class="ria-card">
+                <h4 class="ria-text-primary">Monthly Income</h4>
+                <ul>
+                    <li>
+                        <span class="ria-text-secondary">Gross Rent</span>
+                        <span class="ria-text-primary">${formatCurrency(income.grossRent)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Vacancy Allowance</span>
+                        <span class="ria-text-primary">-${formatCurrency(income.vacancyAllowance)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Net Income</span>
+                        <span class="ria-text-primary">${formatCurrency(income.netIncome)}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="ria-card">
+                <h4 class="ria-text-primary">Monthly Expenses</h4>
+                <ul>
+                    <li>
+                        <span class="ria-text-secondary">Mortgage Payment</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.mortgagePayment)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Property Taxes</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.propertyTaxes)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Insurance</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.insurance)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Property Management</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.propertyManagement)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Maintenance Reserve</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.maintenanceReserve)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">HOA Fees</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.hoaFees)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Total Expenses</span>
+                        <span class="ria-text-primary">${formatCurrency(expenses.total)}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="ria-card">
+                <h4 class="ria-text-primary">Investment Metrics</h4>
+                <ul>
+                    <li>
+                        <span class="ria-text-secondary">Monthly Cash Flow</span>
+                        <span class="ria-text-primary ${metrics.monthlyCashFlow >= 0 ? 'ria-text-success' : 'ria-text-error'}">
+                            ${formatCurrency(metrics.monthlyCashFlow)}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Annual Cash Flow</span>
+                        <span class="ria-text-primary ${metrics.annualCashFlow >= 0 ? 'ria-text-success' : 'ria-text-error'}">
+                            ${formatCurrency(metrics.annualCashFlow)}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Cash on Cash Return</span>
+                        <span class="ria-text-primary">${formatPercentage(metrics.cashOnCashReturn)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Cap Rate</span>
+                        <span class="ria-text-primary">${formatPercentage(metrics.capRate)}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="ria-card">
+                <h4 class="ria-text-primary">Property Details</h4>
+                <ul>
+                    <li>
+                        <span class="ria-text-secondary">Price per Sq Ft</span>
+                        <span class="ria-text-primary">${formatCurrency(analysis.propertyDetails.pricePerSqFt)}</span>
+                    </li>
+                    <li>
+                        <span class="ria-text-secondary">Rent Source</span>
+                        <span class="ria-text-primary">${rentSource}</span>
+                    </li>
+                </ul>
             </div>
         `;
     }
