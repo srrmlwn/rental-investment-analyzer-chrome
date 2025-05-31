@@ -3,17 +3,71 @@
   position: fixed;
   right: 0;
   top: 0;
-  width: 300px;
+  width: 350px;
   height: 100vh;
   background: white;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transition: transform 0.3s ease-in-out;
+  margin-top: 60px; /* Adjust based on Zillow's header height */
+  height: calc(100vh - 60px);
 }
 
 /* Hide sidebar by default */
 .ria-sidebar.hidden {
-  display: none;
+  transform: translateX(100%);
+}
+
+.ria-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #4A90E2;
+  color: white;
+}
+
+.ria-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ria-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.ria-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ria-content {
+  padding: 20px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.ria-loading {
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+}
+
+/* Ensure sidebar doesn't interfere with Zillow's UI */
+.ria-sidebar * {
+  box-sizing: border-box;
 } 
