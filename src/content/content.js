@@ -3,6 +3,7 @@ console.log('Content script loaded');
 
 import { DataExtractor } from '../services/dataExtractor.js';
 import rentalEstimator from '../services/rentalEstimator.js';
+import Sidebar from './sidebar.js';
 
 class SidebarManager {
   constructor() {
@@ -63,52 +64,47 @@ class SidebarManager {
 class ContentScript {
     constructor() {
         this.dataExtractor = new DataExtractor();
-        this.sidebar = null; // We'll implement this later
+        this.sidebar = null;
     }
 
     async initialize() {
-        console.log('🎯 Rental Investment Analyzer: Content script initialized');
-        
+        console.log('🚀 Initializing Rental Investment Analyzer content script...');
+        this.sidebar = new Sidebar();
+        this.sidebar.show();
         try {
-            // Extract property data
-            console.log('📊 Extracting property data...');
             const propertyData = await this.dataExtractor.extractPropertyData();
-            console.log('✅ Property data extracted:', propertyData);
-
-            // Get rental estimate
-            console.log('💰 Getting rental estimate...');
-            try {
-                const rentalEstimate = await rentalEstimator.getRentalEstimate(propertyData);
-                console.log('✅ Rental estimate:', rentalEstimate);
-            } catch (error) {
-                console.error('❌ Error getting rental estimate:', error.message);
-            }
-
-            // Log what we would calculate (to be implemented)
-            console.log('📈 Would calculate:');
-            console.log('- Monthly cash flow');
-            console.log('- Annual cash flow');
-            console.log('- Cap rate');
-            console.log('- Cash-on-cash return');
-
+            // TODO: Use rentalEstimator and mortgage calculator for analysis
+            // For now, just display property data
+            this.sidebar.updatePropertyData(this.formatPropertyData(propertyData));
         } catch (error) {
-            console.error('❌ Error in content script:', error.message);
-            if (error.message.includes('Required information is missing')) {
-                console.log('💡 Tip: Make sure you are on a valid Zillow listing page');
-            }
+            console.error('Error in content script:', error);
+            this.sidebar.updatePropertyData(`<span style="color:red;">${error.message}</span>`);
         }
+    }
+
+    formatPropertyData(data) {
+        return `
+            <ul style="list-style:none;padding:0;">
+                <li><b>Price:</b> $${data.price.toLocaleString()}</li>
+                <li><b>Bedrooms:</b> ${data.bedrooms}</li>
+                <li><b>Bathrooms:</b> ${data.bathrooms}</li>
+                <li><b>Type:</b> ${data.propertyType}</li>
+                <li><b>Sqft:</b> ${data.squareFeet.toLocaleString()}</li>
+                <li><b>Zip Code:</b> ${data.zipCode}</li>
+                <li><b>Rent Estimate:</b> ${data.rentZestimate ? `$${data.rentZestimate.toLocaleString()}/mo` : 'N/A'}</li>
+            </ul>
+            <div style="margin-top:12px;">
+                <i>Analysis and user controls coming soon...</i>
+            </div>
+        `;
     }
 }
 
-// Initialize when the page is loaded
+// Initialize on page load
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        const contentScript = new ContentScript();
-        contentScript.initialize();
-    });
+    document.addEventListener('DOMContentLoaded', () => new ContentScript().initialize());
 } else {
-    const contentScript = new ContentScript();
-    contentScript.initialize();
+    new ContentScript().initialize();
 }
 
 // Export for testing
