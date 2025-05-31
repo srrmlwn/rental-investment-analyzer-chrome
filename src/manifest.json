@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Rental Investment Analyzer",
+  "version": "0.1.0",
+  "description": "Analyze rental investment properties on Zillow",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://*.zillow.com/*"
+  ],
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.zillow.com/*"],
+      "js": ["content/content.js"],
+      "css": ["content/styles.css"]
+    }
+  ],
+  "icons": {
+    "16": "../public/icons/icon16.png",
+    "48": "../public/icons/icon48.png",
+    "128": "../public/icons/icon128.png"
+  }
+} 
