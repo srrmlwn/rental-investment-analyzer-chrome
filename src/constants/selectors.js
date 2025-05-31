@@ -11,7 +11,7 @@ const SELECTORS = {
     
     // Property Details
     PROPERTY_TYPE: 'meta[property="og:description"]', // Extract from meta description
-    SQUARE_FEET: 'li:has(span:contains("sqft")) span',
+    SQUARE_FEET: '[data-testid="bed-bath-sqft-fact-container"] span:first-child',
     
     // Rental Estimate
     RENT_ZESTIMATE: '[data-testid="rent-zestimate"]',
@@ -28,6 +28,7 @@ const JSON_PATHS = {
     PROPERTY_TYPE: 'architecturalStyle',
     SQUARE_FEET: 'livingArea',
     ZIP_CODE: 'zipcode',
+    RENT_ZESTIMATE: 'rentZestimate',
 };
 
 // Regular Expressions for Data Extraction
@@ -42,6 +43,9 @@ const REGEX = {
     
     // Extract price from string like "$250,000"
     PRICE: /\$([\d,]+)/,
+    
+    // Extract rent from string like "$1,901/mo"
+    RENT: /\$([\d,]+)\/mo/,
 };
 
 // Error Messages
@@ -52,6 +56,7 @@ const ERROR_MESSAGES = {
     MISSING_PROPERTY_TYPE: 'Unable to determine property type',
     MISSING_SQUARE_FEET: 'Unable to find square footage',
     MISSING_ZIP_CODE: 'Unable to find zip code for rental estimate',
+    MISSING_RENTAL_ESTIMATE: 'Unable to get rental estimate. Neither Zestimate nor HUD data is available for this property.',
     INVALID_LISTING: 'This listing appears to be incomplete. Required information is missing.',
 };
 

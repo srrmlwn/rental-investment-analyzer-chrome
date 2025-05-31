@@ -1,40 +1,35 @@
-const { SELECTORS, JSON_PATHS, REGEX, ERROR_MESSAGES } = require('../constants/selectors');
+import { SELECTORS, JSON_PATHS, REGEX, ERROR_MESSAGES } from '../constants/selectors.js';
 
 class DataExtractor {
     constructor() {
         this.jsonData = null;
+        this.findJsonData();
     }
 
     /**
-     * Initialize the extractor by finding and parsing the page's JSON data
+     * Find and parse JSON data from the page
      */
-    async initialize() {
-        // Find the JSON data in the page
-        const jsonScript = document.querySelector('script[type="application/json"]');
-        if (jsonScript) {
+    findJsonData() {
+        console.log('🔍 Looking for JSON data in page...');
+        const scripts = document.querySelectorAll('script[type="application/json"]');
+        scripts.forEach(script => {
             try {
-                // Trim whitespace before parsing JSON
-                const jsonContent = jsonScript.textContent.trim();
-                console.log('Found JSON content:', jsonContent);
-                
-                if (jsonContent) {
-                    this.jsonData = JSON.parse(jsonContent);
-                    console.log('Parsed JSON data:', this.jsonData);
+                const data = JSON.parse(script.textContent);
+                if (data?.props?.pageProps?.componentProps?.gdpClientCache) {
+                    console.log('📦 Found Zillow JSON data');
+                    this.jsonData = data.props.pageProps.componentProps.gdpClientCache;
                 }
-            } catch (e) {
-                console.warn('Failed to parse JSON data:', e);
-                this.jsonData = null;
+            } catch (error) {
+                // Ignore parsing errors for non-matching scripts
             }
-        } else {
-            console.log('No JSON script found in the page');
-        }
+        });
     }
 
     /**
      * Extract all property data
      */
     async extractPropertyData() {
-        console.log('Starting property data extraction. JSON data available:', !!this.jsonData);
+        console.log('🏠 Starting property data extraction...');
         
         const data = {
             price: await this.extractPrice(),
@@ -43,7 +38,18 @@ class DataExtractor {
             propertyType: await this.extractPropertyType(),
             squareFeet: await this.extractSquareFeet(),
             zipCode: await this.extractZipCode(),
+            rentZestimate: await this.extractRentZestimate(),
         };
+
+        console.log('📝 Extracted data:', {
+            price: `$${data.price.toLocaleString()}`,
+            bedrooms: data.bedrooms,
+            bathrooms: data.bathrooms,
+            propertyType: data.propertyType,
+            squareFeet: `${data.squareFeet.toLocaleString()} sqft`,
+            zipCode: data.zipCode,
+            rentZestimate: data.rentZestimate ? `$${data.rentZestimate.toLocaleString()}/mo` : 'Not available'
+        });
 
         // Validate required fields
         this.validateRequiredData(data);
@@ -55,25 +61,27 @@ class DataExtractor {
      * Extract price from the listing
      */
     async extractPrice() {
+        console.log('💰 Extracting price...');
+        
         // Try JSON data first
         if (this.jsonData?.price) {
-            console.log('Extracting price from JSON:', this.jsonData.price);
+            console.log('✅ Found price in JSON:', this.jsonData.price);
             return this.jsonData.price;
         }
 
         // Fallback to DOM
         const priceElement = document.querySelector(SELECTORS.PRICE);
         if (priceElement) {
-            console.log('Found price element:', priceElement.textContent);
+            console.log('🔍 Found price element:', priceElement.textContent);
             const match = priceElement.textContent.match(REGEX.PRICE);
             if (match) {
                 const price = parseInt(match[1].replace(/,/g, ''));
-                console.log('Extracted price from DOM:', price);
+                console.log('✅ Extracted price from DOM:', price);
                 return price;
             }
         }
 
-        console.log('Failed to extract price from both JSON and DOM');
+        console.error('❌ Failed to extract price from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_PRICE);
     }
 
@@ -81,8 +89,11 @@ class DataExtractor {
      * Extract number of bedrooms
      */
     async extractBedrooms() {
+        console.log('🛏️ Extracting bedrooms...');
+        
         // Try JSON data first
         if (this.jsonData?.bedrooms) {
+            console.log('✅ Found bedrooms in JSON:', this.jsonData.bedrooms);
             return this.jsonData.bedrooms;
         }
 
@@ -90,12 +101,16 @@ class DataExtractor {
         const bedBathSection = document.querySelector(SELECTORS.BED_BATH_SECTION);
         if (bedBathSection) {
             const bedroomsText = bedBathSection.textContent;
+            console.log('🔍 Found bed/bath section:', bedroomsText);
             const match = bedroomsText.match(REGEX.BEDROOMS);
             if (match) {
-                return parseInt(match[1]);
+                const bedrooms = parseInt(match[1]);
+                console.log('✅ Extracted bedrooms from DOM:', bedrooms);
+                return bedrooms;
             }
         }
 
+        console.error('❌ Failed to extract bedrooms from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_BEDROOMS);
     }
 
@@ -103,8 +118,11 @@ class DataExtractor {
      * Extract number of bathrooms
      */
     async extractBathrooms() {
+        console.log('🚿 Extracting bathrooms...');
+        
         // Try JSON data first
         if (this.jsonData?.bathrooms) {
+            console.log('✅ Found bathrooms in JSON:', this.jsonData.bathrooms);
             return this.jsonData.bathrooms;
         }
 
@@ -112,12 +130,16 @@ class DataExtractor {
         const bedBathSection = document.querySelector(SELECTORS.BED_BATH_SECTION);
         if (bedBathSection) {
             const bathroomsText = bedBathSection.textContent;
+            console.log('🔍 Found bed/bath section:', bathroomsText);
             const match = bathroomsText.match(REGEX.BATHROOMS);
             if (match) {
-                return parseInt(match[1]);
+                const bathrooms = parseInt(match[1]);
+                console.log('✅ Extracted bathrooms from DOM:', bathrooms);
+                return bathrooms;
             }
         }
 
+        console.error('❌ Failed to extract bathrooms from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_BATHROOMS);
     }
 
@@ -125,8 +147,11 @@ class DataExtractor {
      * Extract property type
      */
     async extractPropertyType() {
+        console.log('🏘️ Extracting property type...');
+        
         // Try JSON data first
         if (this.jsonData?.architecturalStyle) {
+            console.log('✅ Found property type in JSON:', this.jsonData.architecturalStyle);
             return this.jsonData.architecturalStyle;
         }
 
@@ -134,11 +159,22 @@ class DataExtractor {
         const metaDesc = document.querySelector(SELECTORS.PROPERTY_TYPE);
         if (metaDesc) {
             const content = metaDesc.getAttribute('content');
-            if (content.includes('Single Family')) return 'Single Family';
-            if (content.includes('Condo')) return 'Condo';
-            if (content.includes('Multi Family')) return 'Multi Family';
+            console.log('🔍 Found meta description:', content);
+            if (content.includes('Single Family')) {
+                console.log('✅ Extracted property type: Single Family');
+                return 'Single Family';
+            }
+            if (content.includes('Condo')) {
+                console.log('✅ Extracted property type: Condo');
+                return 'Condo';
+            }
+            if (content.includes('Multi Family')) {
+                console.log('✅ Extracted property type: Multi Family');
+                return 'Multi Family';
+            }
         }
 
+        console.error('❌ Failed to extract property type from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_PROPERTY_TYPE);
     }
 
@@ -146,56 +182,103 @@ class DataExtractor {
      * Extract square footage
      */
     async extractSquareFeet() {
+        console.log('📏 Extracting square footage...');
+        
         // Try JSON data first
         if (this.jsonData?.livingArea) {
+            console.log('✅ Found square footage in JSON:', this.jsonData.livingArea);
             return this.jsonData.livingArea;
         }
 
         // Fallback to DOM
         const sqftElement = document.querySelector(SELECTORS.SQUARE_FEET);
         if (sqftElement) {
-            const match = sqftElement.textContent.match(REGEX.SQUARE_FEET);
-            if (match) {
-                return parseInt(match[1]);
+            console.log('🔍 Found square footage element:', sqftElement.textContent);
+            // The element contains just the number, so we can parse it directly
+            const sqft = parseInt(sqftElement.textContent.replace(/,/g, ''));
+            if (!isNaN(sqft)) {
+                console.log('✅ Extracted square footage from DOM:', sqft);
+                return sqft;
             }
         }
 
+        console.error('❌ Failed to extract square footage from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_SQUARE_FEET);
     }
 
     /**
-     * Extract zip code from address
+     * Extract zip code
      */
     async extractZipCode() {
+        console.log('📍 Extracting zip code...');
+        
         // Try JSON data first
         if (this.jsonData?.zipcode) {
+            console.log('✅ Found zip code in JSON:', this.jsonData.zipcode);
             return this.jsonData.zipcode;
         }
 
         // Fallback to meta title
-        const addressMeta = document.querySelector(SELECTORS.ADDRESS);
-        if (addressMeta) {
-            const content = addressMeta.getAttribute('content');
+        const metaTitle = document.querySelector(SELECTORS.ADDRESS);
+        if (metaTitle) {
+            const content = metaTitle.getAttribute('content');
+            console.log('🔍 Found meta title:', content);
             const match = content.match(REGEX.ZIP_CODE);
             if (match) {
-                return match[0];
+                const zipCode = match[0];
+                console.log('✅ Extracted zip code from DOM:', zipCode);
+                return zipCode;
             }
         }
 
+        console.error('❌ Failed to extract zip code from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_ZIP_CODE);
+    }
+
+    /**
+     * Extract Rent Zestimate
+     * Returns null if not available (will fall back to HUD data)
+     */
+    async extractRentZestimate() {
+        console.log('💰 Extracting Rent Zestimate...');
+        
+        // Try JSON data first
+        if (this.jsonData?.rentZestimate) {
+            console.log('✅ Found Rent Zestimate in JSON:', this.jsonData.rentZestimate);
+            return this.jsonData.rentZestimate;
+        }
+
+        // Fallback to DOM
+        const rentElement = document.querySelector(SELECTORS.RENT_ZESTIMATE);
+        if (rentElement) {
+            console.log('🔍 Found Rent Zestimate element:', rentElement.textContent);
+            const match = rentElement.textContent.match(REGEX.RENT);
+            if (match) {
+                const rent = parseInt(match[1].replace(/,/g, ''));
+                console.log('✅ Extracted Rent Zestimate from DOM:', rent);
+                return rent;
+            }
+        }
+
+        console.log('ℹ️ No Rent Zestimate available - will fall back to HUD data');
+        return null;
     }
 
     /**
      * Validate that all required data is present
      */
     validateRequiredData(data) {
+        console.log('🔍 Validating required data...');
+        // Note: rentZestimate is not required as we can fall back to HUD data
         const requiredFields = ['price', 'bedrooms', 'bathrooms', 'propertyType', 'zipCode'];
         const missingFields = requiredFields.filter(field => !data[field]);
 
         if (missingFields.length > 0) {
+            console.error('❌ Missing required fields:', missingFields);
             throw new Error(ERROR_MESSAGES.INVALID_LISTING);
         }
+        console.log('✅ All required data is present');
     }
 }
 
-module.exports = { DataExtractor }; 
+export { DataExtractor }; 
