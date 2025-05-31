@@ -29,15 +29,15 @@
 - [x] Set up Chrome storage integration
 - [x] Create data validation utilities
 
-## Phase 2: Core Data Extraction 🔴
-### 2.1 Zillow Page Integration
-- [ ] Research and document Zillow page structure
-- [ ] Create selectors for property data
-- [ ] Implement basic page detection
-- [ ] Set up content script injection logic
-- [ ] Create DOM utility functions
+## Phase 2: Core Data Extraction 🟢
+### 2.1 Zillow Page Integration 🟢
+- [x] Research and document Zillow page structure
+- [x] Create selectors for property data
+- [x] Implement basic page detection
+- [x] Set up content script injection logic
+- [x] Create DOM utility functions
 
-### 2.2 Data Extraction Service
+### 2.2 Data Extraction Service 🔴
 - [ ] Implement property data extraction
   - [ ] Price
   - [ ] Bedrooms/Bathrooms
@@ -49,7 +49,7 @@
 - [ ] Add data transformation utilities
 - [ ] Create data extraction tests
 
-### 2.3 HUD Data Integration
+### 2.3 HUD Data Integration 🔴
 - [ ] Process and optimize HUD dataset
 - [ ] Create zip code mapping
 - [ ] Implement rental data lookup service
@@ -168,9 +168,9 @@
 
 ## Progress Tracking
 - Total Tasks: 85
-- Completed: 16
+- Completed: 21
 - In Progress: 0
-- Not Started: 69
+- Not Started: 64
 - Blocked: 0
 
 Last Updated: 2024-03-19
@@ -179,6 +179,7 @@ Last Updated: 2024-03-19
 - Completed Phase 1.1 setup tasks
 - Completed Phase 1.2 Chrome Extension Basics
 - Completed Phase 1.3 Data Infrastructure
+- Completed Phase 2.1 Zillow Page Integration (research, selectors, page detection, content script injection, and DOM utilities)
 - Added ESLint and Prettier configurations
 - Created basic project structure with placeholder files
 - Set up webpack and Jest configurations
