@@ -1,12 +1,14 @@
 module.exports = {
   testEnvironment: 'jsdom',
-  moduleFileExtensions: ['js', 'json'],
   transform: {
     '^.+\\.js$': 'babel-jest',
   },
-  testMatch: ['**/tests/**/*.test.js'],
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov'],
-  setupFiles: ['./tests/setup.js'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(jsdom|whatwg-url)/)',
+  ],
+  moduleNameMapper: {
+    // Handle module aliases (if any)
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  setupFiles: ['<rootDir>/tests/setup.js'],
 }; 

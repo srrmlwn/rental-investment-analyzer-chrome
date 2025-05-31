@@ -1,6 +1,6 @@
 // Zillow Listing Page Selectors
 
-export const SELECTORS = {
+const SELECTORS = {
     // Price
     PRICE: '[data-testid="price"]',
     
@@ -21,7 +21,7 @@ export const SELECTORS = {
 };
 
 // JSON Data Paths (for extracting from page's JSON data)
-export const JSON_PATHS = {
+const JSON_PATHS = {
     PRICE: 'price',
     BEDROOMS: 'bedrooms',
     BATHROOMS: 'bathrooms',
@@ -31,7 +31,7 @@ export const JSON_PATHS = {
 };
 
 // Regular Expressions for Data Extraction
-export const REGEX = {
+const REGEX = {
     // Extract numbers from strings like "Bedrooms: 4"
     BEDROOMS: /Bedrooms:\s*(\d+)/,
     BATHROOMS: /Bathrooms:\s*(\d+)/,
@@ -45,7 +45,7 @@ export const REGEX = {
 };
 
 // Error Messages
-export const ERROR_MESSAGES = {
+const ERROR_MESSAGES = {
     MISSING_PRICE: 'Unable to find property price',
     MISSING_BEDROOMS: 'Unable to find number of bedrooms',
     MISSING_BATHROOMS: 'Unable to find number of bathrooms',
@@ -53,4 +53,11 @@ export const ERROR_MESSAGES = {
     MISSING_SQUARE_FEET: 'Unable to find square footage',
     MISSING_ZIP_CODE: 'Unable to find zip code for rental estimate',
     INVALID_LISTING: 'This listing appears to be incomplete. Required information is missing.',
+};
+
+module.exports = {
+    SELECTORS,
+    JSON_PATHS,
+    REGEX,
+    ERROR_MESSAGES
 }; 

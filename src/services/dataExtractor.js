@@ -1,6 +1,6 @@
-import { SELECTORS, JSON_PATHS, REGEX, ERROR_MESSAGES } from '../constants/selectors';
+const { SELECTORS, JSON_PATHS, REGEX, ERROR_MESSAGES } = require('../constants/selectors');
 
-export class DataExtractor {
+class DataExtractor {
     constructor() {
         this.jsonData = null;
     }
@@ -13,10 +13,20 @@ export class DataExtractor {
         const jsonScript = document.querySelector('script[type="application/json"]');
         if (jsonScript) {
             try {
-                this.jsonData = JSON.parse(jsonScript.textContent);
+                // Trim whitespace before parsing JSON
+                const jsonContent = jsonScript.textContent.trim();
+                console.log('Found JSON content:', jsonContent);
+                
+                if (jsonContent) {
+                    this.jsonData = JSON.parse(jsonContent);
+                    console.log('Parsed JSON data:', this.jsonData);
+                }
             } catch (e) {
                 console.warn('Failed to parse JSON data:', e);
+                this.jsonData = null;
             }
+        } else {
+            console.log('No JSON script found in the page');
         }
     }
 
@@ -24,6 +34,8 @@ export class DataExtractor {
      * Extract all property data
      */
     async extractPropertyData() {
+        console.log('Starting property data extraction. JSON data available:', !!this.jsonData);
+        
         const data = {
             price: await this.extractPrice(),
             bedrooms: await this.extractBedrooms(),
@@ -45,18 +57,23 @@ export class DataExtractor {
     async extractPrice() {
         // Try JSON data first
         if (this.jsonData?.price) {
+            console.log('Extracting price from JSON:', this.jsonData.price);
             return this.jsonData.price;
         }
 
         // Fallback to DOM
         const priceElement = document.querySelector(SELECTORS.PRICE);
         if (priceElement) {
+            console.log('Found price element:', priceElement.textContent);
             const match = priceElement.textContent.match(REGEX.PRICE);
             if (match) {
-                return parseInt(match[1].replace(/,/g, ''));
+                const price = parseInt(match[1].replace(/,/g, ''));
+                console.log('Extracted price from DOM:', price);
+                return price;
             }
         }
 
+        console.log('Failed to extract price from both JSON and DOM');
         throw new Error(ERROR_MESSAGES.MISSING_PRICE);
     }
 
@@ -150,6 +167,12 @@ export class DataExtractor {
      * Extract zip code from address
      */
     async extractZipCode() {
+        // Try JSON data first
+        if (this.jsonData?.zipcode) {
+            return this.jsonData.zipcode;
+        }
+
+        // Fallback to meta title
         const addressMeta = document.querySelector(SELECTORS.ADDRESS);
         if (addressMeta) {
             const content = addressMeta.getAttribute('content');
@@ -173,4 +196,6 @@ export class DataExtractor {
             throw new Error(ERROR_MESSAGES.INVALID_LISTING);
         }
     }
-} 
+}
+
+module.exports = { DataExtractor }; 
