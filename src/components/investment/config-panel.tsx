@@ -75,10 +75,10 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
       return (
         <LabeledSlider
           label={param.label}
-          value={value}
-          min={param.min || 0}
-          max={param.max || 100}
-          step={param.step || 1}
+          value={value ?? 0} // Provide default of 0 if value is undefined
+          min={param.min ?? 0}
+          max={param.max ?? 100}
+          step={param.step ?? 1}
           unit={param.unit}
           onChange={(newValue) => handleConfigChange(param.key, newValue)}
           disabled={param.isAutoFilled}
