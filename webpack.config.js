@@ -9,7 +9,9 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
+    filename: (pathData) => {
+      return pathData.chunk.name === 'content' ? 'ABCcontent.js' : '[name].js';
+    },
     clean: true,
   },
   module: {
@@ -20,15 +22,16 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
-              presets: [
-                '@babel/preset-env',
-                '@babel/preset-react',
-                '@babel/preset-typescript',
-              ],
+              cacheDirectory: true,
+              babelrc: true
             },
           },
         ],
-        exclude: /node_modules/,
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, 'node_modules/react'),
+          path.resolve(__dirname, 'node_modules/react-dom')
+        ],
       },
       {
         test: /\.css$/,
@@ -40,13 +43,21 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
     },
+    fallback: {
+      "react": require.resolve("react"),
+      "react-dom": require.resolve("react-dom")
+    }
   },
   plugins: [
     new CopyPlugin({
       patterns: [
         { from: 'public', to: '.' },
         { from: 'manifest.json', to: '.' },
+        { from: 'src/styles', to: 'styles' },
+        { from: 'src/content/styles.css', to: 'content/styles.css' },
       ],
     }),
   ],

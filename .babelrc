@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "chrome": "88"
+      }
+    }],
+    ["@babel/preset-react", {
+      "runtime": "automatic"
+    }],
+    "@babel/preset-typescript"
+  ],
+  "plugins": []
+} 
