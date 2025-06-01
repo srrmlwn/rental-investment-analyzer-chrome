@@ -39,6 +39,7 @@ class DataExtractor {
             squareFeet: await this.extractSquareFeet(),
             zipCode: await this.extractZipCode(),
             rentZestimate: await this.extractRentZestimate(),
+            propertyTaxes: await this.extractPropertyTaxes(),
         };
 
         console.log('📝 Extracted data:', {
@@ -48,7 +49,8 @@ class DataExtractor {
             propertyType: data.propertyType,
             squareFeet: `${data.squareFeet.toLocaleString()} sqft`,
             zipCode: data.zipCode,
-            rentZestimate: data.rentZestimate ? `$${data.rentZestimate.toLocaleString()}/mo` : 'Not available'
+            rentZestimate: data.rentZestimate ? `$${data.rentZestimate.toLocaleString()}/mo` : 'Not available',
+            propertyTaxes: data.propertyTaxes ? `$${data.propertyTaxes.toLocaleString()}/yr` : 'Not available'
         });
 
         // Validate required fields
@@ -265,6 +267,37 @@ class DataExtractor {
         }
 
         console.log('ℹ️ No Rent Zestimate available - will fall back to HUD data');
+        return null;
+    }
+
+    /**
+     * Extract property taxes from the listing
+     * Returns null if not available (will fall back to default rate)
+     */
+    async extractPropertyTaxes() {
+        console.log('💰 Extracting property taxes...');
+        
+        // Try JSON data first
+        if (this.jsonData?.propertyTaxes) {
+            console.log('✅ Found property taxes in JSON:', this.jsonData.propertyTaxes);
+            return this.jsonData.propertyTaxes;
+        }
+
+        // Fallback to DOM
+        const taxElement = document.querySelector(SELECTORS.PROPERTY_TAXES);
+        if (taxElement) {
+            console.log('🔍 Found property taxes element:', taxElement.textContent);
+            const match = taxElement.textContent.match(REGEX.PROPERTY_TAXES);
+            if (match) {
+                // Convert monthly to annual
+                const monthlyTax = parseInt(match[1].replace(/,/g, ''));
+                const annualTax = monthlyTax * 12;
+                console.log('✅ Extracted annual property taxes from DOM:', annualTax);
+                return annualTax;
+            }
+        }
+
+        console.log('ℹ️ No property taxes available - will use default rate');
         return null;
     }
 

@@ -17,6 +17,9 @@ const SELECTORS = {
     // Rental Estimate
     RENT_ZESTIMATE: '[data-testid="rent-zestimate"]',
     
+    // Property Taxes
+    PROPERTY_TAXES: '#label-property-tax .hNuOht', // Monthly property taxes
+    
     // Address (for zip code lookup)
     ADDRESS: 'meta[property="og:title"]', // Extract from meta title
 };
@@ -30,6 +33,7 @@ const JSON_PATHS = {
     SQUARE_FEET: 'livingArea',
     ZIP_CODE: 'zipcode',
     RENT_ZESTIMATE: 'rentZestimate',
+    PROPERTY_TAXES: 'propertyTaxes', // Annual property taxes
 };
 
 // Regular Expressions for Data Extraction
@@ -47,6 +51,9 @@ const REGEX = {
     
     // Extract rent from string like "$1,901/mo"
     RENT: /\$([\d,]+)\/mo/,
+
+    // Extract property taxes from string like "$308"
+    PROPERTY_TAXES: /\$([\d,]+)/,
 };
 
 // Error Messages
@@ -58,6 +65,7 @@ const ERROR_MESSAGES = {
     MISSING_SQUARE_FEET: 'Unable to find square footage',
     MISSING_ZIP_CODE: 'Unable to find zip code for rental estimate',
     MISSING_RENTAL_ESTIMATE: 'Unable to get rental estimate. Neither Zestimate nor HUD data is available for this property.',
+    MISSING_PROPERTY_TAXES: 'Unable to find property taxes',
     INVALID_LISTING: 'This listing appears to be incomplete. Required information is missing.',
 };
 
