@@ -26,7 +26,7 @@
   height: 100vh;
   background: var(--md-background);
   box-shadow: var(--md-elevation-2);
-  z-index: 1000;
+  z-index: 2147483647; /* Maximum z-index value */
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   transition: var(--md-transition);
   margin-top: 60px;
@@ -34,6 +34,11 @@
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--md-divider);
+  transform: translateX(100%);
+}
+
+.ria-sidebar.open {
+  transform: translateX(0);
 }
 
 /* Modal-specific styles */
@@ -309,9 +314,36 @@
   box-shadow: var(--md-elevation-2);
   cursor: pointer;
   transition: var(--md-transition);
-  z-index: 999;
+  z-index: 2147483646; /* Just below the sidebar */
   border: none;
   font-weight: 500;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ria-floating-btn:hover {
+  background: var(--md-primary-dark);
+  box-shadow: var(--md-elevation-3);
+  transform: scale(1.1);
+}
+
+.ria-floating-btn.hidden {
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Container styles */
+#rental-investment-analyzer-sidebar,
+#rental-investment-analyzer-floating-button {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+#rental-investment-analyzer-sidebar > *,
+#rental-investment-analyzer-floating-button > * {
+  pointer-events: auto;
 }
 
 /* Modal-specific floating button styles */
@@ -319,12 +351,6 @@
   z-index: 999999;
   right: 32px;
   bottom: 32px;
-}
-
-.ria-floating-btn:hover {
-  background: var(--md-primary-dark);
-  box-shadow: var(--md-elevation-3);
-  transform: translateY(-2px);
 }
 
 /* Responsive Design */
@@ -795,4 +821,237 @@
 /* Utility Classes */
 .hidden {
     display: none !important;
+}
+
+/* Container styles */
+.ria-sidebar-container {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 480px; /* Default width */
+  min-width: 320px; /* Minimum width */
+  max-width: 800px; /* Maximum width */
+  display: block !important; /* Force display */
+}
+
+.ria-floating-btn-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  z-index: 2147483646;
+  pointer-events: none;
+  display: block !important; /* Force display */
+}
+
+/* Sidebar styles */
+.ria-sidebar {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 480px; /* Default width */
+  min-width: 320px; /* Minimum width */
+  max-width: 800px; /* Maximum width */
+  height: calc(100vh - 2rem);
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 2147483647;
+  pointer-events: auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95);
+  display: block !important; /* Force display */
+}
+
+.ria-sidebar.open {
+  transform: translateX(0);
+}
+
+/* Drag handle for resizing */
+.ria-resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.ria-resize-handle:hover,
+.ria-resize-handle.resizing {
+  background-color: var(--md-primary);
+}
+
+/* Update content styles to be responsive */
+.ria-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: transparent;
+  height: calc(100% - 4rem);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Make cards responsive */
+.ria-card,
+.ria-property-data,
+.ria-cash-flow-analysis {
+  width: 100%;
+  min-width: 0; /* Allow cards to shrink below their content size */
+  overflow: hidden; /* Prevent content from overflowing */
+}
+
+/* Make metrics grid responsive */
+.ria-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Make details grid responsive */
+.ria-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Make sliders responsive */
+.ria-sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Update responsive styles */
+@media (max-width: 768px) {
+  .ria-sidebar-container {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  
+  .ria-sidebar {
+    width: calc(100% - 2rem);
+    min-width: calc(100% - 2rem);
+    max-width: calc(100% - 2rem);
+    right: 1rem;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+    resize: none; /* Disable resizing on mobile */
+  }
+
+  .ria-content {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+
+  .ria-metrics-grid,
+  .ria-details,
+  .ria-sliders {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+}
+
+/* Add styles for resizing state */
+.ria-sidebar.resizing {
+  transition: none; /* Disable transitions while resizing */
+  user-select: none; /* Prevent text selection while resizing */
+}
+
+.ria-sidebar.resizing * {
+  pointer-events: none; /* Disable pointer events while resizing */
+}
+
+.ria-sidebar.resizing .ria-resize-handle {
+  pointer-events: auto; /* Keep resize handle active */
+}
+
+/* Floating button styles */
+.ria-floating-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background-color: #2563eb;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex !important; /* Force display */
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2147483646;
+}
+
+.ria-floating-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.ria-floating-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* Ensure the button is visible */
+.ria-floating-btn-container * {
+  pointer-events: auto;
+}
+
+/* Ensure the sidebar content is visible */
+.ria-sidebar * {
+  pointer-events: auto;
+}
+
+/* Update header styles to match new design */
+.ria-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: var(--md-primary);
+  color: white;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+/* Update modal-specific styles */
+.modal-container .ria-sidebar {
+  position: fixed;
+  margin: 1rem;
+  height: calc(100vh - 2rem);
+  z-index: 999999;
+  right: 0;
+  top: 0;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Update responsive styles */
+@media (max-width: 768px) {
+  .ria-sidebar-container {
+    width: 100%;
+  }
+  
+  .ria-sidebar {
+    width: calc(100% - 2rem);
+    right: 1rem;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+  }
 } 
