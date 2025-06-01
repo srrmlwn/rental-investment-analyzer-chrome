@@ -508,4 +508,291 @@
  *    - Optimize DOM operations
  *    - Minimize reflows/repaints
  *    - Handle memory management
- */ 
+ */
+
+/* Remove all property card styles */
+/* Property Card Component Styles */
+.ria-property-card,
+.ria-property-header,
+.ria-property-title,
+.ria-property-price,
+.ria-property-meta,
+.ria-meta-item,
+.ria-property-details,
+.ria-detail-section,
+.ria-detail-item,
+.ria-label,
+.ria-value,
+.ria-source {
+    /* Remove all these style definitions */
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .ria-property-card {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .ria-property-meta {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .ria-property-title {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ria-property-price {
+        font-size: 1.25rem;
+    }
+}
+
+/* Rental Investment Analyzer Styles */
+
+/* Card Container */
+.ria-investment-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 24px 0;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #1a1a1a;
+    transition: box-shadow 0.2s ease;
+}
+
+.ria-investment-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ria-investment-card.hidden {
+    display: none;
+}
+
+/* Card Header */
+.ria-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ria-card-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.ria-close-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #666;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.ria-close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1a1a1a;
+}
+
+/* Metrics Grid */
+.ria-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ria-metric-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.ria-metric-card h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    margin: 0 0 8px 0;
+}
+
+.ria-metric-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.ria-metric-card.positive .ria-metric-value {
+    color: #00a862;
+}
+
+.ria-metric-card.negative .ria-metric-value {
+    color: #dc3545;
+}
+
+/* Details Sections */
+.ria-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.ria-detail-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.ria-detail-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+}
+
+.ria-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.ria-detail-item.total {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e9ecef;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Quick Adjust Section */
+.ria-quick-adjust {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e9ecef;
+}
+
+.ria-quick-adjust h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+}
+
+.ria-sliders {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.ria-slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ria-slider-group label {
+    font-size: 14px;
+    color: #666;
+}
+
+.ria-slider-group input[type="range"] {
+    width: 100%;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.ria-slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0066cc;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.ria-slider-group input[type="range"]::-webkit-slider-thumb:hover {
+    background: #0052a3;
+}
+
+.ria-slider-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+    text-align: right;
+}
+
+/* Loading State */
+.ria-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px;
+    color: #666;
+    font-size: 14px;
+}
+
+.ria-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.ria-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px;
+    color: #dc3545;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ria-investment-card {
+        margin: 16px 0;
+        padding: 16px;
+    }
+
+    .ria-metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .ria-details {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .ria-sliders {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+} 

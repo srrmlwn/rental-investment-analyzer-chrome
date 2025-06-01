@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Cursor Rules for Rental Investment Analyzer Chrome Extension
 
@@ -11,7 +11,7 @@ alwaysApply: false
 - The project uses a modular structure: `src/` contains content scripts, background scripts, services, utils, and constants.
 
 ## 2. File/Directory Priorities
-- Always keep the following files in context for architectural and requirements reference:
+- Always keep the following files in context for architectural and requirements reference. These are all under the docs/ directory.
   - `README.md`
   - `tech-architecture.md`
   - `product-specs.md`
