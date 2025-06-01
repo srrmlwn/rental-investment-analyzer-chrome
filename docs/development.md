@@ -78,28 +78,126 @@
 
 ## Debugging
 
-### Common Issues
-1. **Extension not loading**
-   - Check manifest.json
-   - Verify build output
-   - Check console for errors
+### Component Injection Debugging
+The extension uses a comprehensive logging system for debugging component injection:
 
-2. **Data extraction failing**
-   - Verify selectors
-   - Check Zillow page structure
-   - Monitor network requests
+1. **Console Logging**
+   - All logs are prefixed with `[RIA]` for easy filtering
+   - Detailed logging of modal detection
+   - DOM structure logging
+   - Property details section detection
+   - Component injection status
 
-3. **UI not updating**
-   - Check mutation observer
-   - Verify event listeners
-   - Inspect DOM changes
+2. **Common Debug Scenarios**
+   ```javascript
+   // Filter RIA logs in console
+   console.filter('[RIA]')
+   
+   // Check modal detection
+   // Look for logs like:
+   [RIA] Searching for property details section...
+   [RIA] Modal content found: true/false
+   [RIA] Layout container found in modal/main content
+   ```
+
+3. **DOM Structure Logging**
+   - Container details (classes, attributes)
+   - Child element hierarchy
+   - Property details elements
+   - Modal structure
+
+4. **Error Handling**
+   - Detailed error messages
+   - Fallback strategies
+   - State management
+   - Cleanup procedures
 
 ### Debug Tools
-- Chrome DevTools
-- Extension background page
-- Content script console
-- Network tab for requests
-- Storage tab for Chrome storage
+
+1. **Chrome DevTools**
+   - Console filtering with `[RIA]`
+   - DOM inspection
+   - Network monitoring
+   - Performance profiling
+
+2. **Extension Context**
+   - Content script debugging
+   - Background page inspection
+   - Storage inspection
+   - Event listener debugging
+
+3. **Component Inspection**
+   - Card element inspection
+   - Modal context verification
+   - Property details section validation
+   - Observer behavior monitoring
+
+### Common Issues and Solutions
+
+1. **Modal Detection Issues**
+   ```javascript
+   // Check modal selectors
+   const modalSelectors = [
+       '.ds-modal-content',
+       '.ds-modal-container',
+       '[data-testid="modal-content"]',
+       // ... other selectors
+   ];
+   
+   // Verify modal structure
+   console.log('[RIA] Modal structure:', {
+       found: !!modalContent,
+       classes: modalContent?.className,
+       children: modalContent?.children.length
+   });
+   ```
+
+2. **Property Details Issues**
+   ```javascript
+   // Check property details selectors
+   const propertyDetailsSelectors = [
+       '[data-testid="home-details-summary"]',
+       '.ds-home-details-chip',
+       // ... other selectors
+   ];
+   
+   // Verify property details
+   console.log('[RIA] Property details:', {
+       found: !!propertyDetails,
+       text: propertyDetails?.textContent,
+       parent: propertyDetails?.parentElement?.className
+   });
+   ```
+
+3. **Component Injection Issues**
+   ```javascript
+   // Check card injection
+   console.log('[RIA] Card injection:', {
+       exists: !!document.getElementById('ria-investment-card'),
+       parent: document.getElementById('ria-investment-card')?.parentElement?.className,
+       position: document.getElementById('ria-investment-card')?.nextElementSibling?.className
+   });
+   ```
+
+### Performance Monitoring
+
+1. **DOM Operations**
+   - Monitor mutation observer callbacks
+   - Track DOM queries
+   - Measure injection time
+   - Profile reflows/repaints
+
+2. **Memory Usage**
+   - Check for memory leaks
+   - Monitor observer cleanup
+   - Track event listener cleanup
+   - Profile component lifecycle
+
+3. **Error Tracking**
+   - Monitor error frequency
+   - Track fallback usage
+   - Log recovery attempts
+   - Measure success rate
 
 ## Deployment
 

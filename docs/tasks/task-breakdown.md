@@ -133,15 +133,24 @@ Implementation Notes:
 - Added color coding for positive/negative values
 - Implemented proper error states and loading indicators
 
-## Phase 4: UI Refinement 🔴
-### 4.1 Sidebar Enhancement
+## Phase 4: UI Refinement 🟡
+### 4.1 Component Injection (In Progress)
+- [x] Research Zillow's modal implementation
+- [x] Implement modal detection
+- [x] Create property details detection
+- [ ] Improve modal detection reliability
+- [ ] Add better fallback strategies
+- [ ] Optimize DOM operations
+- [ ] Add comprehensive error handling
+
+### 4.2 Sidebar Enhancement
 - [ ] Improve sidebar organization
 - [ ] Add collapsible sections
 - [ ] Implement better error states
 - [ ] Add loading indicators
 - [ ] Improve mobile responsiveness
 
-### 4.2 User Experience
+### 4.3 User Experience
 - [ ] Add tooltips and help text
 - [ ] Implement keyboard shortcuts
 - [ ] Add copy-to-clipboard features
@@ -239,53 +248,50 @@ Last Updated: 2024-03-20
 - Monitor performance with the large HUD data file (19.3 MiB)
 
 ## Current Focus
-Moving to Phase 4: UI Refinement
-- Improve sidebar organization
-- Add collapsible sections
-- Implement better error states
-- Add loading indicators
-- Improve mobile responsiveness
+Working on Phase 4.1: Component Injection
+- Improving modal detection reliability
+- Enhancing property details section targeting
+- Optimizing DOM operations
+- Adding comprehensive error handling
 
 ## Current Tasks
 
-### Floating Button Implementation
-**Status**: Pending
-**Priority**: Medium
+### Modal and Component Injection
+**Status**: In Progress
+**Priority**: High
 **Dependencies**: None
 
-#### 1. Research and Modal Handling
-- [ ] Investigate Zillow's modal implementation
-- [ ] Test different modal types (search results, property details, etc.)
-- [ ] Ensure proper z-index handling across all contexts
-- [ ] Document modal structure and behavior
+#### 1. Modal Detection Improvements
+- [x] Research Zillow's modal implementation
+- [x] Test different modal types
+- [x] Implement initial modal detection
+- [ ] Add more robust modal detection
+- [ ] Improve error handling
+- [ ] Add detailed logging
 
-#### 2. Floating Button UI/UX
-- [ ] Design floating button that works in both main page and modal contexts
-- [ ] Implement proper positioning relative to modal content
-- [ ] Add smooth transitions and animations
-- [ ] Ensure accessibility (keyboard navigation, screen readers)
-- [ ] Add hover and active states
-- [ ] Implement proper touch targets for mobile
+#### 2. Property Details Targeting
+- [x] Research property details section structure
+- [x] Implement initial targeting
+- [x] Add fallback selectors
+- [ ] Improve selector reliability
+- [ ] Add comprehensive logging
+- [ ] Optimize DOM queries
 
-#### 3. State Management
-- [ ] Implement proper state tracking for sidebar visibility
-- [ ] Add persistence for user preferences
-- [ ] Handle edge cases (modal closing, page navigation)
-- [ ] Implement proper cleanup on unmount
+#### 3. Component Injection
+- [x] Create basic injection logic
+- [x] Implement observer pattern
+- [x] Add basic error handling
+- [ ] Improve injection reliability
+- [ ] Add state management
+- [ ] Optimize performance
 
-#### 4. Testing
-- [ ] Test in all Zillow contexts (search, listing, modal)
-- [ ] Verify z-index behavior
-- [ ] Test responsive design
-- [ ] Verify accessibility
-- [ ] Test keyboard navigation
-- [ ] Test touch interactions
-
-#### 5. Performance
-- [ ] Optimize DOM operations
-- [ ] Minimize reflows/repaints
-- [ ] Handle memory management
-- [ ] Profile and optimize animations
+#### 4. Testing and Debugging
+- [x] Add basic console logging
+- [x] Implement DOM structure logging
+- [ ] Add comprehensive tests
+- [ ] Create debugging tools
+- [ ] Document common issues
+- [ ] Add performance monitoring
 
 ## Completed Tasks
 - Initial sidebar implementation
