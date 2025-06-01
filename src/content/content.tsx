@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Sidebar } from '../components/sidebar/sidebar';
 import { FloatingButton } from '../components/sidebar/floating-button';
-import { InvestmentAnalysisPanel } from '../components/sidebar/investment-analysis-panel';
 import '../styles/globals.css';
 import './styles.css';
 

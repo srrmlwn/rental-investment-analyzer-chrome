@@ -204,7 +204,7 @@ export function InvestmentAnalysisPanel() {
             <div
               className={`text-2xl font-bold ${calculations.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}
             >
-              ${calculations.monthlyCashFlow >= 0 ? "+" : ""}$
+              ${calculations.monthlyCashFlow >= 0 ? "+" : ""}
               {Math.round(calculations.monthlyCashFlow).toLocaleString()}
             </div>
           </div>
@@ -233,7 +233,7 @@ export function InvestmentAnalysisPanel() {
             <div
               className={`text-2xl font-bold ${calculations.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}
             >
-              ${calculations.annualCashFlow >= 0 ? "+" : ""}$
+              ${calculations.annualCashFlow >= 0 ? "+" : ""}
               {Math.round(calculations.annualCashFlow).toLocaleString()}
             </div>
           </div>
