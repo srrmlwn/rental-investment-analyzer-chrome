@@ -53,3 +53,4 @@ alwaysApply: true
 - Maintain modularity and separation of concerns in code.
 - Document new features or changes in `README.md` and/or `tech-architecture.md`.
 - Keep track of status of tasks in docs/tasks/task-breakdown.md
+- Keep track of implementation notes in docs/tasks/task-breakdown.md
