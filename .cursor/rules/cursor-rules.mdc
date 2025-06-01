@@ -52,4 +52,4 @@ alwaysApply: true
 - Always clarify requirements or context if unsure.
 - Maintain modularity and separation of concerns in code.
 - Document new features or changes in `README.md` and/or `tech-architecture.md`.
-- Keep track of status of tasks inn task task-
+- Keep track of status of tasks in docs/tasks/task-breakdown.md
