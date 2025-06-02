@@ -2,6 +2,7 @@
 export interface InvestmentConfig {
   // Purchase & Loan
   propertyPrice?: number; // Optional as it's listing-specific
+  monthlyRent?: number; // Optional as it's listing-specific
   downPaymentPercent: number;
   interestRate: number;
   loanTermYears: number;
@@ -39,6 +40,7 @@ export interface PropertyData {
   rentEstimate: number;
   rentSource: 'Zestimate' | 'HUD';
   propertyTaxes?: number; // Annual property taxes, optional as it may not be available
+  hoaFees?: number; // Monthly HOA fees, optional as it may not be available
 }
 
 // Combined type for calculations
@@ -106,4 +108,6 @@ export interface ConfigParameter {
   step?: number;
   unit?: string;
   default?: number;
+  allowedValues?: number[]; // Optional array of allowed values
+  useSlider?: boolean; // Whether to use slider instead of input
 } 

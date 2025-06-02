@@ -1,7 +1,4 @@
-import { Calculator, DollarSign, TrendingUp, Percent } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Badge } from "./ui/badge"
-import { Separator } from "./ui/separator"
+import { DollarSign, TrendingUp, Percent } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ConfigPanel } from "./investment/config-panel"
 import { ConfigManager } from "@/services/configManager"
@@ -13,6 +10,7 @@ export function InvestmentAnalysisPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [config, setConfig] = useState<InvestmentParams | null>(null);
+  const [needsManualRentInput, setNeedsManualRentInput] = useState(false);
   const [calculations, setCalculations] = useState<InvestmentCalculations>({
     downPayment: 0,
     loanAmount: 0,
@@ -46,14 +44,30 @@ export function InvestmentAnalysisPanel() {
         const propertyData: PropertyData = {
           price: extractedData.price,
           propertyType: extractedData.propertyType,
-          bedrooms: extractedData.bedrooms,
-          bathrooms: extractedData.bathrooms,
+          bedrooms: extractedData.bedrooms || 0, // Default to 0 if not found
+          bathrooms: extractedData.bathrooms || 0, // Default to 0 if not found
           squareFeet: extractedData.squareFeet,
           zipCode: extractedData.zipCode,
-          rentEstimate: extractedData.rentZestimate || 0, // Use Zestimate or fallback to 0
+          rentEstimate: extractedData.rentZestimate || 0,
           rentSource: extractedData.rentZestimate ? 'Zestimate' : 'HUD',
           propertyTaxes: extractedData.propertyTaxes,
         };
+
+        // Check if we need manual rent input
+        setNeedsManualRentInput(!extractedData.bedrooms || !extractedData.bathrooms);
+        
+        // Log property data for debugging
+        console.log('[RIA Debug] Extracted property data:', {
+          price: propertyData.price,
+          propertyType: propertyData.propertyType,
+          bedrooms: propertyData.bedrooms || 'Not found',
+          bathrooms: propertyData.bathrooms || 'Not found',
+          squareFeet: propertyData.squareFeet,
+          zipCode: propertyData.zipCode,
+          rentEstimate: propertyData.rentEstimate,
+          rentSource: propertyData.rentSource,
+          propertyTaxes: propertyData.propertyTaxes
+        });
         
         // Update configuration based on property data
         await ConfigManager.getInstance().updateFromPropertyData(propertyData);
@@ -159,11 +173,14 @@ export function InvestmentAnalysisPanel() {
         </div>
       </div>
 
-      {/* Configuration Panel */}
-      <ConfigPanel onConfigChange={(newConfig) => {
-        setConfig(newConfig);
-        setCalculations(calculateInvestmentMetrics(newConfig));
-      }} />
+      {/* Configuration Panel with special rent input */}
+      <ConfigPanel 
+        onConfigChange={(newConfig) => {
+          setConfig(newConfig);
+          setCalculations(calculateInvestmentMetrics(newConfig));
+        }}
+        needsManualRentInput={needsManualRentInput}
+      />
 
       {/* Investment Summary */}
       <div className="bg-white rounded-lg p-4 border shadow-sm">

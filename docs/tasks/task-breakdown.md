@@ -358,6 +358,41 @@ Next Steps:
 - Add documentation
 - Implement performance optimizations
 
+## Phase 2 - Issues
+[x] Property Price is not editable. Default price should be from listings, but user can still play around with the price they wwant to pay.
+Implementation Notes:
+- Modified ConfigPanel to allow editing of auto-filled values
+- Removed disabled state for property price input
+- Kept auto-filled indicator to show value source
+- Maintained validation and error handling
+
+[x] Provide ability to reset values to original values - either values from listings (e.g. property price) or our default configs (e.g. interestt rate %)
+Implementation Notes:
+- Added originalConfig storage in ConfigManager to track initial values
+- Implemented resetToOriginal() function to restore original property values
+- Added resetToOriginal button in ConfigPanel UI
+- Updated types to support listing-specific values in config
+- Added proper error handling for reset operations
+
+[x] Can we make loan term to have a slider too? The only valid values would be 10, 15, 20, 30, and 40. 30 years should be default.
+Implementation Notes:
+- Added allowedValues and useSlider properties to ConfigParameter type
+- Modified loan term parameter to use slider with specific values [10, 15, 20, 30, 40]
+- Updated LabeledSlider component to support marks for specific values
+- Added snapping behavior to nearest allowed value
+- Improved slider UI with value markers
+
+[x] Extract HOA from property listings. We should also move HOA to the advanced section. 
+Implementation Notes:
+- Added HOA selectors and extraction logic to DataExtractor
+- Implemented JSON and DOM-based extraction with fallbacks
+- Added handling for "No HOA" cases
+- Moved HOA fees to advanced section in config
+- Updated types to support listing-specific HOA values
+- Added proper logging and error handling
+
+[ ] Property tax rate is not extracted correctly from listings yet.
+
 ## Phase 3: Testing & Documentation 🔴
 ### 3.1 Testing Infrastructure
 - [ ] Component Tests

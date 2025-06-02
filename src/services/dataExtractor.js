@@ -40,17 +40,20 @@ class DataExtractor {
             zipCode: await this.extractZipCode(),
             rentZestimate: await this.extractRentZestimate(),
             propertyTaxes: await this.extractPropertyTaxes(),
+            hoaFees: await this.extractHoaFees(),
         };
 
+        // Log extracted data for debugging
         console.log('📝 Extracted data:', {
             price: `$${data.price.toLocaleString()}`,
-            bedrooms: data.bedrooms,
-            bathrooms: data.bathrooms,
+            bedrooms: data.bedrooms || 'Not found',
+            bathrooms: data.bathrooms || 'Not found',
             propertyType: data.propertyType,
             squareFeet: `${data.squareFeet.toLocaleString()} sqft`,
             zipCode: data.zipCode,
             rentZestimate: data.rentZestimate ? `$${data.rentZestimate.toLocaleString()}/mo` : 'Not available',
-            propertyTaxes: data.propertyTaxes ? `$${data.propertyTaxes.toLocaleString()}/yr` : 'Not available'
+            propertyTaxes: data.propertyTaxes ? `$${data.propertyTaxes.toLocaleString()}/yr` : 'Not available',
+            hoaFees: data.hoaFees ? `$${data.hoaFees.toLocaleString()}/mo` : 'Not available'
         });
 
         // Validate required fields
@@ -302,18 +305,65 @@ class DataExtractor {
     }
 
     /**
+     * Extract HOA fees
+     * Returns 0 if not available (not critical)
+     */
+    async extractHoaFees() {
+        console.log('🏢 Extracting HOA fees...');
+        
+        // Try JSON data first
+        if (this.jsonData?.hoaFee) {
+            console.log('✅ Found HOA fees in JSON:', this.jsonData.hoaFee);
+            return this.jsonData.hoaFee;
+        }
+
+        // Fallback to DOM
+        const hoaElement = document.querySelector(SELECTORS.HOA_FEES);
+        if (hoaElement) {
+            const hoaText = hoaElement.textContent;
+            console.log('🔍 Found HOA element:', hoaText);
+            const match = hoaText.match(REGEX.HOA_FEES);
+            if (match) {
+                const hoaFees = parseInt(match[1].replace(/,/g, ''));
+                console.log('✅ Extracted HOA fees from DOM:', hoaFees);
+                return hoaFees;
+            }
+        }
+
+        // Check HOA section for additional info
+        const hoaSection = document.querySelector(SELECTORS.HOA_FEES_SECTION);
+        if (hoaSection) {
+            const sectionText = hoaSection.textContent;
+            if (sectionText.includes('No HOA')) {
+                console.log('✅ No HOA fees (explicitly stated)');
+                return 0;
+            }
+        }
+
+        console.log('ℹ️ No HOA fees found, defaulting to 0');
+        return 0; // Default to 0 if not found
+    }
+
+    /**
      * Validate that all required data is present
      */
     validateRequiredData(data) {
         console.log('🔍 Validating required data...');
-        // Note: rentZestimate is not required as we can fall back to HUD data
-        const requiredFields = ['price', 'bedrooms', 'bathrooms', 'propertyType', 'zipCode'];
+        // Only price, propertyType, and zipCode are required
+        // bedrooms and bathrooms are optional but needed for accurate rent estimates
+        const requiredFields = ['price', 'propertyType', 'zipCode'];
         const missingFields = requiredFields.filter(field => !data[field]);
 
         if (missingFields.length > 0) {
             console.error('❌ Missing required fields:', missingFields);
             throw new Error(ERROR_MESSAGES.INVALID_LISTING);
         }
+
+        // Log warning if bedrooms/bathrooms are missing
+        if (!data.bedrooms || !data.bathrooms) {
+            console.warn('⚠️ Bedrooms or bathrooms not found - rent estimates may be less accurate');
+        }
+
         console.log('✅ All required data is present');
     }
 }

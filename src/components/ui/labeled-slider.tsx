@@ -3,6 +3,11 @@ import { Slider } from './slider';
 import { Label } from './label';
 import { cn } from '@/lib/utils';
 
+interface Mark {
+  value: number;
+  label: string;
+}
+
 interface LabeledSliderProps {
   label: string;
   value: number;
@@ -14,6 +19,7 @@ interface LabeledSliderProps {
   disabled?: boolean;
   className?: string;
   error?: string;
+  marks?: Mark[]; // Optional marks for specific values
 }
 
 export function LabeledSlider({
@@ -27,6 +33,7 @@ export function LabeledSlider({
   disabled = false,
   className,
   error,
+  marks,
 }: LabeledSliderProps) {
   const formatValue = (val: number) => {
     if (unit === '%') {
@@ -51,19 +58,37 @@ export function LabeledSlider({
           {formatValue(value)}
         </span>
       </div>
-      <Slider
-        value={[value]}
-        min={min}
-        max={max}
-        step={step}
-        onValueChange={([newValue]) => onChange(newValue)}
-        disabled={disabled}
-        className={cn(
-          "w-full",
-          error && "border-red-500",
-          disabled && "opacity-50"
+      <div className="relative">
+        <Slider
+          value={[value]}
+          min={min}
+          max={max}
+          step={step}
+          onValueChange={([newValue]) => onChange(newValue)}
+          disabled={disabled}
+          className={cn(
+            "w-full",
+            error && "border-red-500",
+            disabled && "opacity-50"
+          )}
+        />
+        {marks && (
+          <div className="absolute w-full flex justify-between px-1 mt-1">
+            {marks.map((mark) => (
+              <div
+                key={mark.value}
+                className="text-xs text-gray-500"
+                style={{
+                  transform: 'translateX(-50%)',
+                  left: `${((mark.value - min) / (max - min)) * 100}%`,
+                }}
+              >
+                {mark.label}
+              </div>
+            ))}
+          </div>
         )}
-      />
+      </div>
       {error && (
         <p className="text-sm text-red-500">{error}</p>
       )}

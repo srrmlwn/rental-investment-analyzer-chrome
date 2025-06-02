@@ -20,6 +20,10 @@ const SELECTORS = {
     // Property Taxes
     PROPERTY_TAXES: '#label-property-tax .hNuOht', // Monthly property taxes
     
+    // HOA Fees
+    HOA_FEES: '#label-hoa .hNuOht', // Monthly HOA fees
+    HOA_FEES_SECTION: '#label-hoa', // HOA section for additional info
+    
     // Address (for zip code lookup)
     ADDRESS: 'meta[property="og:title"]', // Extract from meta title
 };
@@ -34,6 +38,7 @@ const JSON_PATHS = {
     ZIP_CODE: 'zipcode',
     RENT_ZESTIMATE: 'rentZestimate',
     PROPERTY_TAXES: 'propertyTaxes', // Annual property taxes
+    HOA_FEES: 'hoaFee', // Monthly HOA fees
 };
 
 // Regular Expressions for Data Extraction
@@ -54,6 +59,9 @@ const REGEX = {
 
     // Extract property taxes from string like "$308"
     PROPERTY_TAXES: /\$([\d,]+)/,
+
+    // Extract HOA fees from string like "$250/mo"
+    HOA_FEES: /\$([\d,]+)\/mo/,
 };
 
 // Error Messages
@@ -66,6 +74,7 @@ const ERROR_MESSAGES = {
     MISSING_ZIP_CODE: 'Unable to find zip code for rental estimate',
     MISSING_RENTAL_ESTIMATE: 'Unable to get rental estimate. Neither Zestimate nor HUD data is available for this property.',
     MISSING_PROPERTY_TAXES: 'Unable to find property taxes',
+    MISSING_HOA_FEES: 'Unable to find HOA fees', // Not critical, will default to 0
     INVALID_LISTING: 'This listing appears to be incomplete. Required information is missing.',
 };
 

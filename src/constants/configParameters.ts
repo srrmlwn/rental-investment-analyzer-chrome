@@ -3,6 +3,21 @@ import { ConfigParameter, ConfigCategory, InvestmentParams } from '@/types/inves
 export const CONFIG_PARAMETERS: ConfigParameter[] = [
   // Purchase Parameters
   {
+    key: 'monthlyRent',
+    label: 'Monthly Rent',
+    category: 'Purchase',
+    type: 'currency',
+    description: 'Estimated monthly rental income',
+    isListingSpecific: true,
+    isAutoFilled: true,
+    min: 500,
+    max: 10000,
+    step: 100,
+    unit: '$',
+    default: 2000,
+    useSlider: true,
+  },
+  {
     key: 'propertyPrice',
     label: 'Property Price',
     category: 'Purchase',
@@ -15,6 +30,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     step: 1000,
     unit: '$',
     default: 300000,
+    useSlider: true,
   },
   {
     key: 'downPaymentPercent',
@@ -66,9 +82,11 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     description: 'Length of mortgage in years',
     isListingSpecific: false,
     min: 10,
-    max: 30,
+    max: 40,
     step: 5,
     default: 30,
+    allowedValues: [10, 15, 20, 30, 40],
+    useSlider: true,
   },
   {
     key: 'points',
@@ -144,7 +162,8 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'currency',
     description: 'Monthly HOA fees',
-    isListingSpecific: false,
+    isListingSpecific: true,
+    isAdvanced: true,
     min: 0,
     step: 10,
     unit: '$',

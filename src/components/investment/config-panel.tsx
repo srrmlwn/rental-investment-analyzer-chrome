@@ -7,18 +7,19 @@ import { LabeledSlider } from '../ui/labeled-slider';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { Calculator, Edit3, RotateCcw, Zap } from 'lucide-react';
+import { Calculator, Edit3, RotateCcw, Zap, History } from 'lucide-react';
 import { ConfigManager, DEFAULT_PRESETS } from '@/services/configManager';
 import { InvestmentParams } from '@/types/investment';
-import { CONFIG_PARAMETERS, getBasicParameters, getAdvancedParameters, getParametersByCategory } from '@/constants/configParameters';
+import { CONFIG_PARAMETERS, getBasicParameters, getParametersByCategory } from '@/constants/configParameters';
 import { cn } from '@/lib/utils';
 
 interface ConfigPanelProps {
   onConfigChange?: (config: InvestmentParams) => void;
   className?: string;
+  needsManualRentInput?: boolean;
 }
 
-export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, className, needsManualRentInput }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [config, setConfig] = useState<InvestmentParams>(ConfigManager.getInstance().getConfig());
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,9 +55,42 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
     await ConfigManager.getInstance().resetToDefaults();
   };
 
+  const handleResetToOriginal = async () => {
+    try {
+      await ConfigManager.getInstance().resetToOriginal();
+    } catch (error) {
+      if (error instanceof Error) {
+        // Show error in UI
+        console.error('Error resetting to original values:', error);
+      }
+    }
+  };
+
   const renderParameterInput = (param: typeof CONFIG_PARAMETERS[0]) => {
     const value = config[param.key];
     const error = errors[param.key];
+
+    // Special handling for rent input when bedrooms/bathrooms are missing
+    if (param.key === 'monthlyRent' && needsManualRentInput) {
+      return (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center gap-2">
+            {param.label}
+            <Badge variant="destructive" className="text-xs">Manual Input Required</Badge>
+          </Label>
+          <Input
+            type="number"
+            value={value}
+            onChange={(e) => handleConfigChange(param.key, Number(e.target.value))}
+            className="border-2 border-red-500 focus:border-red-500 focus:ring-red-500"
+            placeholder="Enter estimated monthly rent"
+          />
+          <p className="text-xs text-red-500">
+            Bedrooms/bathrooms not found. Please enter your estimated monthly rent.
+          </p>
+        </div>
+      );
+    }
 
     if (param.isReadOnly) {
       return (
@@ -71,17 +105,31 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
       );
     }
 
-    if (param.type === 'percentage' || (param.type === 'currency' && param.min !== undefined && param.max !== undefined)) {
+    if (param.type === 'percentage' || (param.type === 'currency' && param.min !== undefined && param.max !== undefined) || param.useSlider) {
+      // For parameters with allowed values, snap to nearest allowed value
+      const handleSliderChange = (newValue: number) => {
+        if (param.allowedValues) {
+          // Find closest allowed value
+          const closest = param.allowedValues.reduce((prev, curr) => {
+            return Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev;
+          });
+          handleConfigChange(param.key, closest);
+        } else {
+          handleConfigChange(param.key, newValue);
+        }
+      };
+
       return (
         <LabeledSlider
           label={param.label}
-          value={value ?? 0} // Provide default of 0 if value is undefined
+          value={value ?? 0}
           min={param.min ?? 0}
           max={param.max ?? 100}
           step={param.step ?? 1}
           unit={param.unit}
-          onChange={(newValue) => handleConfigChange(param.key, newValue)}
-          disabled={param.isAutoFilled}
+          onChange={handleSliderChange}
+          disabled={false}
+          marks={param.allowedValues?.map(v => ({ value: v, label: v.toString() }))}
         />
       );
     }
@@ -93,11 +141,10 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
           type="number"
           value={value}
           onChange={(e) => handleConfigChange(param.key, Number(e.target.value))}
-          disabled={param.isAutoFilled}
+          disabled={false} // Allow editing of all values
           className={cn(
             "w-full",
-            error && "border-red-500",
-            param.isAutoFilled && "bg-gray-50"
+            error && "border-red-500"
           )}
         />
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -115,9 +162,6 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-blue-600" />
             <CardTitle className="text-lg text-blue-900">Investment Configuration</CardTitle>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-              Live Calculator
-            </Badge>
           </div>
           <div className="flex gap-2">
             {/* Quick Preset Buttons */}
@@ -169,15 +213,28 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
             <div className="bg-white rounded-lg p-4 border shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-semibold">Advanced Settings</h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="gap-2"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  Reset to Defaults
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetToOriginal}
+                    className="gap-2"
+                    title="Reset to original property values"
+                  >
+                    <History className="h-4 w-4" />
+                    Reset to Original
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="gap-2"
+                    title="Reset to default values"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Reset to Defaults
+                  </Button>
+                </div>
               </div>
 
               {/* Group by category */}

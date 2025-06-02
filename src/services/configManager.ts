@@ -1,6 +1,18 @@
 import { InvestmentConfig, InvestmentParams, ConfigValidation, PropertyData } from '@/types/investment';
 import { CONFIG_PARAMETERS, getParameterByKey } from '@/constants/configParameters';
 
+// Add debounce utility
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
 export interface ConfigPreset {
   name: string;
   description: string;
@@ -62,12 +74,22 @@ type ConfigChangeListener = (config: InvestmentParams) => void;
 export class ConfigManager {
   private static instance: ConfigManager;
   private config: InvestmentConfig;
+  private originalConfig: InvestmentConfig | null = null; // Store original values
   private propertyData: PropertyData | null = null;
   private listeners: Set<ConfigChangeListener>;
+  private debouncedSave: () => void;
+  private saveTimeout: NodeJS.Timeout | null = null;
+  private isSaving: boolean = false;
 
   private constructor() {
     this.config = { ...DEFAULT_CONFIG };
     this.listeners = new Set();
+    // Debounce save operations to once per second
+    this.debouncedSave = debounce(() => {
+      if (!this.isSaving) {
+        this.saveConfig().catch(console.error);
+      }
+    }, 1000);
     this.loadConfig();
   }
 
@@ -91,11 +113,21 @@ export class ConfigManager {
   }
 
   private async saveConfig(): Promise<void> {
+    if (this.isSaving) return;
+    
     try {
+      this.isSaving = true;
       // Only save listing-agnostic settings
       await chrome.storage.sync.set({ investmentConfig: this.config });
     } catch (error) {
       console.error('Error saving config:', error);
+      // If we hit the quota limit, wait a bit and try again
+      if (error instanceof Error && error.message.includes('MAX_WRITE_OPERATIONS_PER_MINUTE')) {
+        console.log('Storage quota exceeded, will retry in 1 minute...');
+        setTimeout(() => this.debouncedSave(), 60000);
+      }
+    } finally {
+      this.isSaving = false;
     }
   }
 
@@ -133,6 +165,14 @@ export class ConfigManager {
 
   public setPropertyData(data: PropertyData): void {
     this.propertyData = data;
+    // Store original values when property data is set
+    this.originalConfig = {
+      ...this.config,
+      propertyPrice: data.price,
+      monthlyRent: data.rentEstimate,
+      propertyTaxRate: data.propertyTaxes ? (data.propertyTaxes / data.price) * 100 : this.config.propertyTaxRate,
+      hoaFees: data.hoaFees || this.config.hoaFees,
+    };
     this.notifyListeners();
   }
 
@@ -172,7 +212,8 @@ export class ConfigManager {
     }
 
     this.config = { ...this.config, ...updates };
-    await this.saveConfig();
+    // Use debounced save instead of immediate save
+    this.debouncedSave();
     this.notifyListeners();
   }
 
@@ -183,6 +224,15 @@ export class ConfigManager {
     }
 
     await this.updateConfig(preset.params);
+  }
+
+  public async resetToOriginal(): Promise<void> {
+    if (!this.originalConfig) {
+      throw new Error('No original values available. Set property data first.');
+    }
+    this.config = { ...this.originalConfig };
+    await this.saveConfig();
+    this.notifyListeners();
   }
 
   public async resetToDefaults(): Promise<void> {
