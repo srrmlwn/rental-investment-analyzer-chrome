@@ -210,7 +210,7 @@ window.addEventListener('unload', () => {
 });
 
 // Listen for messages from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   console.log('[RIA] Content script received message:', message);
   if (message.type === 'TOGGLE_SIDEBAR') {
     cleanup = injectContainers();

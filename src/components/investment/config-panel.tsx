@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
@@ -6,7 +6,6 @@ import { Separator } from '../ui/separator';
 import { LabeledSlider } from '../ui/labeled-slider';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Badge } from '../ui/badge';
 import { Calculator, Edit3, RotateCcw } from 'lucide-react';
 import { ConfigManager } from '@/services/configManager';
 import { UserCalculationInputs, PropertyData } from '@/types/investment';
@@ -19,7 +18,7 @@ interface ConfigPanelProps {
   className?: string;
 }
 
-export function ConfigPanel({ onConfigChange, propertyData, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [config, setConfig] = useState<UserCalculationInputs>(ConfigManager.getInstance().getConfig());
   const [errors, setErrors] = useState<Record<string, string>>({});

@@ -1,4 +1,4 @@
-import { UserCalculationInputs, ConfigValidation, ConfigParameter } from '@/types/investment';
+import { UserCalculationInputs, ConfigValidation } from '@/types/investment';
 import { CONFIG_PARAMETERS, getParameterByKey } from '@/constants/configParameters';
 
 // Add debounce utility
@@ -27,7 +27,6 @@ export class ConfigManager {
   private config: UserCalculationInputs;
   private listeners: Set<ConfigChangeListener>;
   private debouncedSave: () => void;
-  private saveTimeout: NodeJS.Timeout | null = null;
   private isSaving: boolean = false;
 
   private constructor() {
