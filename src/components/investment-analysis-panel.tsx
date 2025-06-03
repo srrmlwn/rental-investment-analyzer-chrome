@@ -2,38 +2,20 @@ import { DollarSign, TrendingUp, Percent } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ConfigPanel } from "./investment/config-panel"
 import { ConfigManager } from "@/services/configManager"
-import { InvestmentParams, InvestmentCalculations, PropertyData } from "@/types/investment"
+import { UserCalculationInputs, CalculatedMetrics, PropertyData } from "@/types/investment"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractor } from "@/services/dataExtractor"
 
 export function InvestmentAnalysisPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [config, setConfig] = useState<InvestmentParams | null>(null);
-  const [needsManualRentInput, setNeedsManualRentInput] = useState(false);
-  const [calculations, setCalculations] = useState<InvestmentCalculations>({
-    downPayment: 0,
-    loanAmount: 0,
-    monthlyMortgage: 0,
-    totalMonthlyExpenses: 0,
-    effectiveMonthlyRent: 0,
-    monthlyCashFlow: 0,
-    annualCashFlow: 0,
-    capRate: 0,
-    cashOnCashReturn: 0,
-    totalROI: 0,
-    breakEvenYears: 0,
-    netOperatingIncome: 0,
-    debtServiceCoverageRatio: 0,
-    totalInvestment: 0,
-    totalReturn: 0,
-    totalProfit: 0,
-    annualizedReturn: 0,
-  });
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
+  const [userInputs, setUserInputs] = useState<UserCalculationInputs | null>(null);
+  const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
 
-  // Extract property data and update configuration on mount
+  // Extract property data on mount
   useEffect(() => {
-    const extractAndUpdateConfig = async () => {
+    const extractPropertyData = async () => {
       setIsLoading(true);
       setError(null);
       try {
@@ -41,43 +23,31 @@ export function InvestmentAnalysisPanel() {
         const extractedData = await dataExtractor.extractPropertyData();
         
         // Map extracted data to PropertyData type
-        const propertyData: PropertyData = {
+        const newPropertyData: PropertyData = {
           price: extractedData.price,
           propertyType: extractedData.propertyType,
-          bedrooms: extractedData.bedrooms || 0, // Default to 0 if not found
-          bathrooms: extractedData.bathrooms || 0, // Default to 0 if not found
+          bedrooms: extractedData.bedrooms || 0,
+          bathrooms: extractedData.bathrooms || 0,
           squareFeet: extractedData.squareFeet,
           zipCode: extractedData.zipCode,
-          rentEstimate: extractedData.rentZestimate || 0,
-          rentSource: extractedData.rentZestimate ? 'Zestimate' : 'HUD',
-          propertyTaxes: extractedData.propertyTaxes,
+          rentZestimate: extractedData.rentZestimate || undefined,
+          propertyTaxes: extractedData.propertyTaxes || undefined,
+          hoaFees: extractedData.hoaFees || undefined,
         };
-
-        // Check if we need manual rent input
-        setNeedsManualRentInput(!extractedData.bedrooms || !extractedData.bathrooms);
         
         // Log property data for debugging
-        console.log('[RIA Debug] Extracted property data:', {
-          price: propertyData.price,
-          propertyType: propertyData.propertyType,
-          bedrooms: propertyData.bedrooms || 'Not found',
-          bathrooms: propertyData.bathrooms || 'Not found',
-          squareFeet: propertyData.squareFeet,
-          zipCode: propertyData.zipCode,
-          rentEstimate: propertyData.rentEstimate,
-          rentSource: propertyData.rentSource,
-          propertyTaxes: propertyData.propertyTaxes
-        });
+        console.log('[RIA Debug] Extracted property data:', newPropertyData);
         
-        // Update configuration based on property data
-        await ConfigManager.getInstance().updateFromPropertyData(propertyData);
+        setPropertyData(newPropertyData);
         
-        // Now that we have property data, get the config
-        const initialConfig = ConfigManager.getInstance().getConfig();
-        setConfig(initialConfig);
-        setCalculations(calculateInvestmentMetrics(initialConfig));
+        // Get initial user inputs from ConfigManager
+        const initialUserInputs = ConfigManager.getInstance().getConfig();
+        setUserInputs(initialUserInputs);
         
-        console.log('[RIA] Updated configuration based on property data:', propertyData);
+        // Calculate initial metrics
+        const initialCalculations = calculateInvestmentMetrics(newPropertyData, initialUserInputs);
+        setCalculations(initialCalculations);
+        
       } catch (error) {
         console.error('[RIA] Error extracting property data:', error);
         setError(error instanceof Error ? error.message : 'Failed to extract property data');
@@ -86,19 +56,20 @@ export function InvestmentAnalysisPanel() {
       }
     };
 
-    extractAndUpdateConfig();
+    extractPropertyData();
   }, []);
 
   // Subscribe to config changes
   useEffect(() => {
-    if (!config) return; // Don't subscribe until we have initial config
+    if (!propertyData || !userInputs) return;
 
-    const unsubscribe = ConfigManager.getInstance().subscribe((newConfig) => {
-      setConfig(newConfig);
-      setCalculations(calculateInvestmentMetrics(newConfig));
+    const unsubscribe = ConfigManager.getInstance().subscribe((newUserInputs) => {
+      setUserInputs(newUserInputs);
+      const newCalculations = calculateInvestmentMetrics(propertyData, newUserInputs);
+      setCalculations(newCalculations);
     });
     return () => unsubscribe();
-  }, [config]);
+  }, [propertyData, userInputs]);
 
   if (isLoading) {
     return (
@@ -122,7 +93,7 @@ export function InvestmentAnalysisPanel() {
     );
   }
 
-  if (!config) {
+  if (!propertyData || !userInputs || !calculations) {
     return null;
   }
 
@@ -173,60 +144,38 @@ export function InvestmentAnalysisPanel() {
         </div>
       </div>
 
-      {/* Configuration Panel with special rent input */}
-      <ConfigPanel 
-        onConfigChange={(newConfig) => {
-          setConfig(newConfig);
-          setCalculations(calculateInvestmentMetrics(newConfig));
-        }}
-        needsManualRentInput={needsManualRentInput}
-      />
-
       {/* Investment Summary */}
       <div className="bg-white rounded-lg p-4 border shadow-sm">
         <h4 className="font-semibold mb-3">Investment Breakdown</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="space-y-1">
-            <span className="text-gray-600">Down Payment:</span>
-            <div className="font-semibold">${Math.round(calculations.downPayment).toLocaleString()}</div>
-          </div>
           <div className="space-y-1">
             <span className="text-gray-600">Monthly Mortgage:</span>
             <div className="font-semibold">${Math.round(calculations.monthlyMortgage).toLocaleString()}</div>
           </div>
           <div className="space-y-1">
             <span className="text-gray-600">Effective Rent:</span>
-            <div className="font-semibold">${Math.round(calculations.effectiveMonthlyRent).toLocaleString()}</div>
+            <div className="font-semibold">${Math.round(propertyData.rentZestimate || 0).toLocaleString()}</div>
           </div>
           <div className="space-y-1">
-            <span className="text-gray-600">Total Expenses:</span>
-            <div className="font-semibold">${Math.round(calculations.totalMonthlyExpenses).toLocaleString()}</div>
+            <span className="text-gray-600">Property Type:</span>
+            <div className="font-semibold">{propertyData.propertyType}</div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-gray-600">Square Feet:</span>
+            <div className="font-semibold">{propertyData.squareFeet.toLocaleString()}</div>
           </div>
         </div>
       </div>
 
-      {/* Additional Metrics */}
-      <div className="bg-white rounded-lg p-4 border shadow-sm">
-        <h4 className="font-semibold mb-3">Additional Metrics</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="space-y-1">
-            <span className="text-gray-600">Total Investment:</span>
-            <div className="font-semibold">${Math.round(calculations.totalInvestment).toLocaleString()}</div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-gray-600">Total Return:</span>
-            <div className="font-semibold">${Math.round(calculations.totalReturn).toLocaleString()}</div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-gray-600">Total Profit:</span>
-            <div className="font-semibold">${Math.round(calculations.totalProfit).toLocaleString()}</div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-gray-600">Annualized Return:</span>
-            <div className="font-semibold">{calculations.annualizedReturn.toFixed(1)}%</div>
-          </div>
-        </div>
-      </div>
+      {/* Configuration Panel */}
+      <ConfigPanel 
+        propertyData={propertyData}
+        onConfigChange={(newUserInputs) => {
+          setUserInputs(newUserInputs);
+          const newCalculations = calculateInvestmentMetrics(propertyData, newUserInputs);
+          setCalculations(newCalculations);
+        }}
+      />
     </div>
   );
 } 

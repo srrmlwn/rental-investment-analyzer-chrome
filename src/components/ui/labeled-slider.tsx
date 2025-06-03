@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Slider } from './slider';
 import { Label } from './label';
+import { Input } from './input';
 import { cn } from '@/lib/utils';
 
 interface Mark {
@@ -35,6 +36,9 @@ export function LabeledSlider({
   error,
   marks,
 }: LabeledSliderProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value.toString());
+
   const formatValue = (val: number) => {
     if (unit === '%') {
       return `${val}%`;
@@ -50,13 +54,61 @@ export function LabeledSlider({
     return val.toString();
   };
 
+  const handleValueClick = () => {
+    if (disabled) return;
+    setIsEditing(true);
+    setEditValue(value.toString());
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  const handleValueBlur = () => {
+    setIsEditing(false);
+    const newValue = Number(editValue);
+    if (!isNaN(newValue) && newValue >= min && newValue <= max) {
+      onChange(newValue);
+    } else {
+      setEditValue(value.toString()); // Reset to current value if invalid
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleValueBlur();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditValue(value.toString());
+    }
+  };
+
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex justify-between items-center">
         <Label className="text-sm font-medium">{label}</Label>
-        <span className="text-sm font-medium text-gray-600">
-          {formatValue(value)}
-        </span>
+        {isEditing ? (
+          <Input
+            type="number"
+            value={editValue}
+            onChange={handleValueChange}
+            onBlur={handleValueBlur}
+            onKeyDown={handleKeyDown}
+            className="w-24 h-6 text-sm"
+            min={min}
+            max={max}
+            step={step}
+            autoFocus
+          />
+        ) : (
+          <span 
+            className="text-sm font-medium text-gray-600 cursor-pointer hover:text-gray-900"
+            onClick={handleValueClick}
+            title="Click to edit value"
+          >
+            {formatValue(value)}
+          </span>
+        )}
       </div>
       <div className="relative">
         <Slider

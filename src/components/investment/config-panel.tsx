@@ -7,21 +7,21 @@ import { LabeledSlider } from '../ui/labeled-slider';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { Calculator, Edit3, RotateCcw, Zap, History } from 'lucide-react';
-import { ConfigManager, DEFAULT_PRESETS } from '@/services/configManager';
-import { InvestmentParams } from '@/types/investment';
+import { Calculator, Edit3, RotateCcw } from 'lucide-react';
+import { ConfigManager } from '@/services/configManager';
+import { UserCalculationInputs, PropertyData } from '@/types/investment';
 import { CONFIG_PARAMETERS, getBasicParameters, getParametersByCategory } from '@/constants/configParameters';
 import { cn } from '@/lib/utils';
 
 interface ConfigPanelProps {
-  onConfigChange?: (config: InvestmentParams) => void;
+  onConfigChange?: (config: UserCalculationInputs) => void;
+  propertyData: PropertyData;
   className?: string;
-  needsManualRentInput?: boolean;
 }
 
-export function ConfigPanel({ onConfigChange, className, needsManualRentInput }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, propertyData, className }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [config, setConfig] = useState<InvestmentParams>(ConfigManager.getInstance().getConfig());
+  const [config, setConfig] = useState<UserCalculationInputs>(ConfigManager.getInstance().getConfig());
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Subscribe to config changes
@@ -33,8 +33,8 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
     return () => unsubscribe();
   }, [onConfigChange]);
 
-  const handleConfigChange = async (key: keyof InvestmentParams, value: number) => {
-    const param = CONFIG_PARAMETERS.find(p => p.key === key);
+  const handleConfigChange = async (key: keyof UserCalculationInputs, value: number) => {
+    const param = CONFIG_PARAMETERS.find(p => p.id === key);
     if (!param) return;
 
     try {
@@ -47,65 +47,15 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
     }
   };
 
-  const handlePresetApply = async (presetKey: keyof typeof DEFAULT_PRESETS) => {
-    await ConfigManager.getInstance().applyPreset(presetKey);
-  };
-
   const handleReset = async () => {
     await ConfigManager.getInstance().resetToDefaults();
   };
 
-  const handleResetToOriginal = async () => {
-    try {
-      await ConfigManager.getInstance().resetToOriginal();
-    } catch (error) {
-      if (error instanceof Error) {
-        // Show error in UI
-        console.error('Error resetting to original values:', error);
-      }
-    }
-  };
-
   const renderParameterInput = (param: typeof CONFIG_PARAMETERS[0]) => {
-    const value = config[param.key];
-    const error = errors[param.key];
+    const value = config[param.id];
+    const error = errors[param.id];
 
-    // Special handling for rent input when bedrooms/bathrooms are missing
-    if (param.key === 'monthlyRent' && needsManualRentInput) {
-      return (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            {param.label}
-            <Badge variant="destructive" className="text-xs">Manual Input Required</Badge>
-          </Label>
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => handleConfigChange(param.key, Number(e.target.value))}
-            className="border-2 border-red-500 focus:border-red-500 focus:ring-red-500"
-            placeholder="Enter estimated monthly rent"
-          />
-          <p className="text-xs text-red-500">
-            Bedrooms/bathrooms not found. Please enter your estimated monthly rent.
-          </p>
-        </div>
-      );
-    }
-
-    if (param.isReadOnly) {
-      return (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">{param.label}</Label>
-          <Input
-            value={value}
-            disabled
-            className="bg-gray-50"
-          />
-        </div>
-      );
-    }
-
-    if (param.type === 'percentage' || (param.type === 'currency' && param.min !== undefined && param.max !== undefined) || param.useSlider) {
+    if (param.useSlider) {
       // For parameters with allowed values, snap to nearest allowed value
       const handleSliderChange = (newValue: number) => {
         if (param.allowedValues) {
@@ -113,9 +63,9 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
           const closest = param.allowedValues.reduce((prev, curr) => {
             return Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev;
           });
-          handleConfigChange(param.key, closest);
+          handleConfigChange(param.id, closest);
         } else {
-          handleConfigChange(param.key, newValue);
+          handleConfigChange(param.id, newValue);
         }
       };
 
@@ -140,17 +90,14 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
         <Input
           type="number"
           value={value}
-          onChange={(e) => handleConfigChange(param.key, Number(e.target.value))}
-          disabled={false} // Allow editing of all values
+          onChange={(e) => handleConfigChange(param.id, Number(e.target.value))}
+          disabled={false}
           className={cn(
             "w-full",
             error && "border-red-500"
           )}
         />
         {error && <p className="text-sm text-red-500">{error}</p>}
-        {param.isAutoFilled && (
-          <p className="text-xs text-gray-500">Auto-filled from property data</p>
-        )}
       </div>
     );
   };
@@ -158,48 +105,22 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
   return (
     <Card className={cn("border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50", className)}>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-blue-600" />
-            <CardTitle className="text-lg text-blue-900">Investment Configuration</CardTitle>
-          </div>
-          <div className="flex gap-2">
-            {/* Quick Preset Buttons */}
-            <div className="flex gap-1">
-              {Object.entries(DEFAULT_PRESETS).map(([key, preset]) => (
-                <Button
-                  key={key}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePresetApply(key as keyof typeof DEFAULT_PRESETS)}
-                  className="text-xs px-2"
-                >
-                  {preset.name}
-                </Button>
-              ))}
-            </div>
-            <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Edit3 className="h-4 w-4" />
-                  Advanced
-                </Button>
-              </CollapsibleTrigger>
-            </Collapsible>
-          </div>
-        </div>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Calculator className="h-5 w-5 text-blue-600" />
+          Investment Parameters
+        </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Quick Adjustments */}
         <div className="bg-white rounded-lg p-4 border shadow-sm">
           <h4 className="font-semibold mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-blue-600" />
+            <Edit3 className="h-4 w-4 text-blue-600" />
             Quick Adjustments
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getBasicParameters().map((param) => (
-              <div key={param.key}>
+              <div key={param.id}>
                 {renderParameterInput(param)}
               </div>
             ))}
@@ -208,37 +129,30 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
 
         {/* Advanced Settings */}
         <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full">
+              Advanced Settings
+            </Button>
+          </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4">
             <Separator />
             <div className="bg-white rounded-lg p-4 border shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-semibold">Advanced Settings</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleResetToOriginal}
-                    className="gap-2"
-                    title="Reset to original property values"
-                  >
-                    <History className="h-4 w-4" />
-                    Reset to Original
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReset}
-                    className="gap-2"
-                    title="Reset to default values"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Reset to Defaults
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="gap-2"
+                  title="Reset to default values"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset to Defaults
+                </Button>
               </div>
 
               {/* Group by category */}
-              {(['Purchase', 'Loan', 'Operating', 'Growth', 'Tax', 'Analysis'] as const).map((category) => {
+              {(['Purchase', 'Loan', 'Operating'] as const).map((category) => {
                 const params = getParametersByCategory(category);
                 if (params.length === 0) return null;
 
@@ -247,7 +161,7 @@ export function ConfigPanel({ onConfigChange, className, needsManualRentInput }:
                     <h5 className="font-medium text-sm text-gray-600 mb-3">{category} Parameters</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {params.map((param) => (
-                        <div key={param.key}>
+                        <div key={param.id}>
                           {renderParameterInput(param)}
                         </div>
                       ))}

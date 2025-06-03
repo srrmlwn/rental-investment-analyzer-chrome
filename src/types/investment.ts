@@ -1,57 +1,64 @@
-// Listing-agnostic configuration parameters (stored in Chrome storage)
-export interface InvestmentConfig {
-  // Purchase & Loan
-  propertyPrice?: number; // Optional as it's listing-specific
-  monthlyRent?: number; // Optional as it's listing-specific
-  downPaymentPercent: number;
-  interestRate: number;
-  loanTermYears: number;
-  points: number;
-  closingCostsPercent: number;
-
-  // Operating Expenses
-  propertyManagementPercent: number;
-  maintenanceReservePercent: number;
-  insuranceRate: number;
-  propertyTaxRate: number;
-  hoaFees: number;
-  vacancyRatePercent: number;
-
-  // Growth Assumptions
-  annualAppreciation: number;
-  annualRentGrowth: number;
-  annualExpenseGrowth: number;
-
-  // Advanced Parameters (optional)
-  marginalTaxRate?: number;
-  depreciationPeriod?: number;
-  analysisPeriod?: number;
-  exitCapRate?: number;
-}
-
-// Listing-specific data (from Zillow/HUD)
+// Raw data from Zillow listing
 export interface PropertyData {
   price: number;
-  propertyType: string;
   bedrooms: number;
   bathrooms: number;
+  propertyType: string;
   squareFeet: number;
   zipCode: string;
-  rentEstimate: number;
-  rentSource: 'Zestimate' | 'HUD';
-  propertyTaxes?: number; // Annual property taxes, optional as it may not be available
-  hoaFees?: number; // Monthly HOA fees, optional as it may not be available
+  rentZestimate?: number;
+  propertyTaxes?: number;
+  hoaFees?: number;
 }
 
-// Combined type for calculations
-export interface InvestmentParams extends InvestmentConfig {
-  // Listing-specific data
-  monthlyRent: number;
-  monthlyMaintenance: number;
-  otherExpensesMonthly: number;
-  hoaFeesMonthly: number;
-  propertyTaxesAnnual: number;
-  insuranceMonthly: number;
+// User-configurable calculation parameters
+export interface UserCalculationInputs {
+  downPaymentPercentage: number;
+  interestRate: number;
+  loanTerm: number;
+  propertyTaxRate: number;
+  insuranceRate: number;
+  maintenanceRate: number;
+  vacancyRate: number;
+  managementRate: number;
+}
+
+// Results of investment analysis
+export interface CalculatedMetrics {
+  monthlyMortgage: number;
+  monthlyCashFlow: number;
+  annualCashFlow: number;
+  cashOnCashReturn: number;
+  capRate: number;
+}
+
+// Configuration parameter definition for UI
+export type ConfigParameterType = 'percentage' | 'currency' | 'number';
+
+export type ConfigCategory = 
+  | 'Purchase'
+  | 'Loan'
+  | 'Operating'
+  | 'Income'
+  | 'Growth'
+  | 'Tax'
+  | 'Analysis';
+
+export interface ConfigParameter {
+  id: keyof UserCalculationInputs;
+  label: string;
+  category: ConfigCategory;
+  type: ConfigParameterType;
+  description?: string;
+  isAdvanced?: boolean;
+  isAutoFilled?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  default?: number;
+  allowedValues?: number[];
+  useSlider?: boolean;
 }
 
 export interface InvestmentCalculations {
@@ -80,34 +87,4 @@ export interface InvestmentCalculations {
 export interface ConfigValidation {
   isValid: boolean;
   error?: string;
-}
-
-export type ConfigCategory = 
-  | 'Purchase'
-  | 'Loan'
-  | 'Operating'
-  | 'Income'
-  | 'Growth'
-  | 'Tax'
-  | 'Analysis';
-
-export type ConfigParameterType = 'percentage' | 'currency' | 'integer';
-
-export interface ConfigParameter {
-  key: keyof InvestmentConfig;
-  label: string;
-  category: ConfigCategory;
-  type: ConfigParameterType;
-  description: string;
-  isAdvanced?: boolean;
-  isAutoFilled?: boolean;
-  isReadOnly?: boolean;
-  isListingSpecific?: boolean;
-  min?: number;
-  max?: number;
-  step?: number;
-  unit?: string;
-  default?: number;
-  allowedValues?: number[]; // Optional array of allowed values
-  useSlider?: boolean; // Whether to use slider instead of input
 } 
