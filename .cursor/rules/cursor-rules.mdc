@@ -3,54 +3,222 @@ description:
 globs: 
 alwaysApply: true
 ---
-# Cursor Rules for Rental Investment Analyzer Chrome Extension
+# Cursor Rules for Rental Investment Analyzer
 
-## 1. Project Context
-- This is a Chrome extension for analyzing rental investment properties on Zillow.
-- The extension extracts property data, estimates rental income (using HUD data), and calculates investment metrics (cap rate, cash flow, etc.).
-- The project uses a modular structure: `src/` contains content scripts, background scripts, services, utils, and constants.
+## Project Documentation Structure
 
-## 2. File/Directory Priorities
-- Always keep the following files in context for architectural and requirements reference. These are all under the docs/ directory.
-  - `README.md`
-  - `tech-architecture.md`
-  - `product-specs.md`
-  - `idea.md`
-- For code context, prioritize:
-  - `src/constants/selectors.js`
-  - `src/services/dataExtractor.js`
-  - Any file in `src/content/`, `src/background/`, `src/services/`, `src/utils/`, and `src/constants/`
+### Core Documentation Files
+1. `docs/architecture/tech-architecture.md`
+   - Defines the technical architecture of the extension
+   - Contains component structure, data models, and data flow
+   - Reference for developers to understand system design
+   - Must be kept in sync with code changes
 
-## 3. Data Extraction & Business Logic
-- Data extraction logic is in `src/services/dataExtractor.js` and uses selectors from `src/constants/selectors.js`.
-- HUD data is (or will be) stored in `src/data/hud_rental_data.json` and accessed via a service.
-- Business logic for analysis is in `src/services/propertyAnalyzer.js`.
+2. `docs/specs/product-specs.md`
+   - Product requirements and specifications
+   - UI/UX design guidelines
+   - Feature definitions and user experience flows
+   - Reference for product decisions and user-facing features
 
-## 4. Workflow Reminders
-- When starting a new chat, always:
-  1. Reference the latest `tech-architecture.md` and `README.md` for project goals and structure.
-  2. Check for updates in `src/constants/selectors.js` and `src/services/dataExtractor.js` for data extraction logic.
-  3. If working on UI, check `src/content/sidebar.js` and related files.
-  4. If working on HUD data, check `src/data/hud_rental_data.json` and related service files.
+3. `docs/tasks/task-breakdown.md`
+   - Current project status and progress tracking
+   - Task organization and prioritization
+   - Implementation status of features
+   - Future roadmap and considerations
 
-## 5. Git & Collaboration
-- All changes should be committed with clear messages.
-- Use feature branches for new features or major changes.
-- Keep `.gitignore` and `package.json` up to date.
+### Documentation Rules
+1. **Architecture Documentation**
+   - Keep `tech-architecture.md` updated when:
+     - Adding new components
+     - Modifying data models
+     - Changing data flow
+     - Updating state management
+   - Include TypeScript interfaces for new data types
+   - Document component responsibilities
+   - Update data flow diagrams
 
-## 6. Testing
-- Unit tests are in `tests/unit/`
-- Integration tests are in `tests/integration/`
-- Use `npm run test` to run all tests.
+2. **Product Specifications**
+   - Update `product-specs.md` when:
+     - Adding new features
+     - Modifying UI/UX
+     - Changing user flows
+     - Updating requirements
+   - Include visual descriptions
+   - Document user interactions
+   - Specify performance requirements
 
-## 7. Build & Run
-- Use `npm run build` to build the extension.
-- Use `npm run dev` for development with hot reload (if configured).
-- Load the extension from the `dist/` directory in Chrome.
+3. **Task Management**
+   - Keep `task-breakdown.md` current by:
+     - Marking completed tasks
+     - Adding new tasks
+     - Updating priorities
+     - Tracking blockers
+   - Use consistent formatting:
+     - ✅ for completed tasks
+     - [ ] for pending tasks
+     - Clear categorization
+   - Update progress tracking section
 
-## 8. General
-- Always clarify requirements or context if unsure.
-- Maintain modularity and separation of concerns in code.
-- Document new features or changes in `README.md` and/or `tech-architecture.md`.
-- Keep track of status of tasks in docs/tasks/task-breakdown.md
-- Keep track of implementation notes in docs/tasks/task-breakdown.md
+## Code Organization Rules
+
+### Directory Structure
+```
+rental-investment-analyzer/
+├── src/
+│   ├── components/          # React components
+│   ├── services/           # Business logic
+│   ├── types/             # TypeScript definitions
+│   ├── constants/         # Configuration
+│   └── utils/            # Helper functions
+├── docs/
+│   ├── architecture/      # Technical docs
+│   ├── specs/            # Product specs
+│   └── tasks/            # Task tracking
+└── tests/                # Test files
+```
+
+### Component Rules
+1. **Naming Conventions**
+   - Use PascalCase for components
+   - Use camelCase for utilities
+   - Prefix interfaces with 'I'
+   - Use descriptive, purpose-indicating names
+
+2. **File Organization**
+   - One component per file
+   - Co-locate related components
+   - Group by feature/domain
+   - Keep files focused and small
+
+3. **Type Safety**
+   - Use TypeScript for all new code
+   - Define interfaces for props
+   - Avoid 'any' type
+   - Document complex types
+
+### State Management Rules
+1. **ConfigManager**
+   - Singleton pattern
+   - Type-safe operations
+   - Persistent storage
+   - Real-time updates
+
+2. **Component State**
+   - Local state for UI
+   - Props for data flow
+   - Context for global state
+   - Avoid prop drilling
+
+### Testing Rules
+1. **Unit Tests**
+   - Test business logic
+   - Mock external dependencies
+   - Use meaningful descriptions
+   - Follow AAA pattern
+
+2. **Integration Tests**
+   - Test component interactions
+   - Verify data flow
+   - Test user interactions
+   - Mock API calls
+
+3. **End-to-End Tests**
+   - Test Zillow integration
+   - Verify extension loading
+   - Test user flows
+   - Validate calculations
+
+## Development Workflow
+
+### Code Review Process
+1. **Documentation Updates**
+   - Update relevant .md files
+   - Document architectural changes
+   - Update task status
+   - Add implementation notes
+
+2. **Testing Requirements**
+   - Add tests for new features
+   - Update existing tests
+   - Verify test coverage
+   - Document test scenarios
+
+3. **Performance Considerations**
+   - Monitor bundle size
+   - Optimize calculations
+   - Minimize re-renders
+   - Profile performance
+
+### Version Control
+1. **Commit Messages**
+   - Use conventional commits
+   - Reference task numbers
+   - Describe changes clearly
+   - Link to documentation
+
+2. **Branch Strategy**
+   - feature/ for new features
+   - bugfix/ for fixes
+   - docs/ for documentation
+   - test/ for test updates
+
+## Maintenance Rules
+
+### Documentation Maintenance
+1. **Regular Updates**
+   - Review docs weekly
+   - Update task status
+   - Verify architecture docs
+   - Check product specs
+
+2. **Version Tracking**
+   - Document breaking changes
+   - Update changelog
+   - Track deprecations
+   - Note migration steps
+
+### Code Quality
+1. **Linting**
+   - Follow ESLint rules
+   - Use Prettier formatting
+   - Fix warnings promptly
+   - Maintain consistency
+
+2. **Performance**
+   - Monitor metrics
+   - Optimize bottlenecks
+   - Profile regularly
+   - Document improvements
+
+## Project Context
+
+### Key Concepts
+1. **Data Model**
+   - PropertyData: Listing information
+   - UserCalculationInputs: User preferences
+   - CalculatedMetrics: Investment analysis
+
+2. **Core Features**
+   - Real-time analysis
+   - Property data extraction
+   - Investment calculations
+   - User preference management
+
+3. **Technical Stack**
+   - React + TypeScript
+   - Chrome Extension
+   - Tailwind CSS
+   - Chrome Storage API
+
+### Development Priorities
+1. **Current Focus**
+   - Testing implementation
+   - Documentation completion
+   - Performance optimization
+   - User experience improvements
+
+2. **Future Goals**
+   - Advanced metrics
+   - Market analysis
+   - Export functionality
+   - Platform expansion
