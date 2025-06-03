@@ -1,5 +1,187 @@
 # Rental Investment Analyzer - Technical Architecture
 
+## Overview
+The Rental Investment Analyzer is a Chrome extension that helps real estate investors analyze rental properties directly on Zillow listings. The extension provides real-time investment metrics and allows users to customize their analysis parameters.
+
+## Core Components
+
+### 1. Content Script (`content.ts`)
+- Injects the React application into Zillow listing pages
+- Handles communication between the extension and the webpage
+- Manages the extension's lifecycle on the page
+
+### 2. App Component (`app.tsx`)
+- Root component that renders the main UI
+- Manages the extension's state and routing
+- Handles communication with the content script
+
+### 3. Investment Analysis Panel (`investment-analysis-panel.tsx`)
+- Main component for displaying investment analysis
+- Layout Structure:
+  1. Key Metrics (top)
+     - Monthly Cash Flow (green/red)
+     - Cap Rate (blue)
+     - Cash-on-Cash Return (purple)
+     - Annual Cash Flow (green/red)
+  2. Investment Summary
+     - Monthly Mortgage
+     - Effective Rent
+     - Property Details
+  3. User Inputs Panel (bottom)
+- Manages state for:
+  - Property data
+  - User calculation inputs
+  - Calculated metrics
+- Subscribes to ConfigManager for real-time updates
+
+### 4. User Inputs Panel (`config-panel.tsx`)
+- Displays and manages user input fields
+- Organized by categories:
+  - Purchase Parameters
+  - Loan Parameters
+  - Operating Expenses
+  - Growth Assumptions
+- Uses ConfigManager for persistence
+
+## Data Model
+
+### 1. Property Data (`PropertyData`)
+```typescript
+interface PropertyData {
+  price: number;
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  squareFeet: number;
+  zipCode: string;
+  rentZestimate?: number;
+  propertyTaxes?: number;
+  hoaFees?: number;
+}
+```
+
+### 2. User Calculation Inputs (`UserCalculationInputs`)
+```typescript
+interface UserCalculationInputs {
+  // Purchase Parameters
+  downPaymentPercentage: number;
+  
+  // Loan Parameters
+  interestRate: number;
+  loanTerm: number;
+  
+  // Operating Expenses
+  managementRate: number;
+  maintenanceRate: number;
+  insuranceRate: number;
+  propertyTaxRate: number;
+  vacancyRate: number;
+}
+```
+
+### 3. Calculated Metrics (`CalculatedMetrics`)
+```typescript
+interface CalculatedMetrics {
+  monthlyMortgage: number;
+  monthlyCashFlow: number;
+  annualCashFlow: number;
+  cashOnCashReturn: number;
+  capRate: number;
+}
+```
+
+## Data Flow
+
+1. **Property Data Extraction**
+   ```
+   Zillow Page → DataExtractor → PropertyData
+   ```
+   - DataExtractor scrapes listing data
+   - Maps to PropertyData interface
+   - Updates InvestmentAnalysisPanel state
+
+2. **User Input Management**
+   ```
+   User Inputs Panel → ConfigManager → UserCalculationInputs
+   ```
+   - ConfigManager persists user preferences
+   - Provides real-time updates via subscription
+   - Validates input values
+
+3. **Metrics Calculation**
+   ```
+   PropertyData + UserCalculationInputs → Calculator → CalculatedMetrics
+   ```
+   - Calculator combines property data and user inputs
+   - Computes investment metrics
+   - Updates UI in real-time
+
+## State Management
+
+### 1. ConfigManager
+- Singleton service for managing user preferences
+- Handles persistence using Chrome Storage
+- Provides subscription mechanism for real-time updates
+- Validates input values against constraints
+
+### 2. Component State
+- InvestmentAnalysisPanel manages:
+  - Property data (from DataExtractor)
+  - User inputs (from ConfigManager)
+  - Calculated metrics (from Calculator)
+- Updates trigger re-renders with new calculations
+
+## Key Features
+
+### 1. Real-time Analysis
+- Instant metric updates as users adjust inputs
+- Color-coded metrics for quick interpretation
+- Responsive layout for all screen sizes
+
+### 2. Data Persistence
+- User preferences saved across sessions
+- Automatic loading of last used settings
+- Validation to ensure data integrity
+
+### 3. Error Handling
+- Graceful handling of missing property data
+- Input validation with user feedback
+- Fallback UI states for loading/errors
+
+## Technical Decisions
+
+### 1. React + TypeScript
+- Type safety for data models
+- Component-based architecture
+- Efficient state management
+
+### 2. Tailwind CSS
+- Utility-first styling
+- Responsive design
+- Consistent visual language
+
+### 3. Chrome Extension Architecture
+- Content script injection
+- Secure storage
+- Cross-origin communication
+
+## Future Considerations
+
+### 1. Performance
+- Memoization of calculations
+- Lazy loading of components
+- Optimized re-renders
+
+### 2. Features
+- Advanced metrics (IRR, DSCR)
+- Historical data analysis
+- Market comparison tools
+
+### 3. Integration
+- Export functionality
+- API integration
+- Multi-platform support
+
 ## Project Structure
 ```
 rental-investment-analyzer/

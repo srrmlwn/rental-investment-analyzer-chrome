@@ -1,162 +1,145 @@
-# Rental Investment Analyzer Chrome Plugin - Product Specification
+# Rental Investment Analyzer - Product Specifications
 
 ## Overview
-A Chrome plugin that helps real estate investors analyze rental property investments directly on Zillow listing pages. The plugin provides quick cash flow analysis with configurable parameters and meaningful defaults.
-
-## MVP Scope
-- Works on Zillow listing pages only
-- Focuses on cash flow analysis
-- Uses a fixed sidebar interface
-- Stateless operation (no property saving/comparison)
-- Supports basic configuration with defaults
+The Rental Investment Analyzer is a Chrome extension that provides real-time investment analysis for rental properties directly on Zillow listing pages. It helps investors quickly evaluate potential rental properties by calculating key metrics and allowing customization of analysis parameters.
 
 ## User Interface
 
-### Sidebar Design
-```
-+------------------------------------------+
-|  Zillow Listing Page                     |
-|                                          |
-|  [Property Details]                      |
-|  [Images]                                |
-|  [Description]                           |
-|                                          |
-|  +----------------------------------+    |
-|  | Rental Investment Analyzer       |    |
-|  |                                  |    |
-|  | Cash Flow Analysis               |    |
-|  | -------------------------------- |    |
-|  | Monthly Cash Flow: $XXX         |    |
-|  | Annual Cash Flow: $XXX          |    |
-|  |                                  |    |
-|  | Rental Estimate: $XXX           |    |
-|  | (Source: Zestimate/HUD)         |    |
-|  |                                  |    |
-|  | Configuration                    |    |
-|  | -------------------------------- |    |
-|  | [ ] Down Payment: 20%           |    |
-|  | [ ] Mortgage Rate: 6.5%         |    |
-|  | [ ] Property Management: 10%    |    |
-|  | [ ] Maintenance: 1%             |    |
-|  | [ ] Vacancy Rate: 10%           |    |
-|  |                                  |    |
-|  | [ ] Save as Default Settings    |    |
-|  | [Save Configuration]             |    |
-|  +----------------------------------+    |
-|                                          |
-+------------------------------------------+
-```
+### 1. Investment Analysis Panel
+- **Location**: Injected into Zillow listing pages
+- **Layout**:
+  1. Key Metrics (Top Section)
+     - Monthly Cash Flow
+       - Color: Green (positive) / Red (negative)
+       - Format: $X,XXX
+     - Cap Rate
+       - Color: Blue
+       - Format: X.X%
+     - Cash-on-Cash Return
+       - Color: Purple
+       - Format: X.X%
+     - Annual Cash Flow
+       - Color: Green (positive) / Red (negative)
+       - Format: $XX,XXX
 
-### Key UI Elements
-1. **Sidebar Position**: Fixed on the right side of the Zillow listing page
-2. **Header**: "Rental Investment Analyzer" with a simple icon
-3. **Cash Flow Display**: 
-   - Monthly and Annual cash flow prominently displayed
-   - Rental estimate with data source
-4. **Configuration Panel**:
-   - Collapsible section
-   - Input fields for key parameters
-   - Save button for default configuration
+  2. Investment Summary (Middle Section)
+     - Monthly Mortgage Payment
+     - Effective Monthly Rent
+     - Property Type
+     - Square Footage
 
-## Default Configuration
-- Down Payment: 20%
-- Mortgage Rate: 6.5%
-- Property Management Fees: 10% of rent
-- Maintenance Reserves: 1% of property value annually
-- Vacancy Rate: 10%
+  3. User Inputs (Bottom Section)
+     - Purchase Parameters
+       - Down Payment Percentage
+     - Loan Parameters
+       - Interest Rate
+       - Loan Term
+     - Operating Expenses
+       - Property Management Rate
+       - Maintenance Rate
+       - Insurance Rate
+       - Property Tax Rate
+       - Vacancy Rate
 
-## Data Requirements
+### 2. Visual Design
+- Clean, modern interface
+- Responsive layout
+- Clear visual hierarchy
+- Color-coded metrics
+- Consistent spacing and typography
+- Shadow and border effects for depth
 
-### Mandatory Data (from Zillow)
-- Listing Price
-- Number of Bedrooms
-- Number of Bathrooms
-- Property Type
+## Features
 
-### Optional Data
-- Property Tax (if available)
-- HOA Fees (if available)
-- Rent Zestimate (primary source)
-- HUD Data (fallback for rental estimates)
+### 1. Property Data Extraction
+- Automatic extraction of:
+  - Property price
+  - Property type
+  - Bedrooms/Bathrooms
+  - Square footage
+  - Zip code
+  - Rent Zestimate
+  - Property taxes
+  - HOA fees
 
-## Error Handling
+### 2. Investment Analysis
+- Real-time calculation of:
+  - Monthly mortgage payment
+  - Monthly cash flow
+  - Annual cash flow
+  - Cash-on-cash return
+  - Cap rate
 
-### Missing Mandatory Data
-```
-Error: Unable to analyze property
-This listing appears to be incomplete. Required information (price, bedrooms, bathrooms) is missing.
-Please try a different listing or refresh the page.
-```
+### 3. User Preferences
+- Persistent storage of:
+  - Down payment percentage
+  - Loan parameters
+  - Operating expense rates
+- Automatic loading of last used settings
+- Input validation with constraints
 
-### Missing Rental Estimate
-```
-Note: Using HUD data for rental estimate
-Zestimate is not available for this property. Using HUD data for the area as a fallback.
-```
+### 4. Error Handling
+- Graceful handling of:
+  - Missing property data
+  - Invalid user inputs
+  - Calculation errors
+- Clear error messages
+- Fallback UI states
 
-## User Experience Flow
-1. User navigates to a Zillow listing page
-2. Plugin sidebar automatically appears on the right
-3. Plugin extracts property data and performs initial analysis
-4. User can:
-   - View cash flow analysis
-   - Adjust configuration parameters
-   - Save their preferred defaults
-   - See the source of rental estimates
+## User Experience
+
+### 1. Installation
+- Simple Chrome Web Store installation
+- Automatic activation on Zillow listing pages
+- No configuration required for first use
+
+### 2. Usage Flow
+1. Visit Zillow listing page
+2. Extension automatically loads
+3. View initial analysis with default settings
+4. Adjust parameters as needed
+5. See real-time updates to metrics
+6. Settings persist for next visit
+
+### 3. Performance
+- Instant metric updates
+- Smooth UI interactions
+- No page reload required
+- Efficient data persistence
 
 ## Technical Requirements
 
-### Implementation Approach
-We will implement this as a standalone Chrome extension for the following reasons:
-- Professional user experience without requiring additional software
-- Direct distribution through Chrome Web Store
-- Better security and permissions management
-- More reliable DOM manipulation and styling
-- Easier maintenance and updates
-- Better performance as a native extension
+### 1. Browser Support
+- Chrome (latest version)
+- Manifest V3 compliant
 
-### Data Extraction
-- Parse Zillow listing page HTML for property details
-- Extract Zestimate data when available
-- Fallback to HUD data API for rental estimates
-- Handle missing data gracefully
+### 2. Data Storage
+- Chrome Storage API
+- Secure data persistence
+- Efficient state management
 
-### Performance
-- Low latency data extraction and analysis
-- Minimal impact on page load time
-- Efficient DOM manipulation for sidebar
+### 3. Performance Targets
+- < 100ms calculation time
+- < 500ms initial load
+- Smooth UI updates
+- Minimal memory footprint
 
-### Browser Compatibility
-- Chrome browser only (MVP)
-- Support for latest Chrome version
-- Implemented as a native Chrome extension
+## Future Enhancements
 
-## Configuration Management
-1. **Per-Property Configuration**
-   - Users can adjust values for individual property analysis
-   - Changes are temporary and only apply to current property
-   - Reset button to restore default values
+### 1. Analysis Features
+- Advanced metrics (IRR, DSCR)
+- Market comparison tools
+- Historical data analysis
+- Custom metric formulas
 
-2. **Default Configuration**
-   - "Save as Default Settings" checkbox in configuration panel
-   - When checked, current values become new defaults
-   - Stored in Chrome's extension storage
-   - Persists across browser sessions
-   - Can be reset to factory defaults
+### 2. User Experience
+- Dark mode support
+- Customizable layouts
+- Export functionality
+- Mobile responsiveness
 
-## Future Enhancements (Post-MVP)
-1. Additional metrics:
-   - Cap Rate
-   - Cash-on-Cash Return
-   - Net Rental Return (NRR)
-2. Support for Zillow search page
-3. Property comparison features
-4. Export functionality
-5. Support for other real estate websites
-
-## Success Metrics
-1. Accurate cash flow calculations
-2. Fast sidebar load time (< 1 second)
-3. Reliable data extraction
-4. User-friendly error messages
-5. Smooth configuration experience 
+### 3. Integration
+- API connections
+- Data export
+- Multi-platform support
+- Analytics dashboard 
