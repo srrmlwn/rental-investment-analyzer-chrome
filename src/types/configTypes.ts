@@ -12,6 +12,7 @@ export type ConfigCategory =
   | 'Tax'
   | 'Analysis';
 
+// Base interface for all config parameters
 export interface ConfigParameter {
   id: keyof CalculationInputs;
   label: string;
@@ -19,17 +20,12 @@ export interface ConfigParameter {
   type: ConfigParameterType;
   description?: string;
   isAdvanced?: boolean;
-  isAutoFilled?: boolean;
-  min?: number;
-  max?: number;
   step?: number;
   unit?: string;
-  default?: number;
-  allowedValues?: number[];
   useSlider?: boolean;
-}
-
-export interface ConfigValidation {
-  isValid: boolean;
-  error?: string;
+  
+  // Dynamic getter methods
+  getValue(inputs: CalculationInputs): number;
+  getMin(inputs: CalculationInputs): number;
+  getMax(inputs: CalculationInputs): number;
 } 

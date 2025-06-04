@@ -1,5 +1,4 @@
 import { CalculationInputs } from '@/types/calculationInputs';
-import { ConfigValidation } from '@/types/configTypes';
 import { CONFIG_PARAMETERS, getParameterByKey } from '@/constants/configParameters';
 
 // Add debounce utility
@@ -14,13 +13,6 @@ function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-// Create default config from parameters
-const DEFAULT_CONFIG: CalculationInputs = CONFIG_PARAMETERS
-  .reduce((config, param) => ({
-    ...config,
-    [param.id]: param.default ?? 0,
-  }), {} as CalculationInputs);
-
 type ConfigChangeListener = (config: CalculationInputs) => void;
 
 export class ConfigManager {
@@ -32,9 +24,14 @@ export class ConfigManager {
   private isInitialLoad: boolean = true;
 
   private constructor() {
-    this.config = { ...DEFAULT_CONFIG };
+    // Initialize with zeros, actual values will be set from storage or property data
+    const initialConfig = {} as CalculationInputs;
+    for (const param of CONFIG_PARAMETERS) {
+      initialConfig[param.id] = 0;
+    }
+    this.config = initialConfig;
+    
     this.listeners = new Set();
-    // Debounce save operations to once per second
     this.debouncedSave = debounce(() => {
       if (!this.isSaving) {
         this.saveConfig().catch(console.error);
@@ -54,7 +51,7 @@ export class ConfigManager {
     try {
       const stored = await chrome.storage.sync.get('userCalculationInputs');
       if (stored.userCalculationInputs) {
-        // Preserve any listing-specific values (like purchase price) when loading from storage
+        // Preserve any listing-specific values when loading from storage
         const listingValues = {
           purchasePrice: this.config.purchasePrice,
           rentEstimate: this.config.rentEstimate,
@@ -63,12 +60,10 @@ export class ConfigManager {
         };
         
         this.config = { 
-          ...DEFAULT_CONFIG, 
           ...stored.userCalculationInputs,
           ...listingValues // Ensure listing values are preserved
         };
         
-        // Only notify listeners if this isn't the initial load
         if (!this.isInitialLoad) {
           this.notifyListeners();
         }
@@ -108,21 +103,28 @@ export class ConfigManager {
       Object.entries(updates).filter(([key]) => !listingKeys.includes(key as typeof listingKeys[number]))
     ) as Partial<CalculationInputs>;
 
-    // Validate updates
+    // Validate updates using parameter getters
     for (const [key, value] of Object.entries(filteredUpdates)) {
       const param = getParameterByKey(key as keyof CalculationInputs);
       if (!param) continue;
 
-      const validation = this.validateValue(key as keyof CalculationInputs, value as number);
-      if (!validation.isValid) {
-        throw new Error(`Invalid value for ${param.label}: ${validation.error}`);
+      const min = param.getMin(this.config);
+      const max = param.getMax(this.config);
+      
+      if (value < min || value > max) {
+        throw new Error(
+          `Invalid value for ${param.label}: must be between ${
+            param.type === 'currency' ? '$' : ''
+          }${min.toLocaleString()} and ${
+            param.type === 'currency' ? '$' : ''
+          }${max.toLocaleString()}`
+        );
       }
     }
 
     // Update config with filtered updates
     this.config = { ...this.config, ...filteredUpdates };
     
-    // Use debounced save instead of immediate save
     this.debouncedSave();
     this.notifyListeners();
   }
@@ -136,7 +138,13 @@ export class ConfigManager {
       hoaFees: this.config.hoaFees
     };
     
-    this.config = { ...DEFAULT_CONFIG, ...listingValues };
+    // Reset to zeros except for listing values
+    const resetConfig = {} as CalculationInputs;
+    for (const param of CONFIG_PARAMETERS) {
+      resetConfig[param.id] = 0;
+    }
+    this.config = { ...resetConfig, ...listingValues };
+    
     await this.saveConfig();
     this.notifyListeners();
   }
@@ -144,61 +152,5 @@ export class ConfigManager {
   public subscribe(listener: ConfigChangeListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
-  }
-
-  public validateValue(key: keyof CalculationInputs, value: number): ConfigValidation {
-    const param = getParameterByKey(key);
-    if (!param) {
-      return { isValid: false, error: 'Invalid parameter' };
-    }
-
-    if (param.type === 'percentage') {
-      return this.validatePercentage(value, param.min, param.max);
-    } else if (param.type === 'currency') {
-      return this.validateCurrency(value, param.min, param.max);
-    } else if (param.type === 'number') {
-      return this.validateNumber(value, param.min || 0, param.max || 100);
-    }
-
-    return { isValid: true };
-  }
-
-  private validatePercentage(value: number, min?: number, max?: number): ConfigValidation {
-    if (isNaN(value)) {
-      return { isValid: false, error: 'Value must be a number' };
-    }
-    if (min !== undefined && value < min) {
-      return { isValid: false, error: `Value must be at least ${min}%` };
-    }
-    if (max !== undefined && value > max) {
-      return { isValid: false, error: `Value must be at most ${max}%` };
-    }
-    return { isValid: true };
-  }
-
-  private validateCurrency(value: number, min?: number, max?: number): ConfigValidation {
-    if (isNaN(value)) {
-      return { isValid: false, error: 'Value must be a number' };
-    }
-    if (min !== undefined && value < min) {
-      return { isValid: false, error: `Value must be at least $${min.toLocaleString()}` };
-    }
-    if (max !== undefined && value > max) {
-      return { isValid: false, error: `Value must be at most $${max.toLocaleString()}` };
-    }
-    return { isValid: true };
-  }
-
-  private validateNumber(value: number, min: number, max: number): ConfigValidation {
-    if (isNaN(value)) {
-      return { isValid: false, error: 'Value must be a number' };
-    }
-    if (value < min) {
-      return { isValid: false, error: `Value must be at least ${min}` };
-    }
-    if (value > max) {
-      return { isValid: false, error: `Value must be at most ${max}` };
-    }
-    return { isValid: true };
   }
 } 

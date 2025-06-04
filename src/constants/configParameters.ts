@@ -1,6 +1,8 @@
 import { ConfigParameter, ConfigCategory } from '@/types/configTypes';
 import { CalculationInputs } from '@/types/calculationInputs';
 
+// Parameters that should get their values from inputs (property listing data)
+
 export const CONFIG_PARAMETERS: ConfigParameter[] = [
   // Purchase Parameters
   {
@@ -9,12 +11,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Purchase', 
     type: 'currency',
     description: 'Offer price for the property',
-    min: 0.25, // 25% of list price
-    max: 2, // 2x list price
     step: 1000,
     unit: '$',
-    default: 0, // Will be set from listing
     useSlider: true,
+    getValue: (inputs: CalculationInputs) => inputs.purchasePrice,
+    getMin: (inputs: CalculationInputs) => inputs.purchasePrice * 0.25, // 25% of list price
+    getMax: (inputs: CalculationInputs) => inputs.purchasePrice * 2,    // 2x list price
   },
   {
     id: 'closingCosts',
@@ -22,13 +24,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Purchase',
     type: 'percentage',
     description: 'Closing costs as percentage of purchase price',
-    min: 0,
-    max: 100,
     step: 0.1,
     unit: '%',
-    default: 3,
     isAdvanced: true,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 3, // 3% default
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (_inputs: CalculationInputs) => 100,
   },
   {
     id: 'rehabCosts',
@@ -36,13 +38,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Purchase',
     type: 'currency',
     description: 'Estimated renovation costs',
-    min: 0,
-    max: 1, // 1x purchase price
     step: 100,
     unit: '$',
-    default: 0,
     isAdvanced: true,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 0,
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (inputs: CalculationInputs) => inputs.purchasePrice, // 1x purchase price
   },
   {
     id: 'afterRepairValue',
@@ -50,13 +52,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Purchase',
     type: 'currency',
     description: 'Estimated value after renovations',
-    min: 1, // 1x purchase price
-    max: 2, // 2x purchase price
     step: 1000,
     unit: '$',
-    default: 0, // Will be set to purchase price initially
     isAdvanced: true,
     useSlider: true,
+    getValue: (inputs: CalculationInputs) => inputs.purchasePrice,
+    getMin: (inputs: CalculationInputs) => inputs.purchasePrice, // 1x purchase price
+    getMax: (inputs: CalculationInputs) => inputs.purchasePrice * 2, // 2x purchase price
   },
 
   // Loan Parameters
@@ -66,12 +68,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Loan',
     type: 'percentage',
     description: 'Percentage of property price paid as down payment',
-    min: 5,
-    max: 100,
     step: 1,
     unit: '%',
-    default: 20,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 20, // 20% default
+    getMin: (_inputs: CalculationInputs) => 5,
+    getMax: (_inputs: CalculationInputs) => 100,
   },
   {
     id: 'interestRate',
@@ -79,12 +81,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Loan',
     type: 'percentage',
     description: 'Annual mortgage interest rate',
-    min: 3,
-    max: 12,
     step: 0.25,
     unit: '%',
-    default: 7.5,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 7.5, // 7.5% default
+    getMin: (_inputs: CalculationInputs) => 3,
+    getMax: (_inputs: CalculationInputs) => 12,
   },
   {
     id: 'loanTerm',
@@ -92,11 +94,11 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Loan',
     type: 'number',
     description: 'Length of mortgage in years',
-    min: 10,
-    max: 40,
     step: 5,
-    default: 30,    
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 30, // 30 years default
+    getMin: (_inputs: CalculationInputs) => 10,
+    getMax: (_inputs: CalculationInputs) => 40,
   },
 
   // Rental Income Parameters
@@ -106,12 +108,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Income',
     type: 'currency',
     description: 'Expected monthly rental income',
-    min: 0,
-    max: 2, // 2x Zestimate
     step: 100,
     unit: '$',
-    default: 0, // Will be set from listing
     useSlider: true,
+    getValue: (inputs: CalculationInputs) => inputs.rentEstimate,
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (inputs: CalculationInputs) => inputs.rentEstimate * 2, // 2x current estimate
   },
   {
     id: 'vacancyRate',
@@ -119,13 +121,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Income',
     type: 'percentage',
     description: 'Expected vacancy rate as percentage of annual rent',
-    min: 0,
-    max: 20,
     step: 0.5,
     unit: '%',
-    default: 5,
     isAdvanced: true,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 5, // 5% default
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (_inputs: CalculationInputs) => 20,
   },
   {
     id: 'otherIncome',
@@ -133,13 +135,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Income',
     type: 'currency',
     description: 'Additional monthly income (parking, storage, etc.)',
-    min: 0,
-    max: 2, // 2x rent estimate
     step: 100,
     unit: '$',
-    default: 0,
     isAdvanced: true,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 0,
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (inputs: CalculationInputs) => inputs.rentEstimate * 2, // 2x rent estimate
   },
 
   // Operating Expenses
@@ -149,12 +151,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'percentage',
     description: 'Percentage of rent paid to property manager',
-    min: 0,
-    max: 30,
     step: 0.5,
     unit: '%',
-    default: 8,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 8, // 8% default
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (_inputs: CalculationInputs) => 30,
   },
   {
     id: 'maintenanceRate',
@@ -162,13 +164,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'percentage',
     description: 'Annual maintenance as percentage of property value',
-    min: 0.5,
-    max: 5,
     step: 0.1,
     unit: '%',
-    default: 1,
     isAdvanced: true,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 1, // 1% default
+    getMin: (_inputs: CalculationInputs) => 0.5,
+    getMax: (_inputs: CalculationInputs) => 5,
   },
   {
     id: 'insuranceRate',
@@ -176,12 +178,12 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'percentage',
     description: 'Annual insurance rate as percentage of property value',
-    min: 0.1,
-    max: 2,
     step: 0.1,
     unit: '%',
-    default: 0.5,
     useSlider: true,
+    getValue: (_inputs: CalculationInputs) => 0.5, // 0.5% default
+    getMin: (_inputs: CalculationInputs) => 0.1,
+    getMax: (_inputs: CalculationInputs) => 2,
   },
   {
     id: 'propertyTaxes',
@@ -189,13 +191,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'currency',
     description: 'Annual property taxes (actual amount)',
-    min: 0,
-    max: 100000,
     step: 100,
     unit: '$',
-    default: 0, // Will be set from listing
     isAdvanced: true,
     useSlider: true,
+    getValue: (inputs: CalculationInputs) => inputs.propertyTaxes,
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (inputs: CalculationInputs) => inputs.propertyTaxes * 2, // 2x current taxes
   },
   {
     id: 'hoaFees',
@@ -203,13 +205,13 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     category: 'Operating',
     type: 'currency',
     description: 'Monthly HOA fees',
-    min: 0,
-    max: 1000,
     step: 10,
     unit: '$',
-    default: 0, // Will be set from listing
     isAdvanced: true,
     useSlider: true,
+    getValue: (inputs: CalculationInputs) => inputs.hoaFees,
+    getMin: (_inputs: CalculationInputs) => 0,
+    getMax: (inputs: CalculationInputs) => inputs.hoaFees * 2, // 2x current HOA fees
   },
 ];
 

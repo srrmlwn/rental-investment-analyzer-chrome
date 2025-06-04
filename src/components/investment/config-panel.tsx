@@ -20,7 +20,7 @@ interface ConfigPanelProps {
 
 export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [config, setConfig] = useState<CalculationInputs>(inputs);
+  const [calculationInputs, setCalculationInputs] = useState<CalculationInputs>(inputs);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Update local state when inputs prop changes
@@ -29,7 +29,7 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
       purchasePrice: inputs.purchasePrice,
       purchasePriceFormatted: `$${inputs.purchasePrice.toLocaleString()}`
     });
-    setConfig(inputs);
+    setCalculationInputs(inputs);
   }, [inputs]);
 
   const handleConfigChange = async (key: keyof CalculationInputs, value: number) => {
@@ -57,7 +57,6 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
   };
 
   const renderParameterInput = (param: typeof CONFIG_PARAMETERS[0]) => {
-    const value = config[param.id];
     const error = errors[param.id];
 
     if (param.useSlider) {
@@ -69,14 +68,13 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
       return (
         <LabeledSlider
           label={param.label}
-          value={value ?? 0}
-          min={param.min ?? 0}
-          max={param.max ?? 100}
+          value={param.getValue(calculationInputs) ?? 0}
+          min={param.getMin(calculationInputs)}
+          max={param.getMax(calculationInputs)}
           step={param.step ?? 1}
           unit={param.unit}
           onChange={handleSliderChange}
           disabled={false}
-          marks={param.allowedValues?.map(v => ({ value: v, label: v.toString() }))}
         />
       );
     }
@@ -86,7 +84,9 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
         <Label className="text-sm font-medium">{param.label}</Label>
         <Input
           type="number"
-          value={value}
+          value={param.getValue(calculationInputs)}
+          min={param.getMin(calculationInputs)}
+          max={param.getMax(calculationInputs)}
           onChange={(e) => handleConfigChange(param.id, Number(e.target.value))}
           disabled={false}
           className={cn(
