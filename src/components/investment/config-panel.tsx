@@ -8,33 +8,39 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Calculator, Edit3, RotateCcw } from 'lucide-react';
 import { ConfigManager } from '@/services/configManager';
-import { UserCalculationInputs, PropertyData } from '@/types/investment';
+import { CalculationInputs } from '@/types/calculationInputs';
 import { CONFIG_PARAMETERS, getBasicParameters, getParametersByCategory } from '@/constants/configParameters';
 import { cn } from '@/lib/utils';
 
 interface ConfigPanelProps {
-  onConfigChange?: (config: UserCalculationInputs) => void;
-  propertyData: PropertyData;
+  onConfigChange?: (config: CalculationInputs) => void;
+  inputs: CalculationInputs;
   className?: string;
 }
 
-export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [config, setConfig] = useState<UserCalculationInputs>(ConfigManager.getInstance().getConfig());
+  const [config, setConfig] = useState<CalculationInputs>(inputs);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Subscribe to config changes
+  // Update local state when inputs prop changes
   useEffect(() => {
-    const unsubscribe = ConfigManager.getInstance().subscribe((newConfig) => {
-      setConfig(newConfig);
-      onConfigChange?.(newConfig);
+    console.log('[RIA Debug] ConfigPanel received new inputs:', {
+      purchasePrice: inputs.purchasePrice,
+      purchasePriceFormatted: `$${inputs.purchasePrice.toLocaleString()}`
     });
-    return () => unsubscribe();
-  }, [onConfigChange]);
+    setConfig(inputs);
+  }, [inputs]);
 
-  const handleConfigChange = async (key: keyof UserCalculationInputs, value: number) => {
+  const handleConfigChange = async (key: keyof CalculationInputs, value: number) => {
     const param = CONFIG_PARAMETERS.find(p => p.id === key);
     if (!param) return;
+
+    console.log('[RIA Debug] ConfigPanel handling config change:', {
+      key,
+      value,
+      valueFormatted: key === 'purchasePrice' ? `$${value.toLocaleString()}` : value.toString()
+    });
 
     try {
       await ConfigManager.getInstance().updateConfig({ [key]: value });
@@ -57,15 +63,7 @@ export function ConfigPanel({ onConfigChange, className }: ConfigPanelProps) {
     if (param.useSlider) {
       // For parameters with allowed values, snap to nearest allowed value
       const handleSliderChange = (newValue: number) => {
-        if (param.allowedValues) {
-          // Find closest allowed value
-          const closest = param.allowedValues.reduce((prev, curr) => {
-            return Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev;
-          });
-          handleConfigChange(param.id, closest);
-        } else {
-          handleConfigChange(param.id, newValue);
-        }
+        handleConfigChange(param.id, newValue);        
       };
 
       return (

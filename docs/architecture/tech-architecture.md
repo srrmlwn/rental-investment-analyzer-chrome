@@ -45,7 +45,7 @@ The Rental Investment Analyzer is a Chrome extension that helps real estate inve
 
 ## Data Model
 
-### 1. Property Data (`PropertyData`)
+### 1. Property Data (`src/types/propertyData.ts`)
 ```typescript
 interface PropertyData {
   price: number;
@@ -60,13 +60,17 @@ interface PropertyData {
 }
 ```
 
-### 2. User Calculation Inputs (`UserCalculationInputs`)
+### 2. Calculation Inputs (`src/types/calculationInputs.ts`)
 ```typescript
-interface UserCalculationInputs {
+interface CalculationInputs {
   // Purchase Parameters
-  downPaymentPercentage: number;
+  purchasePrice: number;
+  closingCosts: number;
+  rehabCosts: number;
+  afterRepairValue: number;
   
   // Loan Parameters
+  downPaymentPercentage: number;
   interestRate: number;
   loanTerm: number;
   
@@ -74,19 +78,62 @@ interface UserCalculationInputs {
   managementRate: number;
   maintenanceRate: number;
   insuranceRate: number;
-  propertyTaxRate: number;
+  propertyTaxes: number;
+  hoaFees: number;
   vacancyRate: number;
+  
+  // Income Parameters
+  rentEstimate: number;
+  otherIncome: number;
 }
 ```
 
-### 3. Calculated Metrics (`CalculatedMetrics`)
+### 3. Calculated Metrics (`src/types/calculatedMetrics.ts`)
 ```typescript
 interface CalculatedMetrics {
+  // Basic Metrics
   monthlyMortgage: number;
   monthlyCashFlow: number;
   annualCashFlow: number;
   cashOnCashReturn: number;
   capRate: number;
+
+  // Advanced Metrics
+  totalInvestment: number;
+  netOperatingIncome: number;
+  debtServiceCoverageRatio: number;
+  returnOnInvestment: number;
+  breakEvenYears: number;
+  effectiveGrossIncome: number;
+  operatingExpenseRatio: number;
+}
+```
+
+### 4. Configuration Types (`src/types/configTypes.ts`)
+```typescript
+interface ConfigParameter {
+  id: string;
+  label: string;
+  type: 'currency' | 'percentage' | 'number';
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  default: number;
+  advanced: boolean;
+  slider: boolean;
+  description: string;
+}
+
+interface ConfigCategory {
+  id: string;
+  label: string;
+  parameters: ConfigParameter[];
+}
+
+interface ConfigValidation {
+  isValid: boolean;
+  message: string;
 }
 ```
 
@@ -198,27 +245,35 @@ rental-investment-analyzer/
 │   ├── background/            # Background scripts
 │   │   └── background.js      # Handles storage and data loading
 │   ├── services/             # Business logic and services
-│   │   ├── propertyAnalyzer.js    # Cash flow calculations
-│   │   ├── dataExtractor.js       # Zillow page parsing
-│   │   ├── rentalEstimator.js     # Rental estimate logic
-│   │   └── configManager.js       # Configuration management
-│   ├── data/                 # Local data files
-│   │   ├── hud_rental_data.json   # Processed HUD data
-│   │   └── zip_code_map.json      # Zip code to HUD data mapping
+│   │   ├── calculator.ts      # Investment calculations
+│   │   ├── dataExtractor.ts   # Zillow page parsing
+│   │   └── configManager.ts   # Configuration management
+│   ├── types/                # TypeScript type definitions
+│   │   ├── propertyData.ts    # Property data interface
+│   │   ├── calculationInputs.ts # Calculation inputs interface
+│   │   ├── calculatedMetrics.ts # Calculated metrics interface
+│   │   └── configTypes.ts     # Configuration type definitions
+│   ├── components/           # React components
+│   │   ├── investment-analysis-panel.tsx
+│   │   └── investment/
+│   │       └── config-panel.tsx
 │   ├── utils/                # Utility functions
-│   │   ├── domUtils.js       # DOM manipulation helpers
-│   │   ├── numberUtils.js    # Number formatting, calculations
-│   │   ├── storageUtils.js   # Chrome storage helpers
-│   │   └── dataUtils.js      # HUD data processing helpers
+│   │   ├── domUtils.ts       # DOM manipulation helpers
+│   │   ├── numberUtils.ts    # Number formatting, calculations
+│   │   └── storageUtils.ts   # Chrome storage helpers
 │   └── constants/            # Constants and configurations
-│       ├── selectors.js      # Zillow page selectors
-│       └── defaults.js       # Default configuration values
+│       ├── selectors.ts      # Zillow page selectors
+│       └── configParameters.ts # Configuration parameters
 ├── public/                   # Static assets
 │   ├── icons/               # Extension icons
 │   └── images/              # Other images
 ├── tests/                   # Test files
 │   ├── unit/
 │   └── integration/
+├── docs/                    # Documentation
+│   ├── architecture/        # Technical architecture docs
+│   ├── specs/              # Product specifications
+│   └── tasks/              # Development tasks
 ├── package.json
 └── README.md
 ```

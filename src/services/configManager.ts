@@ -1,4 +1,5 @@
-import { UserCalculationInputs, ConfigValidation } from '@/types/investment';
+import { CalculationInputs } from '@/types/calculationInputs';
+import { ConfigValidation } from '@/types/configTypes';
 import { CONFIG_PARAMETERS, getParameterByKey } from '@/constants/configParameters';
 
 // Add debounce utility
@@ -14,20 +15,21 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 // Create default config from parameters
-const DEFAULT_CONFIG: UserCalculationInputs = CONFIG_PARAMETERS
+const DEFAULT_CONFIG: CalculationInputs = CONFIG_PARAMETERS
   .reduce((config, param) => ({
     ...config,
     [param.id]: param.default ?? 0,
-  }), {} as UserCalculationInputs);
+  }), {} as CalculationInputs);
 
-type ConfigChangeListener = (config: UserCalculationInputs) => void;
+type ConfigChangeListener = (config: CalculationInputs) => void;
 
 export class ConfigManager {
   private static instance: ConfigManager;
-  private config: UserCalculationInputs;
+  private config: CalculationInputs;
   private listeners: Set<ConfigChangeListener>;
   private debouncedSave: () => void;
   private isSaving: boolean = false;
+  private isInitialLoad: boolean = true;
 
   private constructor() {
     this.config = { ...DEFAULT_CONFIG };
@@ -52,8 +54,25 @@ export class ConfigManager {
     try {
       const stored = await chrome.storage.sync.get('userCalculationInputs');
       if (stored.userCalculationInputs) {
-        this.config = { ...DEFAULT_CONFIG, ...stored.userCalculationInputs };
-        this.notifyListeners();
+        // Preserve any listing-specific values (like purchase price) when loading from storage
+        const listingValues = {
+          purchasePrice: this.config.purchasePrice,
+          rentEstimate: this.config.rentEstimate,
+          propertyTaxes: this.config.propertyTaxes,
+          hoaFees: this.config.hoaFees
+        };
+        
+        this.config = { 
+          ...DEFAULT_CONFIG, 
+          ...stored.userCalculationInputs,
+          ...listingValues // Ensure listing values are preserved
+        };
+        
+        // Only notify listeners if this isn't the initial load
+        if (!this.isInitialLoad) {
+          this.notifyListeners();
+        }
+        this.isInitialLoad = false;
       }
     } catch (error) {
       console.error('Error loading config:', error);
@@ -78,30 +97,46 @@ export class ConfigManager {
     this.listeners.forEach((listener) => listener(this.getConfig()));
   }
 
-  public getConfig(): UserCalculationInputs {
+  public getConfig(): CalculationInputs {
     return { ...this.config };
   }
 
-  public async updateConfig(updates: Partial<UserCalculationInputs>): Promise<void> {
+  public async updateConfig(updates: Partial<CalculationInputs>): Promise<void> {
+    // Don't update listing-specific values from storage
+    const listingKeys = ['purchasePrice', 'rentEstimate', 'propertyTaxes', 'hoaFees'] as const;
+    const filteredUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => !listingKeys.includes(key as typeof listingKeys[number]))
+    ) as Partial<CalculationInputs>;
+
     // Validate updates
-    for (const [key, value] of Object.entries(updates)) {
-      const param = getParameterByKey(key as keyof UserCalculationInputs);
+    for (const [key, value] of Object.entries(filteredUpdates)) {
+      const param = getParameterByKey(key as keyof CalculationInputs);
       if (!param) continue;
 
-      const validation = this.validateValue(key as keyof UserCalculationInputs, value);
+      const validation = this.validateValue(key as keyof CalculationInputs, value as number);
       if (!validation.isValid) {
         throw new Error(`Invalid value for ${param.label}: ${validation.error}`);
       }
     }
 
-    this.config = { ...this.config, ...updates };
+    // Update config with filtered updates
+    this.config = { ...this.config, ...filteredUpdates };
+    
     // Use debounced save instead of immediate save
     this.debouncedSave();
     this.notifyListeners();
   }
 
   public async resetToDefaults(): Promise<void> {
-    this.config = { ...DEFAULT_CONFIG };
+    // Preserve listing-specific values when resetting
+    const listingValues = {
+      purchasePrice: this.config.purchasePrice,
+      rentEstimate: this.config.rentEstimate,
+      propertyTaxes: this.config.propertyTaxes,
+      hoaFees: this.config.hoaFees
+    };
+    
+    this.config = { ...DEFAULT_CONFIG, ...listingValues };
     await this.saveConfig();
     this.notifyListeners();
   }
@@ -111,7 +146,7 @@ export class ConfigManager {
     return () => this.listeners.delete(listener);
   }
 
-  public validateValue(key: keyof UserCalculationInputs, value: number): ConfigValidation {
+  public validateValue(key: keyof CalculationInputs, value: number): ConfigValidation {
     const param = getParameterByKey(key);
     if (!param) {
       return { isValid: false, error: 'Invalid parameter' };
@@ -120,7 +155,7 @@ export class ConfigManager {
     if (param.type === 'percentage') {
       return this.validatePercentage(value, param.min, param.max);
     } else if (param.type === 'currency') {
-      return this.validateCurrency(value, param.min);
+      return this.validateCurrency(value, param.min, param.max);
     } else if (param.type === 'number') {
       return this.validateNumber(value, param.min || 0, param.max || 100);
     }
@@ -141,12 +176,15 @@ export class ConfigManager {
     return { isValid: true };
   }
 
-  private validateCurrency(value: number, min?: number): ConfigValidation {
+  private validateCurrency(value: number, min?: number, max?: number): ConfigValidation {
     if (isNaN(value)) {
       return { isValid: false, error: 'Value must be a number' };
     }
     if (min !== undefined && value < min) {
-      return { isValid: false, error: `Value must be at least $${min}` };
+      return { isValid: false, error: `Value must be at least $${min.toLocaleString()}` };
+    }
+    if (max !== undefined && value > max) {
+      return { isValid: false, error: `Value must be at most $${max.toLocaleString()}` };
     }
     return { isValid: true };
   }

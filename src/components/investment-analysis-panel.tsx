@@ -2,50 +2,64 @@ import { DollarSign, TrendingUp, Percent } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ConfigPanel } from "./investment/config-panel"
 import { ConfigManager } from "@/services/configManager"
-import { UserCalculationInputs, CalculatedMetrics, PropertyData } from "@/types/investment"
+import { CalculationInputs } from "@/types/calculationInputs"
+import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractor } from "@/services/dataExtractor"
 
 export function InvestmentAnalysisPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
-  const [userInputs, setUserInputs] = useState<UserCalculationInputs | null>(null);
+  const [calculationInputs, setCalculationInputs] = useState<CalculationInputs | null>(null);
   const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
+  const [propertyDetails, setPropertyDetails] = useState<{ propertyType: string; squareFeet: number } | null>(null);
 
-  // Extract property data on mount
+  // Extract property data and initialize calculation inputs on mount
   useEffect(() => {
-    const extractPropertyData = async () => {
+    const extractAndInitialize = async () => {
       setIsLoading(true);
       setError(null);
       try {
         const dataExtractor = new DataExtractor();
         const extractedData = await dataExtractor.extractPropertyData();
         
-        // Map extracted data to PropertyData type
-        const newPropertyData: PropertyData = {
+        console.log('[RIA Debug] Extracted property data:', {
           price: extractedData.price,
+          priceFormatted: `$${extractedData.price.toLocaleString()}`
+        });
+        
+        // Store property details for display
+        setPropertyDetails({
           propertyType: extractedData.propertyType,
-          bedrooms: extractedData.bedrooms || 0,
-          bathrooms: extractedData.bathrooms || 0,
-          squareFeet: extractedData.squareFeet,
-          zipCode: extractedData.zipCode,
-          rentZestimate: extractedData.rentZestimate || undefined,
-          propertyTaxes: extractedData.propertyTaxes || undefined,
-          hoaFees: extractedData.hoaFees || undefined,
+          squareFeet: extractedData.squareFeet
+        });
+        
+        // Get user's preferred defaults from ConfigManager
+        const userDefaults = ConfigManager.getInstance().getConfig();
+        console.log('[RIA Debug] User defaults:', {
+          purchasePrice: userDefaults.purchasePrice,
+          purchasePriceFormatted: `$${userDefaults.purchasePrice.toLocaleString()}`
+        });
+        
+        // Create calculation inputs combining user defaults and extracted data
+        const inputs: CalculationInputs = {
+          ...userDefaults,
+          // Listing-specific values
+          purchasePrice: extractedData.price,
+          rentEstimate: extractedData.rentZestimate || 0,
+          propertyTaxes: extractedData.propertyTaxes || 0,
+          hoaFees: extractedData.hoaFees || 0
         };
         
-        // Log property data for debugging
-        console.log('[RIA Debug] Extracted property data:', newPropertyData);
+        console.log('[RIA Debug] Final calculation inputs:', {
+          purchasePrice: inputs.purchasePrice,
+          purchasePriceFormatted: `$${inputs.purchasePrice.toLocaleString()}`
+        });
         
-        setPropertyData(newPropertyData);
-        
-        // Get initial user inputs from ConfigManager
-        const initialUserInputs = ConfigManager.getInstance().getConfig();
-        setUserInputs(initialUserInputs);
+        setCalculationInputs(inputs);
         
         // Calculate initial metrics
-        const initialCalculations = calculateInvestmentMetrics(newPropertyData, initialUserInputs);
+        const initialCalculations = calculateInvestmentMetrics(inputs);
         setCalculations(initialCalculations);
         
       } catch (error) {
@@ -56,20 +70,20 @@ export function InvestmentAnalysisPanel() {
       }
     };
 
-    extractPropertyData();
+    extractAndInitialize();
   }, []);
 
   // Subscribe to config changes
   useEffect(() => {
-    if (!propertyData || !userInputs) return;
+    if (!calculationInputs) return;
 
-    const unsubscribe = ConfigManager.getInstance().subscribe((newUserInputs) => {
-      setUserInputs(newUserInputs);
-      const newCalculations = calculateInvestmentMetrics(propertyData, newUserInputs);
+    const unsubscribe = ConfigManager.getInstance().subscribe((newInputs) => {
+      setCalculationInputs(newInputs);
+      const newCalculations = calculateInvestmentMetrics(newInputs);
       setCalculations(newCalculations);
     });
     return () => unsubscribe();
-  }, [propertyData, userInputs]);
+  }, [calculationInputs]);
 
   if (isLoading) {
     return (
@@ -93,7 +107,7 @@ export function InvestmentAnalysisPanel() {
     );
   }
 
-  if (!propertyData || !userInputs || !calculations) {
+  if (!calculationInputs || !calculations || !propertyDetails) {
     return null;
   }
 
@@ -154,25 +168,25 @@ export function InvestmentAnalysisPanel() {
           </div>
           <div className="space-y-1">
             <span className="text-gray-600">Effective Rent:</span>
-            <div className="font-semibold">${Math.round(propertyData.rentZestimate || 0).toLocaleString()}</div>
+            <div className="font-semibold">${Math.round(calculationInputs.rentEstimate).toLocaleString()}</div>
           </div>
           <div className="space-y-1">
             <span className="text-gray-600">Property Type:</span>
-            <div className="font-semibold">{propertyData.propertyType}</div>
+            <div className="font-semibold">{propertyDetails.propertyType}</div>
           </div>
           <div className="space-y-1">
             <span className="text-gray-600">Square Feet:</span>
-            <div className="font-semibold">{propertyData.squareFeet.toLocaleString()}</div>
+            <div className="font-semibold">{propertyDetails.squareFeet.toLocaleString()}</div>
           </div>
         </div>
       </div>
 
       {/* Configuration Panel */}
       <ConfigPanel 
-        propertyData={propertyData}
-        onConfigChange={(newUserInputs) => {
-          setUserInputs(newUserInputs);
-          const newCalculations = calculateInvestmentMetrics(propertyData, newUserInputs);
+        inputs={calculationInputs}
+        onConfigChange={(newInputs) => {
+          setCalculationInputs(newInputs);
+          const newCalculations = calculateInvestmentMetrics(newInputs);
           setCalculations(newCalculations);
         }}
       />
