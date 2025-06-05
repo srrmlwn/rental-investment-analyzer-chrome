@@ -1,18 +1,16 @@
-import { DollarSign, TrendingUp, Percent } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ConfigPanel } from "./investment/config-panel"
-import { ConfigManager } from "@/services/configManager"
-import { CalculationInputs } from "@/types/calculationInputs"
+import { CalculationInputs, createInitialInputs } from "@/types/calculationInputs"
 import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractor } from "@/services/dataExtractor"
+import { DollarSign, Percent, TrendingUp } from "lucide-react"
 
 export function InvestmentAnalysisPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calculationInputs, setCalculationInputs] = useState<CalculationInputs | null>(null);
   const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
-  const [propertyDetails, setPropertyDetails] = useState<{ propertyType: string; squareFeet: number } | null>(null);
 
   // Extract property data and initialize calculation inputs on mount
   useEffect(() => {
@@ -23,47 +21,14 @@ export function InvestmentAnalysisPanel() {
         const dataExtractor = new DataExtractor();
         const extractedData = await dataExtractor.extractPropertyData();
         
-        console.log('[RIA Debug] Extracted property data:', {
-          price: extractedData.price,
-          priceFormatted: `$${extractedData.price.toLocaleString()}`
-        });
+        // Create initial calculation inputs using the helper function
+        const initialInputs = createInitialInputs(extractedData);
         
-        // Store property details for display
-        setPropertyDetails({
-          propertyType: extractedData.propertyType,
-          squareFeet: extractedData.squareFeet
-        });
-        
-        // Get user's preferred defaults from ConfigManager
-        const userDefaults = ConfigManager.getInstance().getConfig();
-        console.log('[RIA Debug] User defaults:', {
-          purchasePrice: userDefaults.purchasePrice,
-          purchasePriceFormatted: `$${userDefaults.purchasePrice.toLocaleString()}`
-        });
-        
-        // Create calculation inputs combining user defaults and extracted data
-        const inputs: CalculationInputs = {
-          ...userDefaults,
-          // Listing-specific values
-          purchasePrice: extractedData.price,
-          rentEstimate: extractedData.rentZestimate || 0,
-          propertyTaxes: extractedData.propertyTaxes || 0,
-          hoaFees: extractedData.hoaFees || 0
-        };
-        
-        console.log('[RIA Debug] Final calculation inputs:', {
-          purchasePrice: inputs.purchasePrice,
-          purchasePriceFormatted: `$${inputs.purchasePrice.toLocaleString()}`
-        });
-        
-        setCalculationInputs(inputs);
-        
-        // Calculate initial metrics
-        const initialCalculations = calculateInvestmentMetrics(inputs);
+        setCalculationInputs(initialInputs);
+        const initialCalculations = calculateInvestmentMetrics(initialInputs);
         setCalculations(initialCalculations);
         
       } catch (error) {
-        console.error('[RIA] Error extracting property data:', error);
         setError(error instanceof Error ? error.message : 'Failed to extract property data');
       } finally {
         setIsLoading(false);
@@ -73,42 +38,24 @@ export function InvestmentAnalysisPanel() {
     extractAndInitialize();
   }, []);
 
-  // Subscribe to config changes
+  // Update calculations when inputs change
   useEffect(() => {
-    if (!calculationInputs) return;
-
-    const unsubscribe = ConfigManager.getInstance().subscribe((newInputs) => {
-      setCalculationInputs(newInputs);
-      const newCalculations = calculateInvestmentMetrics(newInputs);
+    if (calculationInputs) {
+      const newCalculations = calculateInvestmentMetrics(calculationInputs);
       setCalculations(newCalculations);
-    });
-    return () => unsubscribe();
+    }
   }, [calculationInputs]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading property data...</p>
-        </div>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center text-red-600">
-          <p className="font-medium mb-2">Error loading property data</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
-    );
+    return <div>Error: {error}</div>;
   }
 
-  if (!calculationInputs || !calculations || !propertyDetails) {
-    return null;
+  if (!calculationInputs || !calculations) {
+    return <div>No data available</div>;
   }
 
   return (
@@ -170,26 +117,15 @@ export function InvestmentAnalysisPanel() {
             <span className="text-gray-600">Effective Rent:</span>
             <div className="font-semibold">${Math.round(calculationInputs.rentEstimate).toLocaleString()}</div>
           </div>
-          <div className="space-y-1">
-            <span className="text-gray-600">Property Type:</span>
-            <div className="font-semibold">{propertyDetails.propertyType}</div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-gray-600">Square Feet:</span>
-            <div className="font-semibold">{propertyDetails.squareFeet.toLocaleString()}</div>
-          </div>
         </div>
       </div>
 
       {/* Configuration Panel */}
       <ConfigPanel 
         inputs={calculationInputs}
-        onConfigChange={(newInputs) => {
-          setCalculationInputs(newInputs);
-          const newCalculations = calculateInvestmentMetrics(newInputs);
-          setCalculations(newCalculations);
-        }}
+        onConfigChange={setCalculationInputs}
       />
+      {/* Rest of the component */}
     </div>
   );
 } 

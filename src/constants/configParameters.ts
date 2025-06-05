@@ -1,6 +1,19 @@
 import { ConfigParameter, ConfigCategory } from '@/types/configTypes';
 import { CalculationInputs } from '@/types/calculationInputs';
 
+export const DEFAULT_CONFIG_VALUES = {
+  closingCosts: 3, // 3% default
+  rehabCosts: 0,
+  downPaymentPercentage: 20, // 20% default
+  interestRate: 7.5, // 7.5% default
+  loanTerm: 30, // 30 years default
+  managementRate: 8, // 8% default
+  maintenanceRate: 1, // 1% default
+  insuranceRate: 0.5, // 0.5% default
+  vacancyRate: 5, // 5% default
+  otherIncome: 0
+} as const;
+
 // Parameters that should get their values from inputs (property listing data)
 
 export const CONFIG_PARAMETERS: ConfigParameter[] = [
@@ -28,7 +41,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     unit: '%',
     isAdvanced: true,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 3, // 3% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.closingCosts, // 3% default
     getMin: (_inputs: CalculationInputs) => 0,
     getMax: (_inputs: CalculationInputs) => 100,
   },
@@ -42,7 +55,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     unit: '$',
     isAdvanced: true,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 0,
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.rehabCosts,
     getMin: (_inputs: CalculationInputs) => 0,
     getMax: (inputs: CalculationInputs) => inputs.purchasePrice, // 1x purchase price
   },
@@ -71,7 +84,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     step: 1,
     unit: '%',
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 20, // 20% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.downPaymentPercentage, // 20% default
     getMin: (_inputs: CalculationInputs) => 5,
     getMax: (_inputs: CalculationInputs) => 100,
   },
@@ -84,7 +97,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     step: 0.25,
     unit: '%',
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 7.5, // 7.5% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.interestRate, // 7.5% default
     getMin: (_inputs: CalculationInputs) => 3,
     getMax: (_inputs: CalculationInputs) => 12,
   },
@@ -96,7 +109,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     description: 'Length of mortgage in years',
     step: 5,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 30, // 30 years default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.loanTerm, // 30 years default
     getMin: (_inputs: CalculationInputs) => 10,
     getMax: (_inputs: CalculationInputs) => 40,
   },
@@ -125,7 +138,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     unit: '%',
     isAdvanced: true,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 5, // 5% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.vacancyRate, // 5% default
     getMin: (_inputs: CalculationInputs) => 0,
     getMax: (_inputs: CalculationInputs) => 20,
   },
@@ -139,7 +152,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     unit: '$',
     isAdvanced: true,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 0,
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.otherIncome,
     getMin: (_inputs: CalculationInputs) => 0,
     getMax: (inputs: CalculationInputs) => inputs.rentEstimate * 2, // 2x rent estimate
   },
@@ -154,7 +167,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     step: 0.5,
     unit: '%',
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 8, // 8% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.managementRate, // 8% default
     getMin: (_inputs: CalculationInputs) => 0,
     getMax: (_inputs: CalculationInputs) => 30,
   },
@@ -168,7 +181,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     unit: '%',
     isAdvanced: true,
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 1, // 1% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.maintenanceRate, // 1% default
     getMin: (_inputs: CalculationInputs) => 0.5,
     getMax: (_inputs: CalculationInputs) => 5,
   },
@@ -181,7 +194,7 @@ export const CONFIG_PARAMETERS: ConfigParameter[] = [
     step: 0.1,
     unit: '%',
     useSlider: true,
-    getValue: (_inputs: CalculationInputs) => 0.5, // 0.5% default
+    getValue: (_inputs: CalculationInputs) => DEFAULT_CONFIG_VALUES.insuranceRate, // 0.5% default
     getMin: (_inputs: CalculationInputs) => 0.1,
     getMax: (_inputs: CalculationInputs) => 2,
   },

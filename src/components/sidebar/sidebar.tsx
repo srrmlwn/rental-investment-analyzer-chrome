@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Calculator, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvestmentAnalysisPanel } from '../investment-analysis-panel';
 
@@ -71,7 +71,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         title="Drag to resize"
       />
       <div className="ria-header">
-        <h2>Rental Investment Analyzer</h2>
+        <div className="flex items-center gap-2">
+          <Calculator className="w-6 h-6 text-slate-50" />
+          <h2>Rental Investment Analyzer</h2>
+        </div>
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
