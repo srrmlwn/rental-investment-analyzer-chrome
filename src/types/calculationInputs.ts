@@ -31,14 +31,14 @@ import { DEFAULT_CONFIG_VALUES } from '@/constants/userParams';
 export function createInitialInputs(propertyData: PropertyData): CalculationInputs {
   return {
     // Listing-specific values
-    purchasePrice: propertyData.price,
+    purchasePrice: propertyData.price || 0,
     rentEstimate: propertyData.rentZestimate || 0,
-    propertyTaxes: propertyData.propertyTaxes || 0,
+    propertyTaxes: propertyData.monthlyPropertyTaxes || 0,
     hoaFees: propertyData.hoaFees || 0,
     // Use defaults from DEFAULT_CONFIG_VALUES for other values
     closingCosts: DEFAULT_CONFIG_VALUES.closingCosts,
     rehabCosts: DEFAULT_CONFIG_VALUES.rehabCosts,
-    afterRepairValue: propertyData.price, 
+    afterRepairValue: propertyData.price || 0, 
     downPaymentPercentage: DEFAULT_CONFIG_VALUES.downPaymentPercentage,
     interestRate: DEFAULT_CONFIG_VALUES.interestRate,
     loanTerm: DEFAULT_CONFIG_VALUES.loanTerm,

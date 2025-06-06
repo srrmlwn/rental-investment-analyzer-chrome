@@ -18,7 +18,7 @@ const SELECTORS = {
     RENT_ZESTIMATE: '[data-testid="rent-zestimate"]',
     
     // Property Taxes
-    PROPERTY_TAXES: '#label-property-tax .hNuOht', // Monthly property taxes
+    PROPERTY_TAXES: '#property-tax, #label-property-tax .hNuOht', // Support both new input field and old format
     
     // HOA Fees
     HOA_FEES: '#label-hoa .hNuOht', // Monthly HOA fees

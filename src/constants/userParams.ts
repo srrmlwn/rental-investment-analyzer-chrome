@@ -32,8 +32,8 @@ class UserParams {
       step: 1000,
       unit: '$',
       useSlider: true,
-      getMin: () => this.propertyData.price * 0.25, // 25% of list price
-      getMax: () => this.propertyData.price * 2,    // 2x list price
+      getMin: () => this.propertyData.price ? this.propertyData.price * 0.25 : 0, // 25% of list price
+      getMax: () => this.propertyData.price ? this.propertyData.price * 2 : 0,    // 2x list price
     },
     {
       id: 'closingCosts',
@@ -59,7 +59,7 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => this.propertyData.price, // 1x purchase price
+      getMax: () => this.propertyData.price ? this.propertyData.price : 0, // 1x purchase price
     },
     {
       id: 'afterRepairValue',
@@ -71,8 +71,8 @@ class UserParams {
       unit: '$',
       isAdvanced: true,
       useSlider: true,
-      getMin: () => this.propertyData.price, // 1x purchase price
-      getMax: () => this.propertyData.price * 2, // 2x purchase price
+      getMin: () => this.propertyData.price ? this.propertyData.price : 0, // 1x purchase price
+      getMax: () => this.propertyData.price ? this.propertyData.price * 2 : 0, // 2x purchase price
     },
   
     // Loan Parameters
@@ -202,7 +202,10 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => this.propertyData.propertyTaxes ? this.propertyData.propertyTaxes * 2 : 0.05 * this.propertyData.price, // 2x current taxes
+      getMax: () => 
+        this.propertyData.monthlyPropertyTaxes 
+          ? this.propertyData.monthlyPropertyTaxes * 12 * 2 // 2x current annual taxes
+          : 0.05 * (this.propertyData.price ?? 0), // Default to 5% of price
     },
     {
       id: 'hoaFees',
