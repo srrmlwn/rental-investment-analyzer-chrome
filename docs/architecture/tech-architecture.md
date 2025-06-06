@@ -5,17 +5,14 @@ The Rental Investment Analyzer is a Chrome extension that helps real estate inve
 
 ## Core Components
 
-### 1. Content Script (`content.ts`)
+### 1. Content Script (`content.tsx`)
 - Injects the React application into Zillow listing pages
-- Handles communication between the extension and the webpage
+- Handles page navigation and reinjection
 - Manages the extension's lifecycle on the page
+- Uses MutationObserver to detect SPA navigation
+- Extracts property data using DataExtractor service
 
-### 2. App Component (`app.tsx`)
-- Root component that renders the main UI
-- Manages the extension's state and routing
-- Handles communication with the content script
-
-### 3. Investment Analysis Panel (`investment-analysis-panel.tsx`)
+### 2. Investment Analysis Panel (`investment-analysis-panel.tsx`)
 - Main component for displaying investment analysis
 - Layout Structure:
   1. Key Metrics (top)
@@ -27,21 +24,33 @@ The Rental Investment Analyzer is a Chrome extension that helps real estate inve
      - Monthly Mortgage
      - Effective Rent
      - Property Details
-  3. User Inputs Panel (bottom)
+  3. Config Panel (bottom)
+     - Quick Adjustments
+     - Advanced Settings
 - Manages state for:
   - Property data
-  - User calculation inputs
+  - Calculation inputs
   - Calculated metrics
-- Subscribes to ConfigManager for real-time updates
 
-### 4. User Inputs Panel (`config-panel.tsx`)
+### 3. Config Panel (`config-panel.tsx`)
 - Displays and manages user input fields
-- Organized by categories:
-  - Purchase Parameters
-  - Loan Parameters
-  - Operating Expenses
-  - Growth Assumptions
-- Uses ConfigManager for persistence
+- Two sections:
+  1. Quick Adjustments
+     - Purchase Price
+     - Down Payment
+     - Interest Rate
+     - Loan Term
+     - Property Management
+  2. Advanced Settings
+     - Closing Costs
+     - Rehab Costs
+     - After Repair Value
+     - Vacancy Rate
+     - Other Income
+     - Maintenance Rate
+     - Insurance Rate
+- Uses UserParams for parameter management
+- Real-time validation and updates
 
 ## Data Model
 
@@ -88,52 +97,23 @@ interface CalculationInputs {
 }
 ```
 
-### 3. Calculated Metrics (`src/types/calculatedMetrics.ts`)
+### 3. Config Parameter (`src/types/configTypes.ts`)
 ```typescript
-interface CalculatedMetrics {
-  // Basic Metrics
-  monthlyMortgage: number;
-  monthlyCashFlow: number;
-  annualCashFlow: number;
-  cashOnCashReturn: number;
-  capRate: number;
+type ConfigParameterType = 'percentage' | 'currency' | 'number';
+type ConfigCategory = 'Purchase' | 'Loan' | 'Income' | 'Operating';
 
-  // Advanced Metrics
-  totalInvestment: number;
-  netOperatingIncome: number;
-  debtServiceCoverageRatio: number;
-  returnOnInvestment: number;
-  breakEvenYears: number;
-  effectiveGrossIncome: number;
-  operatingExpenseRatio: number;
-}
-```
-
-### 4. Configuration Types (`src/types/configTypes.ts`)
-```typescript
 interface ConfigParameter {
   id: string;
   label: string;
-  type: 'currency' | 'percentage' | 'number';
-  min: number;
-  max: number;
-  step: number;
-  unit: string;
-  default: number;
-  advanced: boolean;
-  slider: boolean;
+  category: ConfigCategory;
+  type: ConfigParameterType;
   description: string;
-}
-
-interface ConfigCategory {
-  id: string;
-  label: string;
-  parameters: ConfigParameter[];
-}
-
-interface ConfigValidation {
-  isValid: boolean;
-  message: string;
+  step?: number;
+  unit?: string;
+  isAdvanced?: boolean;
+  useSlider: boolean;
+  getMin: () => number;
+  getMax: () => number;
 }
 ```
 
@@ -141,23 +121,26 @@ interface ConfigValidation {
 
 1. **Property Data Extraction**
    ```
-   Zillow Page → DataExtractor → PropertyData
+   Zillow Page → DataExtractor → PropertyData → createInitialInputs() → CalculationInputs
    ```
    - DataExtractor scrapes listing data
    - Maps to PropertyData interface
-   - Updates InvestmentAnalysisPanel state
+   - createInitialInputs() creates fresh inputs with:
+     - Listing-specific values (price, rent, taxes, HOA)
+     - Default values from DEFAULT_CONFIG_VALUES
 
-2. **User Input Management**
+2. **Parameter Management**
    ```
-   User Inputs Panel → ConfigManager → UserCalculationInputs
+   UserParams → ConfigParameter[] → ConfigPanel → CalculationInputs
    ```
-   - ConfigManager persists user preferences
-   - Provides real-time updates via subscription
+   - UserParams manages parameter definitions
+   - Provides min/max constraints
+   - Handles parameter categorization
    - Validates input values
 
 3. **Metrics Calculation**
    ```
-   PropertyData + UserCalculationInputs → Calculator → CalculatedMetrics
+   PropertyData + CalculationInputs → Calculator → CalculatedMetrics
    ```
    - Calculator combines property data and user inputs
    - Computes investment metrics
@@ -165,16 +148,18 @@ interface ConfigValidation {
 
 ## State Management
 
-### 1. ConfigManager
-- Singleton service for managing user preferences
-- Handles persistence using Chrome Storage
-- Provides subscription mechanism for real-time updates
-- Validates input values against constraints
+### 1. UserParams
+- Manages parameter definitions and constraints
+- Provides methods for:
+  - Getting parameters by category
+  - Getting basic/advanced parameters
+  - Validating input values
+- Uses property data for dynamic min/max values
 
 ### 2. Component State
 - InvestmentAnalysisPanel manages:
   - Property data (from DataExtractor)
-  - User inputs (from ConfigManager)
+  - Calculation inputs (from ConfigPanel)
   - Calculated metrics (from Calculator)
 - Updates trigger re-renders with new calculations
 
@@ -185,10 +170,11 @@ interface ConfigValidation {
 - Color-coded metrics for quick interpretation
 - Responsive layout for all screen sizes
 
-### 2. Data Persistence
-- User preferences saved across sessions
-- Automatic loading of last used settings
-- Validation to ensure data integrity
+### 2. Parameter Management
+- Dynamic min/max values based on property data
+- Categorized parameters (basic/advanced)
+- Input validation with user feedback
+- Automatic reset on new listings
 
 ### 3. Error Handling
 - Graceful handling of missing property data
@@ -202,81 +188,43 @@ interface ConfigValidation {
 - Component-based architecture
 - Efficient state management
 
-### 2. Tailwind CSS
+### 2. Tailwind CSS + Shadcn UI
 - Utility-first styling
 - Responsive design
 - Consistent visual language
+- Accessible components
 
 ### 3. Chrome Extension Architecture
 - Content script injection
-- Secure storage
+- SPA navigation handling
 - Cross-origin communication
-
-## Future Considerations
-
-### 1. Performance
-- Memoization of calculations
-- Lazy loading of components
-- Optimized re-renders
-
-### 2. Features
-- Advanced metrics (IRR, DSCR)
-- Historical data analysis
-- Market comparison tools
-
-### 3. Integration
-- Export functionality
-- API integration
-- Multi-platform support
 
 ## Project Structure
 ```
 rental-investment-analyzer/
 ├── src/
 │   ├── manifest.json           # Chrome extension manifest
-│   ├── popup/                  # Extension popup (if needed)
-│   │   ├── popup.html
-│   │   ├── popup.css
-│   │   └── popup.js
-│   ├── content/               # Content scripts that run on Zillow
-│   │   ├── content.js         # Main content script
-│   │   ├── sidebar.js         # Sidebar UI management
-│   │   └── styles.css         # Sidebar styles
-│   ├── background/            # Background scripts
-│   │   └── background.js      # Handles storage and data loading
-│   ├── services/             # Business logic and services
-│   │   ├── calculator.ts      # Investment calculations
-│   │   ├── dataExtractor.ts   # Zillow page parsing
-│   │   └── configManager.ts   # Configuration management
-│   ├── types/                # TypeScript type definitions
-│   │   ├── propertyData.ts    # Property data interface
-│   │   ├── calculationInputs.ts # Calculation inputs interface
-│   │   ├── calculatedMetrics.ts # Calculated metrics interface
-│   │   └── configTypes.ts     # Configuration type definitions
-│   ├── components/           # React components
-│   │   ├── investment-analysis-panel.tsx
-│   │   └── investment/
-│   │       └── config-panel.tsx
-│   ├── utils/                # Utility functions
-│   │   ├── domUtils.ts       # DOM manipulation helpers
-│   │   ├── numberUtils.ts    # Number formatting, calculations
-│   │   └── storageUtils.ts   # Chrome storage helpers
-│   └── constants/            # Constants and configurations
-│       ├── selectors.ts      # Zillow page selectors
-│       ├── userParams.ts     # User configuration parameters and validation
-│       └── ... other constants
-├── public/                   # Static assets
-│   ├── icons/               # Extension icons
-│   └── images/              # Other images
-├── tests/                   # Test files
-│   ├── unit/
-│   └── integration/
-├── docs/                    # Documentation
-│   ├── architecture/        # Technical architecture docs
-│   ├── specs/              # Product specifications
-│   └── tasks/              # Development tasks
-├── package.json
-└── README.md
+│   ├── content/               # Content scripts
+│   │   ├── content.tsx        # Main content script
+│   │   └── styles.css         # Content styles
+│   ├── components/            # React components
+│   │   ├── investment/        # Investment analysis
+│   │   │   ├── config-panel.tsx
+│   │   │   └── investment-analysis-panel.tsx
+│   │   ├── ui/               # Shared UI components
+│   │   │   ├── slider.tsx
+│   │   │   ├── card.tsx
+│   │   │   └── ...
+│   │   └── sidebar/          # Sidebar components
+│   ├── constants/            # Constants and configs
+│   │   └── userParams.ts     # Parameter definitions
+│   ├── types/               # TypeScript types
+│   │   ├── propertyData.ts
+│   │   ├── calculationInputs.ts
+│   │   └── configTypes.ts
+│   └── services/            # Business logic
+│       ├── calculator.ts     # Investment calculations
+│       └── dataExtractor.ts  # Zillow page parsing
 ```
 
 ## Component Architecture

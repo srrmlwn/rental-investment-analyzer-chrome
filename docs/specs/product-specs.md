@@ -1,145 +1,144 @@
 # Rental Investment Analyzer - Product Specifications
 
 ## Overview
-The Rental Investment Analyzer is a Chrome extension that provides real-time investment analysis for rental properties directly on Zillow listing pages. It helps investors quickly evaluate potential rental properties by calculating key metrics and allowing customization of analysis parameters.
+The Rental Investment Analyzer is a Chrome extension that provides real-time investment analysis for rental properties listed on Zillow. It helps users quickly evaluate potential investment properties by calculating key metrics and providing customizable analysis parameters.
 
 ## User Interface
 
-### 1. Investment Analysis Panel
-- **Location**: Injected into Zillow listing pages
-- **Layout**:
-  1. Key Metrics (Top Section)
-     - Monthly Cash Flow
-       - Color: Green (positive) / Red (negative)
-       - Format: $X,XXX
-     - Cap Rate
-       - Color: Blue
-       - Format: X.X%
-     - Cash-on-Cash Return
-       - Color: Purple
-       - Format: X.X%
-     - Annual Cash Flow
-       - Color: Green (positive) / Red (negative)
-       - Format: $XX,XXX
+### Sidebar
+- Fixed position on the right side of Zillow listing pages
+- Resizable width (300px - 600px)
+- Smooth animations for open/close transitions
+- Floating action button for quick access
+- Custom scrollbar styling
+- Z-index management to stay above Zillow content
 
-  2. Investment Summary (Middle Section)
-     - Monthly Mortgage Payment
-     - Effective Monthly Rent
-     - Property Type
-     - Square Footage
+### Investment Analysis Panel
+- Key metrics display
+  - Monthly mortgage payment
+  - Monthly cash flow
+  - Cap rate
+  - Cash-on-cash return
+- Investment summary
+  - Total investment
+  - Monthly income
+  - Annual return
+- Real-time updates
+- Error states and loading indicators
 
-  3. User Inputs (Bottom Section)
-     - Purchase Parameters
-       - Down Payment Percentage
-     - Loan Parameters
-       - Interest Rate
-       - Loan Term
-     - Operating Expenses
-       - Property Management Rate
-       - Maintenance Rate
-       - Insurance Rate
-       - Property Tax Rate
-       - Vacancy Rate
-
-### 2. Visual Design
-- Clean, modern interface
-- Responsive layout
-- Clear visual hierarchy
-- Color-coded metrics
-- Consistent spacing and typography
-- Shadow and border effects for depth
+### Config Panel
+- Quick adjustments section
+  - Down payment percentage
+  - Interest rate
+  - Loan term
+  - Monthly rent
+- Advanced settings section
+  - Purchase price
+  - Closing costs
+  - Property tax rate
+  - Insurance rate
+  - HOA fees
+  - Maintenance rate
+  - Property management rate
+  - Vacancy rate
+- Interactive sliders
+  - Visual feedback
+  - Real-time validation
+  - Min/max constraints
+- Automatic reset on new listings
 
 ## Features
 
-### 1. Property Data Extraction
-- Automatic extraction of:
-  - Property price
+### Property Data Extraction
+- Automatic detection of Zillow listing pages
+- Extraction of key property details
+  - Listing price
   - Property type
-  - Bedrooms/Bathrooms
+  - Bedrooms/bathrooms
   - Square footage
-  - Zip code
-  - Rent Zestimate
-  - Property taxes
-  - HOA fees
+  - Year built
+  - Location data
+- Error handling and retry logic
+- Support for SPA navigation
 
-### 2. Investment Analysis
-- Real-time calculation of:
+### Investment Analysis
+- Real-time calculations
   - Monthly mortgage payment
-  - Monthly cash flow
-  - Annual cash flow
-  - Cash-on-cash return
-  - Cap rate
+  - Cash flow analysis
+  - Return metrics
+  - Operating expenses
+- Dynamic parameter constraints
+  - Property-based min/max values
+  - Category-based organization
+  - Basic/advanced separation
+- Input validation
+  - Real-time error messages
+  - Constraint enforcement
+  - Type safety
 
-### 3. User Preferences
-- Persistent storage of:
-  - Down payment percentage
-  - Loan parameters
-  - Operating expense rates
-- Automatic loading of last used settings
-- Input validation with constraints
-
-### 4. Error Handling
-- Graceful handling of:
-  - Missing property data
-  - Invalid user inputs
-  - Calculation errors
+### User Experience
+- Seamless integration with Zillow
+- Responsive sidebar
+- Smooth animations
 - Clear error messages
-- Fallback UI states
-
-## User Experience
-
-### 1. Installation
-- Simple Chrome Web Store installation
-- Automatic activation on Zillow listing pages
-- No configuration required for first use
-
-### 2. Usage Flow
-1. Visit Zillow listing page
-2. Extension automatically loads
-3. View initial analysis with default settings
-4. Adjust parameters as needed
-5. See real-time updates to metrics
-6. Settings persist for next visit
-
-### 3. Performance
-- Instant metric updates
-- Smooth UI interactions
-- No page reload required
-- Efficient data persistence
+- Loading states
+- Automatic state management
+- SPA navigation support
 
 ## Technical Requirements
 
-### 1. Browser Support
-- Chrome (latest version)
-- Manifest V3 compliant
+### Browser Support
+- Chrome 88+
+- Manifest V3
+- React 18+
+- TypeScript 5+
 
-### 2. Data Storage
-- Chrome Storage API
-- Secure data persistence
-- Efficient state management
+### Performance
+- Fast initial load
+- Smooth interactions
+- Efficient calculations
+- Minimal memory usage
+- Responsive UI
 
-### 3. Performance Targets
-- < 100ms calculation time
-- < 500ms initial load
-- Smooth UI updates
-- Minimal memory footprint
+### Security
+- No data collection
+- Local storage only
+- Secure content script
+- Safe DOM manipulation
 
 ## Future Enhancements
 
-### 1. Analysis Features
-- Advanced metrics (IRR, DSCR)
-- Market comparison tools
-- Historical data analysis
-- Custom metric formulas
+### Analysis Features
+- Advanced metrics
+  - IRR calculation
+  - DSCR
+  - ROI over time
+- Market comparison
+  - Area statistics
+  - Similar properties
+- Historical data
+  - Price trends
+  - Rental trends
+  - Market analysis
 
-### 2. User Experience
-- Dark mode support
+### User Experience
+- Dark mode
 - Customizable layouts
-- Export functionality
 - Mobile responsiveness
+- Keyboard shortcuts
+- Export functionality
+  - PDF reports
+  - CSV data
+  - Shareable links
 
-### 3. Integration
-- API connections
-- Data export
-- Multi-platform support
-- Analytics dashboard 
+### Platform Expansion
+- Firefox extension
+- Safari extension
+- Web application
+- Mobile app
+
+### Community Features
+- User preferences sharing
+- Market insights
+- Community benchmarks
+- Expert analysis 

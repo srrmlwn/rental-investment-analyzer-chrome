@@ -123,7 +123,7 @@ class UserParams {
       unit: '$',
       useSlider: true,
       getMin: () => 0,
-      getMax: () => (this.propertyData.rentZestimate ?? 0) * 2, // 2x current estimate
+      getMax: () => !this.propertyData.rentZestimate ? 15000 : this.propertyData.rentZestimate * 2,
     },
     {
       id: 'vacancyRate',
@@ -202,7 +202,7 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => (this.propertyData.propertyTaxes ?? 0) * 2, // 2x current taxes
+      getMax: () => this.propertyData.propertyTaxes ? this.propertyData.propertyTaxes * 2 : 0.05 * this.propertyData.price, // 2x current taxes
     },
     {
       id: 'hoaFees',
