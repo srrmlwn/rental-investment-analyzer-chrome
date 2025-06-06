@@ -25,7 +25,7 @@ export interface CalculationInputs {
 }
 
 import { PropertyData } from './propertyData';
-import { DEFAULT_CONFIG_VALUES } from '@/constants/configParameters';
+import { DEFAULT_CONFIG_VALUES } from '@/constants/userParams';
 
 // Create initial calculation inputs from extracted property data
 export function createInitialInputs(propertyData: PropertyData): CalculationInputs {

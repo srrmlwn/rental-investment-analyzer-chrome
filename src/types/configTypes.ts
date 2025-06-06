@@ -24,8 +24,7 @@ export interface ConfigParameter {
   unit?: string;
   useSlider?: boolean;
   
-  // Dynamic getter methods
-  getValue(inputs: CalculationInputs): number;
-  getMin(inputs: CalculationInputs): number;
-  getMax(inputs: CalculationInputs): number;
+  // Dynamic getter methods for min/max constraints
+  getMin(): number;
+  getMax(): number;
 } 

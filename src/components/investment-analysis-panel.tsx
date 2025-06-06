@@ -5,12 +5,14 @@ import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractor } from "@/services/dataExtractor"
 import { DollarSign, Percent, TrendingUp } from "lucide-react"
+import { UserParams } from "@/constants/userParams"
 
 export function InvestmentAnalysisPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calculationInputs, setCalculationInputs] = useState<CalculationInputs | null>(null);
   const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
+  const [userParams, setUserParams] = useState<UserParams | null>(null);
 
   // Extract property data and initialize calculation inputs on mount
   useEffect(() => {
@@ -21,10 +23,14 @@ export function InvestmentAnalysisPanel() {
         const dataExtractor = new DataExtractor();
         const extractedData = await dataExtractor.extractPropertyData();
         
+        // Create UserParams instance with extracted data
+        const params = new UserParams(extractedData);
+        setUserParams(params);
+        
         // Create initial calculation inputs using the helper function
         const initialInputs = createInitialInputs(extractedData);
-        
         setCalculationInputs(initialInputs);
+        
         const initialCalculations = calculateInvestmentMetrics(initialInputs);
         setCalculations(initialCalculations);
         
@@ -121,10 +127,13 @@ export function InvestmentAnalysisPanel() {
       </div>
 
       {/* Configuration Panel */}
-      <ConfigPanel 
-        inputs={calculationInputs}
-        onConfigChange={setCalculationInputs}
-      />
+      {userParams && (
+        <ConfigPanel 
+          inputs={calculationInputs}
+          onConfigChange={setCalculationInputs}
+          userParams={userParams}
+        />
+      )}
       {/* Rest of the component */}
     </div>
   );

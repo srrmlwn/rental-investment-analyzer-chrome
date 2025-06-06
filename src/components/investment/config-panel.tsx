@@ -2,21 +2,22 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Separator } from '../ui/separator';
-import { LabeledSlider } from '../ui/labeled-slider';
-import { Input } from '../ui/input';
+import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Calculator, Edit3, SlidersHorizontal, ChevronDown, Zap, Cog } from 'lucide-react';
 import { CalculationInputs } from '@/types/calculationInputs';
-import { CONFIG_PARAMETERS, getBasicParameters, getParametersByCategory } from '@/constants/configParameters';
+import { ConfigCategory } from '@/types/configTypes';
+import { UserParams } from '@/constants/userParams';
 import { cn } from '@/lib/utils';
 
 interface ConfigPanelProps {
   onConfigChange?: (config: CalculationInputs) => void;
   inputs: CalculationInputs;
+  userParams: UserParams;
   className?: string;
 }
 
-export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, inputs, userParams, className }: ConfigPanelProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localInputs, setLocalInputs] = useState<CalculationInputs>(inputs);
@@ -27,21 +28,17 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
   }, [inputs]);
 
   const handleConfigChange = (key: keyof CalculationInputs, value: number) => {
-    const param = CONFIG_PARAMETERS.find(p => p.id === key);
+    const param = userParams.getParameterByKey(key);
     if (!param) return;
 
     try {
-      // Validate the value
-      const min = param.getMin(localInputs);
-      const max = param.getMax(localInputs);
-      
-      if (value < min || value > max) {
+      if (value < param.getMin() || value > param.getMax()) {
         throw new Error(
           `Invalid value for ${param.label}: must be between ${
             param.type === 'currency' ? '$' : ''
-          }${min.toLocaleString()} and ${
+          }${param.getMin().toLocaleString()} and ${
             param.type === 'currency' ? '$' : ''
-          }${max.toLocaleString()}`
+          }${param.getMax().toLocaleString()}`
         );
       }
 
@@ -70,44 +67,58 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
     }
   };
 
-  const renderParameterInput = (param: typeof CONFIG_PARAMETERS[0]) => {
-    const error = errors[param.id];
-
-    if (param.useSlider) {
-      const handleSliderChange = (newValue: number) => {
-        handleConfigChange(param.id, newValue);        
-      };
-
-      return (
-        <LabeledSlider
-          label={param.label}
-          value={param.getValue(localInputs) ?? 0}
-          min={param.getMin(localInputs)}
-          max={param.getMax(localInputs)}
-          step={param.step ?? 1}
-          unit={param.unit}
-          onChange={handleSliderChange}
-          disabled={false}
-        />
-      );
+  const formatValue = (value: number, unit?: string) => {
+    if (unit === '%') {
+      return `${value}%`;
     }
+    if (unit === '$') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(value);
+    }
+    return value.toString();
+  };
+
+  const renderParameterInput = (param: ReturnType<typeof userParams.getParameterByKey>) => {
+    if (!param) return null;
+    
+    const error = errors[param.id];
+    const value = localInputs[param.id];
+    const min = param.getMin();
+    const max = param.getMax();
+
+    const handleSliderChange = (newValue: number[]) => {
+      handleConfigChange(param.id, newValue[0]);
+    };
 
     return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">{param.label}</Label>
-        <Input
-          type="number"
-          value={param.getValue(localInputs)}
-          min={param.getMin(localInputs)}
-          max={param.getMax(localInputs)}
-          onChange={(e) => handleConfigChange(param.id, Number(e.target.value))}
-          disabled={false}
-          className={cn(
-            "w-full",
-            error && "border-red-500"
-          )}
+      <div className={cn("space-y-2", error && "border-red-500")}>
+        <div className="flex justify-between items-center">
+          <Label className="text-sm font-medium">{param.label}</Label>
+          <span className="text-sm font-bold text-blue-600">
+            {formatValue(value, param.unit)}
+          </span>
+        </div>
+        <Slider
+          value={[value]}
+          onValueChange={handleSliderChange}
+          min={min}
+          max={max}
+          step={param.step ?? 1}
+          className="w-full"
         />
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>{formatValue(min, param.unit)}</span>
+          <span>{formatValue(max, param.unit)}</span>
+        </div>
+        {error && (
+          <p className="text-xs text-red-500 mt-1">
+            {error}
+          </p>
+        )}
       </div>
     );
   };
@@ -129,7 +140,7 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
             Quick Adjustments
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getBasicParameters().map((param) => (
+            {userParams.getBasicParameters().map((param) => (
               <div key={param.id}>
                 {renderParameterInput(param)}
               </div>
@@ -155,24 +166,13 @@ export function ConfigPanel({ onConfigChange, inputs, className }: ConfigPanelPr
             <CollapsibleContent>
               <div className="pt-4">
                 <Separator className="mb-4" />
-                {/* Group by category */}
-                {(['Purchase', 'Loan', 'Operating'] as const).map((category) => {
-                  const params = getParametersByCategory(category);
-                  if (params.length === 0) return null;
-
-                  return (
-                    <div key={category} className="mb-6 last:mb-0">
-                      <h5 className="font-medium text-sm text-gray-600 mb-3">{category} Parameters</h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {params.map((param) => (
-                          <div key={param.id}>
-                            {renderParameterInput(param)}
-                          </div>
-                        ))}
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userParams.getAdvancedParameters().map((param) => (
+                    <div key={param.id}>
+                      {renderParameterInput(param)}
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </CollapsibleContent>
           </div>

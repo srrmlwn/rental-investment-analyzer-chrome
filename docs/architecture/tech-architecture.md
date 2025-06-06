@@ -263,7 +263,8 @@ rental-investment-analyzer/
 │   │   └── storageUtils.ts   # Chrome storage helpers
 │   └── constants/            # Constants and configurations
 │       ├── selectors.ts      # Zillow page selectors
-│       └── configParameters.ts # Configuration parameters
+│       ├── userParams.ts     # User configuration parameters and validation
+│       └── ... other constants
 ├── public/                   # Static assets
 │   ├── icons/               # Extension icons
 │   └── images/              # Other images
