@@ -4,7 +4,6 @@ export interface PropertyData {
   bedrooms?: number;
   bathrooms?: number;
   propertyType?: string;
-  squareFeet?: number;
   zipCode?: string;
   rentZestimate?: number;
   monthlyPropertyTaxes?: number;  // Monthly property taxes

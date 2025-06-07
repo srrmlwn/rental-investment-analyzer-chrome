@@ -2,66 +2,70 @@ import { PriceExtractor } from './extractors/PriceExtractor';
 import { PropertyTaxExtractor } from './extractors/PropertyTaxExtractor';
 import { BedBathExtractor } from './extractors/BedBathExtractor';
 import { PropertyTypeExtractor } from './extractors/PropertyTypeExtractor';
-import { SquareFeetExtractor } from './extractors/SquareFeetExtractor';
 import { ZipCodeExtractor } from './extractors/ZipCodeExtractor';
 import { RentZestimateExtractor } from './extractors/RentZestimateExtractor';
 import { HoaFeesExtractor } from './extractors/HoaFeesExtractor';
 import { PropertyData } from '@/types/propertyData';
+import { PropertyJsonExtractor } from './PropertyJsonExtractor';
 
-export class DataExtractor {
-    private priceExtractor: PriceExtractor;
-    private propertyTaxExtractor: PropertyTaxExtractor;
-    private bedBathExtractor: BedBathExtractor;
-    private propertyTypeExtractor: PropertyTypeExtractor;
-    private squareFeetExtractor: SquareFeetExtractor;
-    private zipCodeExtractor: ZipCodeExtractor;
-    private rentZestimateExtractor: RentZestimateExtractor;
-    private hoaFeesExtractor: HoaFeesExtractor;
+export class DataExtractionService {
+    private propertyJsonExtractor: PropertyJsonExtractor;
+    private extractors: {
+        price: PriceExtractor;
+        propertyTax: PropertyTaxExtractor;
+        bedBath: BedBathExtractor;
+        propertyType: PropertyTypeExtractor;
+        zipCode: ZipCodeExtractor;
+        rentZestimate: RentZestimateExtractor;
+        hoaFees: HoaFeesExtractor;
+    };
 
     constructor() {
-        this.priceExtractor = new PriceExtractor();
-        this.propertyTaxExtractor = new PropertyTaxExtractor();
-        this.bedBathExtractor = new BedBathExtractor();
-        this.propertyTypeExtractor = new PropertyTypeExtractor();
-        this.squareFeetExtractor = new SquareFeetExtractor();
-        this.zipCodeExtractor = new ZipCodeExtractor();
-        this.rentZestimateExtractor = new RentZestimateExtractor();
-        this.hoaFeesExtractor = new HoaFeesExtractor();
+        this.propertyJsonExtractor = new PropertyJsonExtractor();
+        this.extractors = {
+            price: new PriceExtractor(),
+            propertyTax: new PropertyTaxExtractor(),
+            bedBath: new BedBathExtractor(),
+            propertyType: new PropertyTypeExtractor(),
+            zipCode: new ZipCodeExtractor(),
+            rentZestimate: new RentZestimateExtractor(),
+            hoaFees: new HoaFeesExtractor()
+        };
     }
 
     async extractPropertyData(): Promise<PropertyData> {
         console.log('Starting property data extraction...');
 
         try {
-            // Extract all data in parallel
+            // Extract property JSON once
+            const property = await this.propertyJsonExtractor.getPropertyJson();
+            
+            // Extract all data in parallel using the same property JSON
             const [
                 price,
                 propertyTax,
                 bedBath,
                 propertyType,
-                squareFeet,
                 zipCode,
                 rentZestimate,
                 hoaFees
             ] = await Promise.all([
-                this.priceExtractor.extract(),
-                this.propertyTaxExtractor.extract(),
-                this.bedBathExtractor.extract(),
-                this.propertyTypeExtractor.extract(),
-                this.squareFeetExtractor.extract(),
-                this.zipCodeExtractor.extract(),
-                this.rentZestimateExtractor.extract(),
-                this.hoaFeesExtractor.extract()
+                this.extractors.price.extract(property),
+                this.extractors.propertyTax.extract(property),
+                this.extractors.bedBath.extract(property),
+                this.extractors.propertyType.extract(property),
+                this.extractors.zipCode.extract(property),
+                this.extractors.rentZestimate.extract(property),
+                this.extractors.hoaFees.extract(property)
             ]);
 
             const propertyData: PropertyData = {
                 price: price ?? undefined,
-                propertyTaxRate: propertyTax.rate ?? undefined,
-                monthlyPropertyTaxes: propertyTax.monthlyAmount ?? undefined,
-                bedrooms: bedBath.bedrooms ?? undefined,
-                bathrooms: bedBath.bathrooms ?? undefined,
+                propertyTaxRate: propertyTax?.rate ?? undefined,
+                monthlyPropertyTaxes: propertyTax?.monthlyAmount ?? undefined,
+                bedrooms: bedBath?.bedrooms ?? undefined,
+                bathrooms: bedBath?.bathrooms ?? undefined,
                 propertyType: propertyType ?? undefined,
-                squareFeet: squareFeet ?? undefined,
                 zipCode: zipCode ?? undefined,
                 rentZestimate: rentZestimate ?? undefined,
                 hoaFees: hoaFees ?? undefined
@@ -75,6 +79,11 @@ export class DataExtractor {
             throw error;
         }
     }
+
+    // Method to clear the property JSON cache if needed
+    clearCache(): void {
+        this.propertyJsonExtractor.clearCache();
+    }
 }
 
-export default DataExtractor; 
+export default DataExtractionService; 

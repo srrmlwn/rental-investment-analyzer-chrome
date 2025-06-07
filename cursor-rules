@@ -12,7 +12,8 @@
   - `task-breakdown.md`  # Added task breakdown to priority files
 - For code context, prioritize:
   - `src/constants/selectors.js`
-  - `src/services/dataExtractor.js`
+  - `src/services/dataExtractionService.ts`
+  - `src/services/calculator.ts`
   - Any file in `src/content/`, `src/background/`, `src/services/`, `src/utils/`, and `src/constants/`
 
 ## 3. Task Management

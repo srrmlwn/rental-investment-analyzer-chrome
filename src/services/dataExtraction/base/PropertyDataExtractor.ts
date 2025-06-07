@@ -1,14 +1,30 @@
 import { PropertyData } from '@/types/propertyData';
+import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
-export abstract class BaseExtractor {
-    protected abstract extract(): Promise<any>;
+export abstract class PropertyDataExtractor<T> {
+    protected abstract extractFromJson(property: ZillowPropertyJson): T | null;
+    protected abstract extractFromDOM(): Promise<T | null>;
+    
+    async extract(property: ZillowPropertyJson | null): Promise<T | null> {
+        // First try to get data from JSON if available
+        if (property) {
+            const result = this.extractFromJson(property);
+            if (result !== null) {
+                this.logExtractionSuccess('from JSON', result);
+                return result;
+            }
+        }
+        
+        // Fallback to DOM extraction
+        return this.extractFromDOM();
+    }
 
     protected logExtractionStart(field: string): void {
         console.log(`🔍 Starting ${field} extraction...`);
     }
 
-    protected logExtractionSuccess(field: string, value: any): void {
-        console.log(`✅ Extracted ${field}:`, value);
+    protected logExtractionSuccess(source: string, value: any): void {
+        console.log(`✅ Extracted from ${source}:`, value);
     }
 
     protected logExtractionError(field: string, error: string): void {

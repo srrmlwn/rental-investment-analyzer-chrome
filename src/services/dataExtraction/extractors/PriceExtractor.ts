@@ -1,9 +1,17 @@
-import { BaseExtractor } from '../base/BaseExtractor';
+import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
 import { PRICE_SELECTORS } from '../selectors/priceSelectors';
 import { ERROR_MESSAGES } from '@/constants/selectors';
+import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
-export class PriceExtractor extends BaseExtractor {
-    async extract(): Promise<number | null> {
+export class PriceExtractor extends PropertyDataExtractor<number> {
+    protected extractFromJson(property: ZillowPropertyJson): number | null {
+        if (typeof property.price === 'number') {
+            return property.price;
+        }
+        return null;
+    }
+
+    protected async extractFromDOM(): Promise<number | null> {
         this.logExtractionStart('price');
         
         // Try primary price selector first
@@ -13,7 +21,7 @@ export class PriceExtractor extends BaseExtractor {
             if (match) {
                 const price = this.safeParseInt(match[1]);
                 if (price) {
-                    this.logExtractionSuccess('price from primary selector', price);
+                    this.logExtractionSuccess('DOM (primary)', price);
                     return price;
                 }
             }
@@ -26,7 +34,7 @@ export class PriceExtractor extends BaseExtractor {
             if (match) {
                 const price = this.safeParseInt(match[1]);
                 if (price) {
-                    this.logExtractionSuccess('price from alternative selector', price);
+                    this.logExtractionSuccess('DOM (alternative)', price);
                     return price;
                 }
             }

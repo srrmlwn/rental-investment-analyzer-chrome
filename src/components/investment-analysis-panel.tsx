@@ -3,7 +3,7 @@ import { ConfigPanel } from "./investment/config-panel"
 import { CalculationInputs, createInitialInputs } from "@/types/calculationInputs"
 import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
-import { DataExtractor } from "@/services/dataExtraction"
+import { DataExtractionService } from "@/services/dataExtraction"
 import { DollarSign, Percent, TrendingUp } from "lucide-react"
 import { UserParams } from "@/constants/userParams"
 
@@ -20,7 +20,7 @@ export function InvestmentAnalysisPanel() {
       setIsLoading(true);
       setError(null);
       try {
-        const dataExtractor = new DataExtractor();
+        const dataExtractor = new DataExtractionService();
         const extractedData = await dataExtractor.extractPropertyData();
         
         // Create UserParams instance with extracted data

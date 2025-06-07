@@ -1,4 +1,4 @@
-import { DataExtractor } from '../services/dataExtraction';
+import { DataExtractionService } from '../services/dataExtraction';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JSDOM } from 'jsdom';
@@ -18,7 +18,7 @@ async function testExtractor(htmlPath: string) {
     (global as any).document = dom.window.document;
     
     try {
-        const extractor = new DataExtractor();
+        const extractor = new DataExtractionService();
         const data = await extractor.extractPropertyData();
         console.log('Extracted Data:', JSON.stringify(data, null, 2));
     } catch (error) {

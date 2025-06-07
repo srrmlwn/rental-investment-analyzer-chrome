@@ -66,15 +66,18 @@ rental-investment-analyzer/
 ├── src/                   # Source code
 │   ├── manifest.json     # Chrome extension manifest
 │   ├── content/          # Content scripts
-│   │   ├── content.js    # Main content script
-│   │   ├── sidebar.js    # Sidebar UI management
-│   │   └── styles.css    # UI styles
-│   ├── background/       # Background scripts
+│   │   ├── content.tsx   # Main content script
+│   │   └── styles.css    # Content styles
+│   ├── components/       # React components
+│   │   ├── investment/   # Investment analysis
+│   │   │   ├── config-panel.tsx
+│   │   │   └── investment-analysis-panel.tsx
+│   │   ├── ui/           # Shared UI components
+│   │   └── sidebar/      # Sidebar components
 │   ├── services/         # Business logic
-│   │   ├── dataExtractor.js    # Zillow data extraction
-│   │   ├── rentalEstimator.js  # Rental estimation
-│   │   ├── cashFlowAnalyzer.js # Investment analysis
-│   │   └── configManager.js    # User configuration
+│   │   ├── calculator.ts # Investment calculations
+│   │   └── dataExtractionService.ts    # Zillow data extraction
+│   ├── background/       # Background scripts
 │   ├── utils/            # Utility functions
 │   └── constants/        # Constants and configs
 ├── public/               # Static assets

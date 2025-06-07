@@ -10,7 +10,7 @@ The Rental Investment Analyzer is a Chrome extension that helps real estate inve
 - Handles page navigation and reinjection
 - Manages the extension's lifecycle on the page
 - Uses MutationObserver to detect SPA navigation
-- Extracts property data using DataExtractor service
+- Extracts property data using DataExtractionService
 
 ### 2. Investment Analysis Panel (`investment-analysis-panel.tsx`)
 - Main component for displaying investment analysis
@@ -61,7 +61,6 @@ interface PropertyData {
   propertyType: string;
   bedrooms: number;
   bathrooms: number;
-  squareFeet: number;
   zipCode: string;
   rentZestimate?: number;
   propertyTaxes?: number;
@@ -121,9 +120,9 @@ interface ConfigParameter {
 
 1. **Property Data Extraction**
    ```
-   Zillow Page → DataExtractor → PropertyData → createInitialInputs() → CalculationInputs
+   Zillow Page → DataExtractionService → PropertyData → createInitialInputs() → CalculationInputs
    ```
-   - DataExtractor scrapes listing data
+   - DataExtractionService scrapes listing data
    - Maps to PropertyData interface
    - createInitialInputs() creates fresh inputs with:
      - Listing-specific values (price, rent, taxes, HOA)
@@ -158,7 +157,7 @@ interface ConfigParameter {
 
 ### 2. Component State
 - InvestmentAnalysisPanel manages:
-  - Property data (from DataExtractor)
+  - Property data (from DataExtractionService)
   - Calculation inputs (from ConfigPanel)
   - Calculated metrics (from Calculator)
 - Updates trigger re-renders with new calculations
@@ -224,7 +223,7 @@ rental-investment-analyzer/
 │   │   └── configTypes.ts
 │   └── services/            # Business logic
 │       ├── calculator.ts     # Investment calculations
-│       └── dataExtractor.ts  # Zillow page parsing
+│       └── dataExtractionService.ts  # Zillow page parsing
 ```
 
 ## Component Architecture
@@ -235,7 +234,7 @@ rental-investment-analyzer/
 class ZillowContentScript {
     constructor() {
         this.sidebar = new SidebarManager();
-        this.dataExtractor = new DataExtractor();
+        this.dataExtractionService = new DataExtractionService();
         this.propertyAnalyzer = new PropertyAnalyzer();
     }
 
@@ -249,8 +248,8 @@ class ZillowContentScript {
 
 ### 2. Data Extraction Layer
 ```javascript
-// dataExtractor.js
-class DataExtractor {
+// dataExtractionService.js
+class DataExtractionService {
     async extractPropertyData() {
         return {
             price: this.extractPrice(),

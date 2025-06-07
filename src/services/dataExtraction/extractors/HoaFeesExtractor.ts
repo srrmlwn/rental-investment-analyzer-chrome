@@ -1,8 +1,18 @@
-import { BaseExtractor } from '../base/BaseExtractor';
+import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
 import { HOA_SELECTORS } from '../selectors/hoaSelectors';
+import { ERROR_MESSAGES } from '@/constants/selectors';
+import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
-export class HoaFeesExtractor extends BaseExtractor {
-    async extract(): Promise<number | null> {
+export class HoaFeesExtractor extends PropertyDataExtractor<number> {
+    protected extractFromJson(property: ZillowPropertyJson): number | null {
+        if (property.monthlyHoaFee?.value !== undefined) {
+            this.logExtractionSuccess('JSON', property.monthlyHoaFee.value);
+            return property.monthlyHoaFee.value;
+        }
+        return null;
+    }
+
+    protected async extractFromDOM(): Promise<number | null> {
         this.logExtractionStart('HOA fees');
         
         // Try primary HOA fees element
@@ -12,7 +22,7 @@ export class HoaFeesExtractor extends BaseExtractor {
             if (match) {
                 const hoaFees = this.safeParseInt(match[1]);
                 if (hoaFees !== null) {
-                    this.logExtractionSuccess('HOA fees', hoaFees);
+                    this.logExtractionSuccess('DOM (primary)', hoaFees);
                     return hoaFees;
                 }
             }
@@ -25,13 +35,13 @@ export class HoaFeesExtractor extends BaseExtractor {
             if (match) {
                 const hoaFees = this.safeParseInt(match[1]);
                 if (hoaFees !== null) {
-                    this.logExtractionSuccess('monthly HOA fees', hoaFees);
+                    this.logExtractionSuccess('DOM (monthly)', hoaFees);
                     return hoaFees;
                 }
             }
         }
 
-        this.logExtractionError('HOA fees', 'No HOA fees available');
-        return null;  // Return null to be consistent with other extractors
+        this.logExtractionError('HOA fees', ERROR_MESSAGES.MISSING_HOA_FEES);
+        return null;
     }
 } 

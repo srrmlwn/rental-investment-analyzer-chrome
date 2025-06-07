@@ -1,9 +1,18 @@
-import { BaseExtractor } from '../base/BaseExtractor';
+import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
 import { ZIP_CODE_SELECTORS } from '../selectors/zipCodeSelectors';
 import { ERROR_MESSAGES } from '@/constants/selectors';
+import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
-export class ZipCodeExtractor extends BaseExtractor {
-    async extract(): Promise<string | null> {
+export class ZipCodeExtractor extends PropertyDataExtractor<string> {
+    protected extractFromJson(property: ZillowPropertyJson): string | null {
+        const zipcode = property.zipcode ?? property.address?.zipcode;
+        if (typeof zipcode === 'string' && /^\d{5}$/.test(zipcode)) {
+            return zipcode;
+        }
+        return null;
+    }
+
+    protected async extractFromDOM(): Promise<string | null> {
         this.logExtractionStart('zip code');
         
         // Try meta title first
@@ -14,7 +23,7 @@ export class ZipCodeExtractor extends BaseExtractor {
                 const match = content.match(/\b\d{5}\b/);
                 if (match) {
                     const zipCode = match[0];
-                    this.logExtractionSuccess('zip code from meta', zipCode);
+                    this.logExtractionSuccess('DOM (meta)', zipCode);
                     return zipCode;
                 }
             }
@@ -26,7 +35,7 @@ export class ZipCodeExtractor extends BaseExtractor {
             const match = zipElement.textContent.match(/\b\d{5}\b/);
             if (match) {
                 const zipCode = match[0];
-                this.logExtractionSuccess('zip code from element', zipCode);
+                this.logExtractionSuccess('DOM (element)', zipCode);
                 return zipCode;
             }
         }

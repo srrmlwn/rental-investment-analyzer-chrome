@@ -55,7 +55,6 @@ The Rental Investment Analyzer is a Chrome extension that provides real-time inv
   - Listing price
   - Property type
   - Bedrooms/bathrooms
-  - Square footage
   - Year built
   - Location data
 - Error handling and retry logic

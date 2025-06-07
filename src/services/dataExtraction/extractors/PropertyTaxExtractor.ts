@@ -1,28 +1,50 @@
-import { BaseExtractor } from '../base/BaseExtractor';
+import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
 import { TAX_SELECTORS } from '../selectors/taxSelectors';
 import { PRICE_SELECTORS } from '../selectors/priceSelectors';
 import { ERROR_MESSAGES } from '@/constants/selectors';
+import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export interface PropertyTaxData {
     rate: number | null;
     monthlyAmount: number | null;
 }
 
-export class PropertyTaxExtractor extends BaseExtractor {
-    async extract(): Promise<PropertyTaxData> {
+export class PropertyTaxExtractor extends PropertyDataExtractor<PropertyTaxData> {
+    protected extractFromJson(property: ZillowPropertyJson): PropertyTaxData | null {
+        // Try to get the rate directly from propertyTaxRate first
+        if (typeof property.propertyTaxRate === 'number') {
+            const rate = property.propertyTaxRate;
+            const monthlyAmount = property.taxAnnualAmount ? Math.round(property.taxAnnualAmount / 12) : null;
+            return { rate, monthlyAmount };
+        }
+
+        // Fallback to calculating rate from annual tax and price
+        const annualTax = property.taxAnnualAmount;
+        const price = property.price;
+
+        if (typeof annualTax === 'number' && typeof price === 'number' && price > 0) {
+            const rate = (annualTax / price) * 100;
+            const monthlyAmount = Math.round(annualTax / 12);
+            return { rate, monthlyAmount };
+        }
+
+        return null;
+    }
+
+    protected async extractFromDOM(): Promise<PropertyTaxData | null> {
         const rate = await this.extractRate();
         const monthlyAmount = await this.extractMonthlyAmount();
         return { rate, monthlyAmount };
     }
 
-    async extractRate(): Promise<number | null> {
+    private async extractRate(): Promise<number | null> {
         this.logExtractionStart('property tax rate');
         
         const taxElement = document.querySelector(TAX_SELECTORS.RATE_INPUT);
         if (taxElement?.id === 'property-tax') {
             const taxRate = this.safeParseFloat((taxElement as HTMLInputElement).value);
             if (taxRate !== null) {
-                this.logExtractionSuccess('property tax rate from input', taxRate);
+                this.logExtractionSuccess('DOM (rate input)', taxRate);
                 return taxRate;
             }
         }
@@ -34,7 +56,7 @@ export class PropertyTaxExtractor extends BaseExtractor {
             if (price) {
                 const annualTax = monthlyTax * 12;
                 const taxRate = (annualTax / price) * 100;
-                this.logExtractionSuccess('property tax rate from monthly amount', taxRate);
+                this.logExtractionSuccess('DOM (calculated from monthly)', taxRate);
                 return taxRate;
             }
         }
@@ -43,7 +65,7 @@ export class PropertyTaxExtractor extends BaseExtractor {
         return null;
     }
 
-    async extractMonthlyAmount(): Promise<number | null> {
+    private async extractMonthlyAmount(): Promise<number | null> {
         this.logExtractionStart('monthly property tax');
         
         const taxElement = document.querySelector(TAX_SELECTORS.MONTHLY_AMOUNT);
@@ -52,7 +74,7 @@ export class PropertyTaxExtractor extends BaseExtractor {
             if (match) {
                 const monthlyTax = this.safeParseInt(match[1]);
                 if (monthlyTax !== null) {
-                    this.logExtractionSuccess('monthly property tax', monthlyTax);
+                    this.logExtractionSuccess('DOM (monthly amount)', monthlyTax);
                     return monthlyTax;
                 }
             }
@@ -62,26 +84,6 @@ export class PropertyTaxExtractor extends BaseExtractor {
         return null;
     }
 
-    async extractMonthlyTaxes(price: number, propertyTaxRate: number | null): Promise<number | null> {
-        this.logExtractionStart('monthly property taxes');
-        
-        if (propertyTaxRate !== null && price) {
-            const annualTax = (propertyTaxRate / 100) * price;
-            const monthlyTax = Math.round(annualTax / 12);
-            this.logExtractionSuccess('monthly property taxes from rate', monthlyTax);
-            return monthlyTax;
-        }
-
-        const monthlyTax = await this.extractMonthlyAmount();
-        if (monthlyTax !== null) {
-            return monthlyTax;
-        }
-
-        this.logExtractionError('monthly property taxes', 'No taxes available');
-        return null;
-    }
-
-    // Helper method to get price - this should be injected or moved to a shared service
     private async extractPrice(): Promise<number | null> {
         const priceElement = document.querySelector(PRICE_SELECTORS.PRIMARY);
         if (priceElement?.textContent) {

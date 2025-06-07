@@ -18,7 +18,7 @@
   - [x] Parameter definitions
   - [x] Dynamic min/max values
   - [x] Basic/advanced categorization
-- [x] Create DataExtractor
+- [x] Create DataExtractionService
   - [x] Zillow page parsing
   - [x] Property data extraction
   - [x] Error handling
@@ -66,7 +66,7 @@
 ### 1. Testing
 - [ ] Unit tests
   - [ ] Calculator functions
-  - [ ] DataExtractor
+  - [ ] DataExtractionService
   - [ ] UserParams
 - [ ] Integration tests
   - [ ] Component interactions
