@@ -1,7 +1,7 @@
 module.exports = {
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.js$': 'babel-jest',
+    '^.+\\.(ts|tsx|js)$': 'ts-jest',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(jsdom|whatwg-url)/)',
@@ -11,4 +11,6 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   setupFiles: ['<rootDir>/tests/setup.js'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 }; 

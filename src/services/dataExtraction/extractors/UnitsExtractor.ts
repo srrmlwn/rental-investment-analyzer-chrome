@@ -1,5 +1,5 @@
 import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
-import { UNITS_SELECTORS } from '../selectors/unitsSelectors';
+import { UNITS_SELECTORS } from '@/services/dataExtraction/selectors/unitsSelectors';
 import { ERROR_MESSAGES } from '@/constants/selectors';
 import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 import { extractNumberFromText } from '@/utils/numberUtils';

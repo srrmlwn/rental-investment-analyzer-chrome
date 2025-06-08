@@ -4,13 +4,10 @@ import { CalculationInputs, createInitialInputs } from "@/types/calculationInput
 import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractionService } from "@/services/dataExtraction"
-import { DollarSign, Percent, TrendingUp, Home, ChevronDown, Calculator, AlertCircle } from "lucide-react"
+import { DollarSign, Percent, TrendingUp, Home, ChevronDown } from "lucide-react"
 import { UserParams } from "@/constants/userParams"
-import { cn } from "@/lib/utils"
-import { Separator } from "./ui/separator"
 import { Button } from "./ui/button"
 import { PropertyData } from "../types/propertyData"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 // Helper function to format currency values
 const formatCurrency = (value?: number) => {
@@ -84,9 +81,7 @@ export function InvestmentAnalysisPanel() {
   const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
   const [userParams, setUserParams] = useState<UserParams | null>(null);
   const [isPropertyInfoExpanded, setIsPropertyInfoExpanded] = useState(false);
-  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
-  const [isCalculationsExpanded, setIsCalculationsExpanded] = useState(true);
-  const [isMetricsExpanded, setIsMetricsExpanded] = useState(true);
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);  
 
   // Extract property data and initialize calculation inputs on mount
   useEffect(() => {

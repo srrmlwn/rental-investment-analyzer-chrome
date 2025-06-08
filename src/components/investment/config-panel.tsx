@@ -70,14 +70,6 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     }
   };
 
-  const handleReset = () => {
-    // Reset to initial values from props
-    setLocalInputs(inputs);
-    setErrors({});
-    if (onConfigChange) {
-      onConfigChange(inputs);
-    }
-  };
 
   const formatValue = (value: number, unit?: string) => {
     if (unit === '%') {

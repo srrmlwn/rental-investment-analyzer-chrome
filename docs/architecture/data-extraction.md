@@ -1,110 +1,81 @@
 ## Data Extraction via Script Tag
 
-In our test script (test/parseListingData.ts), we extract property data by parsing the __NEXT_DATA__ script tag (using a regex) and then parsing the JSON contained therein. In particular, we extract the "gdpClientCache" (a JSON string) from the parsed JSON (at props.pageProps.componentProps.gdpClientCache) and then parse that string into an object. (This object is an aggregate of property data, with keys (for example, "ForSaleShopperPlatformFullRenderQuery{…}") whose values (if they are objects and have a "property" key) contain the property details.) 
+The DataExtractionService extracts property data from Zillow listing pages by parsing the page content and extracting relevant information. The service is designed to handle various listing formats and provides fallback mechanisms for missing data.
 
-Below is a sample snippet (in TypeScript) that illustrates the extraction and summary printing logic:
+### Extracted Property Data
 
------------------------------------------------------------
-import fs from 'fs';
+The service extracts the following fields:
 
-function extractJsonFromScriptTag(htmlContent: string): any | null {
-  const scriptTagRegex = /<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/;
-  const match = htmlContent.match(scriptTagRegex);
-  if (!match || !match[1]) {
-    console.error("Could not find __NEXT_DATA__ script tag");
-    return null;
-  }
-  try {
-    return JSON.parse(match[1]);
-  } catch (error) {
-    console.error("Error parsing JSON from script tag:", error);
-    return null;
-  }
+```typescript
+interface PropertyData {
+    price: number;              // Listing price
+    bedrooms?: number;          // Number of bedrooms
+    bathrooms?: number;         // Number of bathrooms
+    propertyType?: string;      // Type of property (e.g., 'Condo', 'Single Family')
+    zipCode?: string;          // Property zip code
+    rentZestimate?: number;    // Zillow's rent estimate
+    monthlyPropertyTaxes?: number;  // Monthly property tax amount
+    propertyTaxRate?: number;   // Annual property tax rate as percentage
+    hoaFees?: number;          // Monthly HOA fees
+    units?: number;            // Number of units (for multi-family properties)
 }
+```
 
-function printPropertySummary(gdpClientCache: any) {
-  // gdpClientCache is an object with keys (e.g. "ForSaleShopperPlatformFullRenderQuery{…}") whose values (if they are objects and have a "property" key) contain the property details.
-  for (const [key, value] of Object.entries(gdpClientCache)) {
-    if (value && typeof value === "object" && "property" in value && typeof (value as any).property === "object") {
-      const prop = (value as any).property;
-      const address = prop.streetAddress || prop.address?.streetAddress || "N/A";
-      const city = prop.city || prop.address?.city || "N/A";
-      const state = prop.state || prop.address?.state || "N/A";
-      const zipcode = prop.zipcode || prop.address?.zipcode || "N/A";
-      const price = prop.price || "N/A";
-      const beds = prop.bedrooms || prop.resoFacts?.bedrooms || "N/A";
-      const baths = prop.bathrooms || prop.resoFacts?.bathrooms || "N/A";
-      const yearBuilt = prop.yearBuilt || prop.resoFacts?.yearBuilt || "N/A";
-      const homeType = prop.homeType || prop.resoFacts?.homeType || "N/A";
-      console.log("-----------------------------");
-      console.log(`Address: ${address}, ${city}, ${state} ${zipcode}`);
-      console.log(`Price: $${price}`);
-      console.log(`Beds: ${beds}`);
-      console.log(`Baths: ${baths}`);
-      console.log(`Year Built: ${yearBuilt}`);
-      console.log(`Home Type: ${homeType}`);
-      if (prop.lotSize || prop.resoFacts?.lotSize) {
-         console.log(`Lot Size: ${prop.lotSize || prop.resoFacts?.lotSize}`);
-      }
-      if (prop.zpid) {
-         console.log(`ZPID: ${prop.zpid}`);
-      }
-      if (prop.taxAnnualAmount) {
-         console.log(`Annual Tax: $${prop.taxAnnualAmount}`);
-      }
-      if (prop.priceChange) {
-         console.log(`Price Change: $${prop.priceChange}`);
-      }
-      if (prop.priceChangeDateString) {
-         console.log(`Price Change Date: ${prop.priceChangeDateString}`);
-      }
-      if (prop.homeStatus) {
-         console.log(`Status: ${prop.homeStatus}`);
-      }
-      if (prop.listingProvider) {
-         console.log(`Listing Provider: ${prop.listingProvider}`);
-      }
-      if (prop.formattedChip?.location) {
-         console.log("Formatted Location:");
-         prop.formattedChip.location.forEach((loc: any) => console.log(`  - ${loc.fullValue}`));
-      }
-      // (Additional fields can be added as needed.)
-    }
-  }
+### Implementation Details
+
+The DataExtractionService uses a combination of methods to extract data:
+
+1. **Script Tag Parsing**
+   - Extracts data from the `__NEXT_DATA__` script tag
+   - Parses the JSON data to access property information
+   - Handles different data structures and formats
+
+2. **DOM Element Selection**
+   - Falls back to DOM element selection when script data is unavailable
+   - Uses specific selectors for each data point
+   - Implements error handling for missing elements
+
+3. **Data Validation**
+   - Validates extracted data types
+   - Handles missing or undefined values
+   - Provides default values when necessary
+
+### Example Usage
+
+```typescript
+const service = new DataExtractionService();
+const propertyData = await service.extractPropertyData();
+
+// Example output:
+{
+    price: 419900,
+    bedrooms: 4,
+    bathrooms: 2,
+    propertyType: 'Condo',
+    zipCode: '43205',
+    rentZestimate: undefined,
+    monthlyPropertyTaxes: undefined,
+    propertyTaxRate: 1.37,
+    hoaFees: undefined,
+    units: 2
 }
+```
 
-async function main() {
-  const htmlFilePath = process.argv[2];
-  if (!htmlFilePath) {
-    console.error("Please provide the path to the HTML file as an argument");
-    process.exit(1);
-  }
-  try {
-    const htmlContent = await fs.promises.readFile(htmlFilePath, "utf-8");
-    const jsonData = extractJsonFromScriptTag(htmlContent);
-    if (!jsonData) {
-      process.exit(1);
-    }
-    // Access props.pageProps.componentProps.gdpClientCache (a JSON string) and parse it.
-    const gdpClientCacheString = jsonData?.props?.pageProps?.componentProps?.gdpClientCache;
-    if (typeof gdpClientCacheString === "string") {
-      try {
-         const gdpClientCache = JSON.parse(gdpClientCacheString);
-         printPropertySummary(gdpClientCache);
-      } catch (e) {
-         console.error("Failed to parse gdpClientCache as JSON:", e);
-      }
-    } else {
-      console.log("gdpClientCache not found at props.pageProps.componentProps.gdpClientCache");
-    }
-  } catch (error) {
-    console.error("Error reading or processing file:", error);
-    process.exit(1);
-  }
-}
+### Error Handling
 
-main();
+The service implements robust error handling:
+- Graceful fallbacks for missing data
+- Type validation for extracted values
+- Clear error messages for debugging
+- Cache management for performance
 
------------------------------------------------------------
+### Testing
 
-This logic (extracting the __NEXT_DATA__ script tag, parsing its JSON, and then parsing the "gdpClientCache" string) can be refactored (for example, in a new chat) so that our services/dataExtraction (or a new module) follows a similar approach. (No code changes are made here.) 
+The service is thoroughly tested with various listing formats:
+- Standard single-family listings
+- Multi-family properties
+- Listings with missing data
+- Different property types
+- Various price ranges and locations
+
+Test cases are available in `tests/services/dataExtraction/index.test.ts` and use sample HTML files from `tests/resources/` to verify extraction accuracy. 

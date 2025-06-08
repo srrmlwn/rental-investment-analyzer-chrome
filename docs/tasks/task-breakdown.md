@@ -64,9 +64,9 @@
 ## In Progress
 
 ### 1. Testing
-- [ ] Unit tests
+- [x] Unit tests
+  - [x] DataExtractionService
   - [ ] Calculator functions
-  - [ ] DataExtractionService
   - [ ] UserParams
 - [ ] Integration tests
   - [ ] Component interactions
