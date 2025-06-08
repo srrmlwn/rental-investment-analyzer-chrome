@@ -28,6 +28,7 @@ export class PropertyJsonExtractor {
                 if (value && typeof value === 'object' && 'property' in value) {
                     this.cachedProperty = value.property as ZillowPropertyJson;
                     console.log('Successfully extracted property JSON');
+                    console.log('Property details:', JSON.stringify(this.cachedProperty, null, 2));
                     return this.cachedProperty;
                 }
             }

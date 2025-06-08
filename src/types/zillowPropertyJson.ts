@@ -17,6 +17,8 @@ export interface ZillowPropertyJson {
     lastSoldPrice: number;
     latitude: number;
     longitude: number;
+    units?: number;  // Number of units for multi-family properties
+    description?: string;  // Property description
 
     // Complex objects that need to be accessed carefully
     rentZestimate: {
@@ -38,6 +40,10 @@ export interface ZillowPropertyJson {
         lotSize?: number;
         yearBuilt?: number;
         homeType?: string;
+        units?: number;  // Number of units in resoFacts
+    };
+    multiFamilyUnits?: {
+        totalUnits?: number;  // Total number of units for multi-family properties
     };
 
     // Additional fields that might be present

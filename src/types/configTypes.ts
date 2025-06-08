@@ -3,14 +3,14 @@ import { CalculationInputs } from './calculationInputs';
 // Configuration parameter definition for UI
 export type ConfigParameterType = 'percentage' | 'currency' | 'number';
 
-export type ConfigCategory = 
-  | 'Purchase'
-  | 'Loan'
-  | 'Operating'
-  | 'Income'
-  | 'Growth'
-  | 'Tax'
-  | 'Analysis';
+export const CONFIG_CATEGORIES = {
+  PURCHASE_AND_REHAB: 'Purchase and Rehab',
+  FINANCING: 'Financing', 
+  OPERATING_INCOME: 'Operating Income',
+  OPERATING_EXPENSES: 'Operating Expenses'
+} as const;
+
+export type ConfigCategory = typeof CONFIG_CATEGORIES[keyof typeof CONFIG_CATEGORIES];
 
 // Base interface for all config parameters
 export interface ConfigParameter {

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Separator } from '../ui/separator';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
-import { Calculator, Edit3, SlidersHorizontal, ChevronDown, Zap, Cog } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, Home, Banknote, TrendingUp, Calculator } from 'lucide-react';
 import { CalculationInputs } from '@/types/calculationInputs';
-import { ConfigCategory } from '@/types/configTypes';
+import { ConfigCategory, CONFIG_CATEGORIES, ConfigParameter } from '@/types/configTypes';
 import { UserParams } from '@/constants/userParams';
 import { cn } from '@/lib/utils';
 
@@ -17,8 +16,21 @@ interface ConfigPanelProps {
   className?: string;
 }
 
+const CATEGORY_ICONS = {
+  [CONFIG_CATEGORIES.PURCHASE_AND_REHAB]: Home,
+  [CONFIG_CATEGORIES.FINANCING]: Banknote,
+  [CONFIG_CATEGORIES.OPERATING_INCOME]: TrendingUp,
+  [CONFIG_CATEGORIES.OPERATING_EXPENSES]: Calculator,
+} as const;
+
 export function ConfigPanel({ onConfigChange, inputs, userParams, className }: ConfigPanelProps) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  // Initialize all sections as expanded
+  const [expandedSections, setExpandedSections] = useState<Record<ConfigCategory, boolean>>(
+    Object.values(CONFIG_CATEGORIES).reduce((acc, category) => ({
+      ...acc,
+      [category]: true
+    }), {} as Record<ConfigCategory, boolean>)
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localInputs, setLocalInputs] = useState<CalculationInputs>(inputs);
 
@@ -123,6 +135,51 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     );
   };
 
+  const toggleSection = (category: ConfigCategory) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const renderCategorySection = (category: ConfigCategory) => {
+    const Icon = CATEGORY_ICONS[category];
+    const isExpanded = expandedSections[category];
+    const parameters = userParams.getAllParameters().filter((param: ConfigParameter) => param.category === category);
+
+    if (parameters.length === 0) return null;
+
+    return (
+      <div className="bg-white rounded-lg p-4 border shadow-sm">
+        <button
+          onClick={() => toggleSection(category)}
+          className="w-full flex justify-between items-center hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
+        >
+          <h4 className="font-semibold flex items-center gap-2">
+            <Icon className="h-4 w-4 text-blue-600" />
+            {category}
+          </h4>
+          <ChevronDown className={cn(
+            "h-4 w-4 text-gray-500 transition-transform duration-200",
+            isExpanded && "transform rotate-180"
+          )} />
+        </button>
+        {isExpanded && (
+          <>
+            <Separator className="my-4" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {parameters.map((param: ConfigParameter) => (
+                <div key={param.id}>
+                  {renderParameterInput(param)}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Card className={cn("border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50", className)}>
       <CardHeader className="pb-3">
@@ -133,50 +190,11 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Quick Adjustments */}
-        <div className="bg-white rounded-lg p-4 border shadow-sm">
-          <h4 className="font-semibold mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-blue-600" />
-            Quick Adjustments
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userParams.getBasicParameters().map((param) => (
-              <div key={param.id}>
-                {renderParameterInput(param)}
-              </div>
-            ))}
+        {Object.values(CONFIG_CATEGORIES).map(category => (
+          <div key={category}>
+            {renderCategorySection(category)}
           </div>
-        </div>
-
-        {/* Advanced Settings */}
-        <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-          <div className="bg-white rounded-lg p-4 border shadow-sm">
-            <CollapsibleTrigger asChild>
-              <div className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Cog className="h-4 w-4 text-blue-600" />
-                  Advanced Settings
-                </h4>
-                <ChevronDown className={cn(
-                  "h-4 w-4 text-gray-500 transition-transform duration-200",
-                  isAdvancedOpen && "transform rotate-180"
-                )} />
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="pt-4">
-                <Separator className="mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userParams.getAdvancedParameters().map((param) => (
-                    <div key={param.id}>
-                      {renderParameterInput(param)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
+        ))}
       </CardContent>
     </Card>
   );

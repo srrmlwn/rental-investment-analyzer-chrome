@@ -9,4 +9,5 @@ export interface PropertyData {
   monthlyPropertyTaxes?: number;  // Monthly property taxes
   propertyTaxRate?: number;  // Property tax rate as a percentage
   hoaFees?: number;
+  units?: number;  // Number of units for multi-family properties
 } 

@@ -5,6 +5,7 @@ import { PropertyTypeExtractor } from './extractors/PropertyTypeExtractor';
 import { ZipCodeExtractor } from './extractors/ZipCodeExtractor';
 import { RentZestimateExtractor } from './extractors/RentZestimateExtractor';
 import { HoaFeesExtractor } from './extractors/HoaFeesExtractor';
+import { UnitsExtractor } from './extractors/UnitsExtractor';
 import { PropertyData } from '@/types/propertyData';
 import { PropertyJsonExtractor } from './PropertyJsonExtractor';
 
@@ -18,6 +19,7 @@ export class DataExtractionService {
         zipCode: ZipCodeExtractor;
         rentZestimate: RentZestimateExtractor;
         hoaFees: HoaFeesExtractor;
+        units: UnitsExtractor;
     };
 
     constructor() {
@@ -29,7 +31,8 @@ export class DataExtractionService {
             propertyType: new PropertyTypeExtractor(),
             zipCode: new ZipCodeExtractor(),
             rentZestimate: new RentZestimateExtractor(),
-            hoaFees: new HoaFeesExtractor()
+            hoaFees: new HoaFeesExtractor(),
+            units: new UnitsExtractor()
         };
     }
 
@@ -48,7 +51,8 @@ export class DataExtractionService {
                 propertyType,
                 zipCode,
                 rentZestimate,
-                hoaFees
+                hoaFees,
+                units
             ] = await Promise.all([
                 this.extractors.price.extract(property),
                 this.extractors.propertyTax.extract(property),
@@ -56,7 +60,8 @@ export class DataExtractionService {
                 this.extractors.propertyType.extract(property),
                 this.extractors.zipCode.extract(property),
                 this.extractors.rentZestimate.extract(property),
-                this.extractors.hoaFees.extract(property)
+                this.extractors.hoaFees.extract(property),
+                this.extractors.units.extract(property)
             ]);
 
             const propertyData: PropertyData = {
@@ -68,7 +73,8 @@ export class DataExtractionService {
                 propertyType: propertyType ?? undefined,
                 zipCode: zipCode ?? undefined,
                 rentZestimate: rentZestimate ?? undefined,
-                hoaFees: hoaFees ?? undefined
+                hoaFees: hoaFees ?? undefined,
+                units: units ?? undefined
             };
 
             console.log('Property data extraction completed successfully');

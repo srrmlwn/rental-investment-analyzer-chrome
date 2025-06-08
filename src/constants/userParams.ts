@@ -1,5 +1,5 @@
 import { CalculationInputs } from '@/types/calculationInputs';
-import { ConfigParameter, ConfigCategory } from '@/types/configTypes';
+import { ConfigParameter, ConfigCategory, CONFIG_CATEGORIES } from '@/types/configTypes';
 import { PropertyData } from '@/types/propertyData';
 
 export const DEFAULT_CONFIG_VALUES = {
@@ -26,7 +26,7 @@ class UserParams {
     {
       id: 'purchasePrice',
       label: 'Purchase Price',
-      category: 'Purchase', 
+      category: CONFIG_CATEGORIES.PURCHASE_AND_REHAB, 
       type: 'currency',
       description: 'Offer price for the property',
       step: 1000,
@@ -38,7 +38,7 @@ class UserParams {
     {
       id: 'closingCosts',
       label: 'Closing Costs',
-      category: 'Purchase',
+      category: CONFIG_CATEGORIES.PURCHASE_AND_REHAB,
       type: 'percentage',
       description: 'Closing costs as percentage of purchase price',
       step: 0.1,
@@ -51,7 +51,7 @@ class UserParams {
     {
       id: 'rehabCosts',
       label: 'Rehab Costs',
-      category: 'Purchase',
+      category: CONFIG_CATEGORIES.PURCHASE_AND_REHAB,
       type: 'currency',
       description: 'Estimated renovation costs',
       step: 100,
@@ -64,7 +64,7 @@ class UserParams {
     {
       id: 'afterRepairValue',
       label: 'After Repair Value',
-      category: 'Purchase',
+      category: CONFIG_CATEGORIES.PURCHASE_AND_REHAB,
       type: 'currency',
       description: 'Estimated value after renovations',
       step: 1000,
@@ -79,7 +79,7 @@ class UserParams {
     {
       id: 'downPaymentPercentage',
       label: 'Down Payment',
-      category: 'Loan',
+      category: CONFIG_CATEGORIES.FINANCING,
       type: 'percentage',
       description: 'Percentage of property price paid as down payment',
       step: 1,
@@ -91,7 +91,7 @@ class UserParams {
     {
       id: 'interestRate',
       label: 'Interest Rate',
-      category: 'Loan',
+      category: CONFIG_CATEGORIES.FINANCING,
       type: 'percentage',
       description: 'Annual mortgage interest rate',
       step: 0.25,
@@ -103,7 +103,7 @@ class UserParams {
     {
       id: 'loanTerm',
       label: 'Loan Term',
-      category: 'Loan',
+      category: CONFIG_CATEGORIES.FINANCING,
       type: 'number',
       description: 'Length of mortgage in years',
       step: 5,
@@ -116,7 +116,7 @@ class UserParams {
     {
       id: 'rentEstimate',
       label: 'Monthly Rent',
-      category: 'Income',
+      category: CONFIG_CATEGORIES.OPERATING_INCOME,
       type: 'currency',
       description: 'Expected monthly rental income',
       step: 100,
@@ -128,7 +128,7 @@ class UserParams {
     {
       id: 'vacancyRate',
       label: 'Vacancy Rate',
-      category: 'Income',
+      category: CONFIG_CATEGORIES.OPERATING_INCOME,
       type: 'percentage',
       description: 'Expected vacancy rate as percentage of annual rent',
       step: 0.5,
@@ -141,7 +141,7 @@ class UserParams {
     {
       id: 'otherIncome',
       label: 'Other Income',
-      category: 'Income',
+      category: CONFIG_CATEGORIES.OPERATING_INCOME,
       type: 'currency',
       description: 'Additional monthly income (parking, storage, etc.)',
       step: 100,
@@ -156,7 +156,7 @@ class UserParams {
     {
       id: 'managementRate',
       label: 'Property Management',
-      category: 'Operating',
+      category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'percentage',
       description: 'Percentage of rent paid to property manager',
       step: 0.5,
@@ -168,7 +168,7 @@ class UserParams {
     {
       id: 'maintenanceRate',
       label: 'Maintenance',
-      category: 'Operating',
+      category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'percentage',
       description: 'Annual maintenance as percentage of property value',
       step: 0.1,
@@ -181,7 +181,7 @@ class UserParams {
     {
       id: 'insuranceRate',
       label: 'Insurance Rate',
-      category: 'Operating',
+      category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'percentage',
       description: 'Annual insurance rate as percentage of property value',
       step: 0.1,
@@ -194,7 +194,7 @@ class UserParams {
     {
       id: 'propertyTaxes',
       label: 'Annual Property Taxes',
-      category: 'Operating',
+      category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'currency',
       description: 'Annual property taxes (actual amount)',
       step: 100,
@@ -210,7 +210,7 @@ class UserParams {
     {
       id: 'hoaFees',
       label: 'Monthly HOA Fees',
-      category: 'Operating',
+      category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'currency',
       description: 'Monthly HOA fees',
       step: 10,
@@ -233,6 +233,10 @@ class UserParams {
   
   public getAdvancedParameters(): ConfigParameter[] {
     return this.configParams.filter((param: ConfigParameter) => param.isAdvanced);
+  }
+  
+  public getAllParameters(): ConfigParameter[] {
+    return this.configParams;
   }
   
   public getParameterByKey(key: keyof CalculationInputs): ConfigParameter | undefined {

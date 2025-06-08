@@ -1,4 +1,3 @@
-import { PropertyData } from '@/types/propertyData';
 import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export abstract class PropertyDataExtractor<T> {
