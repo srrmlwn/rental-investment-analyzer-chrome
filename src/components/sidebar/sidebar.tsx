@@ -83,7 +83,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <X className="w-6 h-6" />
         </button>
       </div>
-      <div className="ria-content">
+      <div className="ria-content overflow-y-auto">
         <InvestmentAnalysisPanel />
       </div>
     </div>

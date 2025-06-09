@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { ConfigPanel } from "./investment/config-panel"
 import { CalculationInputs, createInitialInputs } from "@/types/calculationInputs"
 import { CalculatedMetrics } from "@/types/calculatedMetrics"
@@ -44,7 +44,8 @@ const getPropertyDataLabel = (key: keyof PropertyData): string => {
     bathrooms: 'Bathrooms',
     propertyType: 'Property Type',
     zipCode: 'Zip Code',
-    rentZestimate: 'Monthly Rent',
+    rentZestimate: 'Rent Zestimate',
+    hudRentEstimate: 'HUD Rent Estimate',
     monthlyPropertyTaxes: 'Monthly Property Tax',
     propertyTaxRate: 'Property Tax Rate',
     hoaFees: 'Monthly HOA Fees',
@@ -56,10 +57,11 @@ const getPropertyDataLabel = (key: keyof PropertyData): string => {
 // Helper function to format property data value
 const formatPropertyDataValue = (key: keyof PropertyData, value: any): string => {
   if (value === undefined || value === null) return 'N/A';
-  
+
   switch (key) {
     case 'price':
     case 'rentZestimate':
+    case 'hudRentEstimate':
     case 'monthlyPropertyTaxes':
     case 'hoaFees':
       return formatCurrency(value);
@@ -81,7 +83,9 @@ export function InvestmentAnalysisPanel() {
   const [calculations, setCalculations] = useState<CalculatedMetrics | null>(null);
   const [userParams, setUserParams] = useState<UserParams | null>(null);
   const [isPropertyInfoExpanded, setIsPropertyInfoExpanded] = useState(false);
-  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);  
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
+  const [isCompact, setIsCompact] = useState(false);
+  const metricsRef = useRef<HTMLDivElement>(null);
 
   // Extract property data and initialize calculation inputs on mount
   useEffect(() => {
@@ -92,18 +96,18 @@ export function InvestmentAnalysisPanel() {
         const dataExtractor = new DataExtractionService();
         const extractedData = await dataExtractor.extractPropertyData();
         setPropertyData(extractedData);
-        
+
         // Create UserParams instance with extracted data
         const params = new UserParams(extractedData);
         setUserParams(params);
-        
+
         // Create initial calculation inputs using the helper function
         const initialInputs = createInitialInputs(extractedData);
         setCalculationInputs(initialInputs);
-        
+
         const initialCalculations = calculateInvestmentMetrics(initialInputs);
         setCalculations(initialCalculations);
-        
+
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to extract property data');
       } finally {
@@ -122,6 +126,19 @@ export function InvestmentAnalysisPanel() {
     }
   }, [calculationInputs]);
 
+  // Add scroll handler for metrics
+  useEffect(() => {
+    const handleScroll = () => {
+      if (metricsRef.current) {
+        const rect = metricsRef.current.getBoundingClientRect();
+        setIsCompact(rect.top < 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -136,103 +153,127 @@ export function InvestmentAnalysisPanel() {
 
   // Get all property data fields in a consistent order
   const propertyDataFields: (keyof PropertyData)[] = [
+    'price',
     'propertyType',
     'units',
     'bedrooms',
     'bathrooms',
-    'price',
-    'rentZestimate',
-    'monthlyPropertyTaxes',
     'propertyTaxRate',
-    'hoaFees',
-    'zipCode'
+    'rentZestimate',
+    'hudRentEstimate',
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Key Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg p-4 border shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-gray-600">Monthly Cash Flow</span>
+  const renderMetrics = (isCompact: boolean) => (
+    <div 
+      ref={metricsRef}
+      className={`sticky top-0 z-50 transition-all duration-200 bg-white ${
+        isCompact 
+          ? 'bg-white/95 backdrop-blur-sm shadow-md' 
+          : ''
+      }`}
+    >
+      <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${isCompact ? 'gap-2' : ''}`}>
+        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
+          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+            <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Monthly Cash Flow</span>
           </div>
           <div
-            className={`text-2xl font-bold ${calculations.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}
+            className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
+              calculations.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"
+            }`}
           >
             ${calculations.monthlyCashFlow >= 0 ? "+" : ""}
             {Math.round(calculations.monthlyCashFlow).toLocaleString()}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <Percent className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-600">Cap Rate</span>
+        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
+          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+            <Percent className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-blue-600`} />
+            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cap Rate</span>
           </div>
-          <div className="text-2xl font-bold text-blue-600">{calculations.capRate.toFixed(1)}%</div>
+          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-blue-600`}>
+            {calculations.capRate.toFixed(1)}%
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="h-4 w-4 text-purple-600" />
-            <span className="text-sm font-medium text-gray-600">Cash-on-Cash</span>
+        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
+          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+            <TrendingUp className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-purple-600`} />
+            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cash-on-Cash</span>
           </div>
-          <div className="text-2xl font-bold text-purple-600">{calculations.cashOnCashReturn.toFixed(1)}%</div>
+          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-purple-600`}>
+            {calculations.cashOnCashReturn.toFixed(1)}%
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="h-4 w-4 text-orange-600" />
-            <span className="text-sm font-medium text-gray-600">Annual Cash Flow</span>
+        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
+          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+            <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-orange-600`} />
+            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Annual Cash Flow</span>
           </div>
           <div
-            className={`text-2xl font-bold ${calculations.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}
+            className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
+              calculations.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"
+            }`}
           >
             ${calculations.annualCashFlow >= 0 ? "+" : ""}
             {Math.round(calculations.annualCashFlow).toLocaleString()}
           </div>
         </div>
       </div>
+    </div>
+  );
 
-      {/* Property Information Section */}
-      <div className="space-y-4 bg-gray-50 rounded-lg p-4 border shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Home className="h-5 w-5 text-muted-foreground" />
-            <h3 className="text-lg font-semibold">Property Information</h3>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsPropertyInfoExpanded(!isPropertyInfoExpanded)}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronDown className={`h-4 w-4 transition-transform ${isPropertyInfoExpanded ? 'rotate-180' : ''}`} />
-          </Button>
-        </div>
-        {isPropertyInfoExpanded && (
-          <div className="grid gap-4 rounded-lg border p-4 bg-white">
-            <div className="grid grid-cols-2 gap-4">
-              {propertyDataFields.map((field) => (
-                <div key={field}>
-                  <p className="text-sm text-muted-foreground">{getPropertyDataLabel(field)}</p>
-                  <p className="font-medium">{formatPropertyDataValue(field, propertyData[field])}</p>
-                </div>
-              ))}
+  return (
+    <div className="flex flex-col h-full">
+      {/* Metrics section - will stay at top */}
+      {renderMetrics(isCompact)}
+
+      {/* Scrollable content container */}
+      <div className="flex-1 overflow-y-auto mt-4" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+        <div className="space-y-6">
+          {/* Property Information Section */}
+          <div className="space-y-4 bg-gray-50 rounded-lg p-4 border shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Home className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-lg font-semibold">Property Information</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsPropertyInfoExpanded(!isPropertyInfoExpanded)}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronDown className={`h-4 w-4 transition-transform ${isPropertyInfoExpanded ? 'rotate-180' : ''}`} />
+              </Button>
             </div>
+            {isPropertyInfoExpanded && (
+              <div className="grid gap-4 rounded-lg border p-4 bg-white">
+                <div className="grid grid-cols-3 gap-4">
+                  {propertyDataFields.map((field) => (
+                    <div key={field}>
+                      <p className="text-sm text-muted-foreground">{getPropertyDataLabel(field)}</p>
+                      <p className="font-medium">{formatPropertyDataValue(field, propertyData[field])}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Configuration Panel */}
-      {userParams && (
-        <ConfigPanel 
-          inputs={calculationInputs}
-          onConfigChange={setCalculationInputs}
-          userParams={userParams}
-        />
-      )}
+          {/* Configuration Panel */}
+          {userParams && (
+            <ConfigPanel
+              inputs={calculationInputs}
+              onConfigChange={setCalculationInputs}
+              userParams={userParams}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 } 

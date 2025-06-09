@@ -26,7 +26,13 @@
 ### 3. UI Components ✅
 - [x] Investment Analysis Panel
   - [x] Key metrics display
-  - [x] Investment summary
+    - [x] Sticky positioning
+    - [x] Compact view on scroll
+    - [x] Smooth transitions
+  - [x] Scrollable content area
+    - [x] Independent scrolling
+    - [x] Property information
+    - [x] Investment parameters
   - [x] Config panel integration
 - [x] Config Panel
   - [x] Quick adjustments section
@@ -68,12 +74,23 @@
   - [x] DataExtractionService
   - [ ] Calculator functions
   - [ ] UserParams
+  - [ ] Rental estimate generator
+    - [ ] Zestimate integration
+    - [ ] HUD data fallback
+    - [ ] Edge case handling
 - [ ] Integration tests
   - [ ] Component interactions
   - [ ] Data flow
+  - [ ] Metric calculation verification
+    - [ ] Monthly mortgage
+    - [ ] Cash flow
+    - [ ] Cap rate
+    - [ ] Cash-on-cash return
+    - [ ] Advanced metrics
 - [ ] End-to-end tests
   - [ ] Zillow page integration
   - [ ] User interactions
+  - [ ] Rental estimate accuracy
 
 ### 2. Documentation
 - [x] Technical architecture
@@ -101,6 +118,17 @@
 - [ ] Export functionality
   - [ ] PDF reports
   - [ ] CSV data
+  - [ ] Email sharing
+    - [ ] Share analysis results
+    - [ ] Customizable email templates
+    - [ ] Property details inclusion
+- [ ] Configuration management
+  - [ ] Reset button implementation
+    - [ ] Reset to listing defaults
+    - [ ] Reset to user defaults
+    - [ ] Reset to system defaults
+  - [ ] Save/load configurations
+  - [ ] Configuration presets
 
 ### 3. User Experience
 - [ ] Dark mode
@@ -132,4 +160,39 @@
 - User preferences sharing
 - Market insights
 - Community benchmarks
-- Expert analysis 
+- Expert analysis
+
+## Immediate Tasks
+
+### 1. Rental Estimate Improvements
+- [ ] Enhance rental estimate generator
+  - [ ] Implement Zestimate priority
+  - [ ] Add HUD data fallback
+  - [ ] Add data source indicators
+  - [ ] Handle missing data gracefully
+  - [ ] Add confidence scores
+  - [ ] Cache rental estimates
+
+### 2. Metric Verification
+- [ ] Verify calculation accuracy
+  - [ ] Cross-reference with industry calculators
+  - [ ] Add validation test cases
+  - [ ] Document calculation formulas
+  - [ ] Add edge case handling
+  - [ ] Implement calculation logging
+  - [ ] Add calculation history
+
+### 3. User Experience Enhancements
+- [ ] Add configuration reset functionality
+  - [ ] Design reset button UI
+  - [ ] Implement reset logic
+  - [ ] Add confirmation dialog
+  - [ ] Add undo capability
+  - [ ] Save reset history
+- [ ] Implement email sharing
+  - [ ] Design email template
+  - [ ] Add share button
+  - [ ] Implement email composition
+  - [ ] Add customization options
+  - [ ] Handle large datasets
+  - [ ] Add privacy controls 

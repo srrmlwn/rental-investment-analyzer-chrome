@@ -14,17 +14,28 @@ The Rental Investment Analyzer is a Chrome extension that provides real-time inv
 - Z-index management to stay above Zillow content
 
 ### Investment Analysis Panel
-- Key metrics display
-  - Monthly mortgage payment
-  - Monthly cash flow
+- Key metrics display (sticky at top)
+  - Stays visible while scrolling
+  - Transitions to compact view when scrolled
+  - Monthly cash flow (color-coded)
   - Cap rate
   - Cash-on-cash return
-- Investment summary
-  - Total investment
-  - Monthly income
-  - Annual return
+  - Annual cash flow
+- Scrollable content area
+  - Property information section
+    - Expandable details
+    - Property type and features
+    - Location data
+    - Rental estimates
+  - Investment parameters
+    - Quick adjustments
+    - Advanced settings
 - Real-time updates
 - Error states and loading indicators
+- Responsive layout
+  - Grid-based metrics
+  - Adaptive content width
+  - Mobile-friendly design
 
 ### Config Panel
 - Quick adjustments section

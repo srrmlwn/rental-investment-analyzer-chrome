@@ -15,22 +15,33 @@ The Rental Investment Analyzer is a Chrome extension that helps real estate inve
 ### 2. Investment Analysis Panel (`investment-analysis-panel.tsx`)
 - Main component for displaying investment analysis
 - Layout Structure:
-  1. Key Metrics (top)
+  1. Key Metrics (sticky at top)
+     - Stays visible while scrolling
+     - Transitions to compact view when scrolled
      - Monthly Cash Flow (green/red)
      - Cap Rate (blue)
      - Cash-on-Cash Return (purple)
      - Annual Cash Flow (green/red)
-  2. Investment Summary
-     - Monthly Mortgage
-     - Effective Rent
-     - Property Details
-  3. Config Panel (bottom)
-     - Quick Adjustments
-     - Advanced Settings
-- Manages state for:
+  2. Scrollable Content
+     - Property Information
+       - Expandable section
+       - Property details
+       - Rental estimates
+     - Investment Parameters
+       - Quick adjustments
+       - Advanced settings
+- Features:
+  - Sticky metrics with smooth transitions
+  - Independent scrollable content
+  - Responsive grid layout
+  - Real-time updates
+  - Error handling
+- State Management:
   - Property data
   - Calculation inputs
   - Calculated metrics
+  - Compact view state
+  - Property info expansion state
 
 ### 3. Config Panel (`config-panel.tsx`)
 - Displays and manages user input fields
