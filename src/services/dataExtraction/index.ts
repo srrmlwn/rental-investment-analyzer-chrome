@@ -6,11 +6,13 @@ import { ZipCodeExtractor } from './extractors/ZipCodeExtractor';
 import { RentZestimateExtractor } from './extractors/RentZestimateExtractor';
 import { HoaFeesExtractor } from './extractors/HoaFeesExtractor';
 import { UnitsExtractor } from './extractors/UnitsExtractor';
-import { PropertyData } from '@/types/propertyData';
+import { PropertyData, HUDRentalData } from '@/types/propertyData';
 import { PropertyJsonExtractor } from './PropertyJsonExtractor';
+import hudDataService from "@/services/hudDataService";
 
 export class DataExtractionService {
     private propertyJsonExtractor: PropertyJsonExtractor;
+
     private extractors: {
         price: PriceExtractor;
         propertyTax: PropertyTaxExtractor;
@@ -76,6 +78,12 @@ export class DataExtractionService {
                 hoaFees: hoaFees ?? undefined,
                 units: units ?? undefined
             };
+
+            if (propertyData.zipCode && propertyData.bedrooms) {
+                let rentalData = await hudDataService.getRentalData(propertyData.zipCode, propertyData.bedrooms) as HUDRentalData | null;
+                propertyData.hudRentEstimate = rentalData?.rent;
+                console.log('Extracted rent from HUD data: ' + JSON.stringify(rentalData));
+            }
 
             console.log('Property data extraction completed successfully');
             return propertyData;

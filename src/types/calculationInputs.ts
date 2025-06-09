@@ -32,7 +32,7 @@ export function createInitialInputs(propertyData: PropertyData): CalculationInpu
   return {
     // Listing-specific values
     purchasePrice: propertyData.price || 0,
-    rentEstimate: propertyData.rentZestimate || 0,
+    rentEstimate: propertyData.rentZestimate || propertyData.hudRentEstimate || 0,
     propertyTaxes: propertyData.monthlyPropertyTaxes || 0,
     hoaFees: propertyData.hoaFees || 0,
     // Use defaults from DEFAULT_CONFIG_VALUES for other values

@@ -58,6 +58,7 @@ module.exports = {
         { from: 'manifest.json', to: '.' },
         { from: 'src/styles', to: 'styles' },
         { from: 'src/content/styles.css', to: 'content/styles.css' },
+        { from: 'src/data/hud_rental_data.json', to: 'data/hud_rental_data.json' },
       ],
     }),
   ],

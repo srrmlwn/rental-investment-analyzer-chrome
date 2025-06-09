@@ -6,8 +6,17 @@ export interface PropertyData {
   propertyType?: string;
   zipCode?: string;
   rentZestimate?: number;
+  hudRentEstimate?: number;
   monthlyPropertyTaxes?: number;  // Monthly property taxes
   propertyTaxRate?: number;  // Property tax rate as a percentage
   hoaFees?: number;
   units?: number;  // Number of units for multi-family properties
+}
+
+export interface HUDRentalData {
+    rent: number;
+    areaName: string;
+    areaCode: string;
+    source: string;
+    lastUpdated: string;
 } 

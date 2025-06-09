@@ -46,7 +46,7 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => 100,
+      getMax: () => 20,
     },
     {
       id: 'rehabCosts',
