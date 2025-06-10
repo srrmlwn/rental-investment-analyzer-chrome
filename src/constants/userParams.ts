@@ -16,7 +16,7 @@ export const DEFAULT_CONFIG_VALUES = {
 } as const;
 
 class UserParams {
-  private configParams: ConfigParameter[];
+  private readonly configParams: ConfigParameter[];
   private propertyData: PropertyData;
 
   constructor(propertyData: PropertyData) {
@@ -149,7 +149,7 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => this.propertyData.rentZestimate ?? 0 * 2, // 2x rent estimate
+      getMax: () => this.propertyData.rentZestimate ?? 0, // 2x rent estimate
     },
   
     // Operating Expenses
@@ -193,19 +193,20 @@ class UserParams {
     },
     {
       id: 'propertyTaxes',
-      label: 'Annual Property Taxes',
+      label: 'Monthly Property Taxes',
       category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
       type: 'currency',
-      description: 'Annual property taxes (actual amount)',
+      description: 'Monthly property taxes (actual amount)',
       step: 100,
       unit: '$',
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => 
-        this.propertyData.monthlyPropertyTaxes 
-          ? this.propertyData.monthlyPropertyTaxes * 12 * 2 // 2x current annual taxes
-          : 0.05 * (this.propertyData.price ?? 0), // Default to 5% of price
+      getMax: () => {
+        return this.propertyData.monthlyPropertyTaxes
+            ? this.propertyData.monthlyPropertyTaxes * 2
+            : 0.05 * (this.propertyData.price ?? 0);
+      },
     },
     {
       id: 'hoaFees',
