@@ -97,8 +97,8 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
     const max = param.getMax();
 
     // Check for validation errors
-    const hasValidationError = param.isErrorValue && param.isErrorValue(value, propertyData);
-    const validationMessage = param.getErrorMessage && param.getErrorMessage(value, propertyData);
+    const hasValidationError = param.isErrorValue && param.isErrorValue(value);
+    const validationMessage = param.getErrorMessage && param.getErrorMessage();
 
     const handleSliderChange = (newValue: number[]) => {
       handleConfigChange(param.id, newValue[0]);

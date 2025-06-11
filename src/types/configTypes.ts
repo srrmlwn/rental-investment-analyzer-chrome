@@ -29,7 +29,7 @@ export interface ConfigParameter {
   getMin(): number;
   getMax(): number;
   
-  // Validation functions for error detection
-  isErrorValue?(value: number, propertyData?: PropertyData): boolean;
-  getErrorMessage?(value: number, propertyData?: PropertyData): string;
+  // Simplified validation functions for error detection
+  isErrorValue?(value: number): boolean;
+  getErrorMessage?(): string;
 } 

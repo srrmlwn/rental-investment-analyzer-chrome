@@ -125,7 +125,7 @@ class UserParams {
       getMin: () => 0,
       getMax: () => !this.propertyData.rentZestimate ? 15000 : this.propertyData.rentZestimate * 2,
       isErrorValue: (value: number) => value === 0,
-      getErrorMessage: (value: number) => 
+      getErrorMessage: () => 
         "No rent estimate found. Please enter the expected monthly rent for this property.",
     },
     {
@@ -211,7 +211,7 @@ class UserParams {
             : 0.05 * (this.propertyData.price ?? 0);
       },
       isErrorValue: (value: number) => value === 0,
-      getErrorMessage: (value: number) => 
+      getErrorMessage: () => 
         "Property taxes not found. Please enter the annual property tax amount.",
     },
     {
