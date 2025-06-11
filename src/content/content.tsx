@@ -31,6 +31,7 @@ function App() {
   }, []);
 
   const handleSidebarClose = () => {
+    console.log('[RIA Debug] Sidebar close triggered');
     sharedState.setSidebarOpen(false);
   };
 

@@ -206,10 +206,15 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
   };
 
   const toggleSection = (category: ConfigCategory) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
+    console.log('[RIA Debug] Toggle section clicked for:', category);
+    setExpandedSections(prev => {
+      const newState = {
+        ...prev,
+        [category]: !prev[category]
+      };
+      console.log('[RIA Debug] New expanded sections state:', newState);
+      return newState;
+    });
   };
 
   const renderCategorySection = (category: ConfigCategory) => {
@@ -222,7 +227,10 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
     return (
       <div className="bg-white rounded-lg p-4 border shadow-sm">
         <button
-          onClick={() => toggleSection(category)}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            toggleSection(category);
+          }}
           className="w-full flex justify-between items-center hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
         >
           <h4 className="font-semibold flex items-center gap-2">
