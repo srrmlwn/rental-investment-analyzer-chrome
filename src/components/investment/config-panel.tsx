@@ -282,7 +282,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pb-8">
         {Object.values(CONFIG_CATEGORIES).map(category => (
           <div key={category}>
             {renderCategorySection(category)}

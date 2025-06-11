@@ -29,8 +29,8 @@
   z-index: 2147483647; /* Maximum z-index value */
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   transition: var(--md-transition);
-  margin-top: 60px;
-  height: calc(100vh - 60px);
+  margin-top: 40px;
+  height: calc(100vh - 40px);
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--md-divider);

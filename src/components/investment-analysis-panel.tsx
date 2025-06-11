@@ -232,7 +232,7 @@ export function InvestmentAnalysisPanel() {
       {renderMetrics(isCompact)}
 
       {/* Scrollable content container */}
-      <div className="flex-1 overflow-y-auto mt-4" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+      <div className="flex-1 overflow-y-auto mt-4 pb-8" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         <div className="space-y-6">
           {/* Property Information Section */}
           <div className="space-y-4 bg-gray-50 rounded-lg p-4 border shadow-sm">
