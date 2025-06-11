@@ -28,8 +28,7 @@ export function calculateInvestmentMetrics(
 ): CalculatedMetrics {
   // 1. Calculate total investment
   const downPayment = (inputs.purchasePrice * inputs.downPaymentPercentage) / 100;
-  const closingCostAmount = (inputs.purchasePrice * inputs.closingCosts) / 100;
-  const totalInvestment = downPayment + closingCostAmount + inputs.rehabCosts;
+  const totalInvestment = downPayment + inputs.closingCosts + inputs.rehabCosts;
 
   // 2. Calculate loan amount and monthly mortgage
   const loanAmount = inputs.purchasePrice - downPayment;
@@ -41,8 +40,8 @@ export function calculateInvestmentMetrics(
 
   // 3. Calculate monthly expenses
   const monthlyPropertyTax = inputs.propertyTaxes / 12;  // Use actual property taxes
-  const monthlyInsurance = (inputs.purchasePrice * inputs.insuranceRate / 100) / 12;
-  const monthlyMaintenance = (inputs.purchasePrice * inputs.maintenanceRate / 100) / 12;
+  const monthlyInsurance = inputs.insuranceCost;  // Use monthly insurance cost directly
+  const monthlyMaintenance = inputs.maintenanceCost;  // Use monthly maintenance cost directly
   const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
   const monthlyHoaFees = inputs.hoaFees;  // Use actual HOA fees
 

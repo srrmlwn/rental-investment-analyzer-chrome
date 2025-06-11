@@ -211,15 +211,10 @@ export function InvestmentAnalysisPanel() {
         <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
           <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
             <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-orange-600`} />
-            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Annual Cash Flow</span>
+            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Total Cash Needed</span>
           </div>
-          <div
-            className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
-              calculations.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            ${calculations.annualCashFlow >= 0 ? "+" : ""}
-            {Math.round(calculations.annualCashFlow).toLocaleString()}
+          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-orange-600`}>
+            ${Math.round(calculations.totalInvestment).toLocaleString()}
           </div>
         </div>
       </div>

@@ -9,8 +9,8 @@ export const DEFAULT_CONFIG_VALUES = {
   interestRate: 7.5, // 7.5% default
   loanTerm: 30, // 30 years default
   managementRate: 8, // 8% default
-  maintenanceRate: 1, // 1% default
-  insuranceRate: 0.5, // 0.5% default
+  maintenanceCost: 200, // $200 monthly maintenance default
+  insuranceCost: 100, // $100 monthly insurance default
   vacancyRate: 5, // 5% default
   otherIncome: 0
 } as const;
@@ -33,20 +33,26 @@ class UserParams {
       unit: '$',
       useSlider: true,
       getMin: () => this.propertyData.price ? this.propertyData.price * 0.25 : 0, // 25% of list price
-      getMax: () => this.propertyData.price ? this.propertyData.price * 2 : 0,    // 2x list price
+      getMax: () => {
+        const maxValue = this.propertyData.price ? this.propertyData.price * 2 : 0; // 2x list price
+        return Math.round(maxValue / 1000) * 1000; // Round to nearest $1000
+      },
     },
     {
       id: 'closingCosts',
       label: 'Closing Costs',
       category: CONFIG_CATEGORIES.PURCHASE_AND_REHAB,
-      type: 'percentage',
-      description: 'Closing costs as percentage of purchase price',
-      step: 0.1,
-      unit: '%',
+      type: 'currency',
+      description: 'Closing costs',
+      step: 100,
+      unit: '$',
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => 20,
+      getMax: () => {
+        const maxValue = this.propertyData.price ? this.propertyData.price * 0.1 : 0; // 10% of purchase price
+        return Math.round(maxValue / 100) * 100; // Round to nearest $100
+      },
     },
     {
       id: 'rehabCosts',
@@ -59,7 +65,10 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => this.propertyData.price ? this.propertyData.price : 0, // 1x purchase price
+      getMax: () => {
+        const maxValue = this.propertyData.price ? this.propertyData.price : 0; // 1x purchase price
+        return Math.round(maxValue / 100) * 100; // Round to nearest $100
+      },
     },
     {
       id: 'afterRepairValue',
@@ -72,7 +81,10 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => this.propertyData.price ? this.propertyData.price : 0, // 1x purchase price
-      getMax: () => this.propertyData.price ? this.propertyData.price * 2 : 0, // 2x purchase price
+      getMax: () => {
+        const maxValue = this.propertyData.price ? this.propertyData.price * 2 : 0; // 2x purchase price
+        return Math.round(maxValue / 1000) * 1000; // Round to nearest $1000
+      },
     },
   
     // Loan Parameters
@@ -123,7 +135,10 @@ class UserParams {
       unit: '$',
       useSlider: true,
       getMin: () => 0,
-      getMax: () => !this.propertyData.rentZestimate ? 0.03 * (this.propertyData.price ?? 0) : this.propertyData.rentZestimate * 2,
+      getMax: () => {
+        const maxValue = !this.propertyData.rentZestimate ? 0.03 * (this.propertyData.price ?? 0) : this.propertyData.rentZestimate * 2;
+        return Math.round(maxValue / 100) * 100; // Round to nearest $100
+      },
       isErrorValue: (value: number) => value === 0,
       getErrorMessage: () => 
         "No rent estimate found. Please enter the expected monthly rent for this property.",
@@ -133,7 +148,7 @@ class UserParams {
       label: 'Vacancy Rate',
       category: CONFIG_CATEGORIES.OPERATING_INCOME,
       type: 'percentage',
-      description: 'Expected vacancy rate as percentage of annual rent',
+      description: 'Expected vacancy rate',
       step: 0.5,
       unit: '%',
       isAdvanced: true,
@@ -152,7 +167,10 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => this.propertyData.rentZestimate ?? 0, // 2x rent estimate
+      getMax: () => {
+        const maxValue = this.propertyData.rentZestimate ?? 0; // 2x rent estimate
+        return Math.round(maxValue / 100) * 100; // Round to nearest $100
+      },
     },
   
     // Operating Expenses
@@ -169,30 +187,36 @@ class UserParams {
       getMax: () => 30,
     },
     {
-      id: 'maintenanceRate',
-      label: 'Maintenance',
+      id: 'maintenanceCost',
+      label: 'Monthly Maintenance',
       category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
-      type: 'percentage',
-      description: 'Annual maintenance as percentage of property value',
-      step: 0.1,
-      unit: '%',
+      type: 'currency',
+      description: 'Monthly maintenance costs in dollars',
+      step: 25,
+      unit: '$',
       isAdvanced: true,
       useSlider: true,
-      getMin: () => 0.5,
-      getMax: () => 5,
+      getMin: () => 0,
+      getMax: () => {
+        const maxValue = this.propertyData.price ? (this.propertyData.price * 0.05) / 12 : 4000;
+        return Math.round(maxValue / 25) * 25; // Round to nearest $25
+      },
     },
     {
-      id: 'insuranceRate',
-      label: 'Insurance Rate',
+      id: 'insuranceCost',
+      label: 'Monthly Insurance',
       category: CONFIG_CATEGORIES.OPERATING_EXPENSES,
-      type: 'percentage',
-      description: 'Annual insurance rate as percentage of property value',
-      step: 0.1,
-      unit: '%',
+      type: 'currency',
+      description: 'Monthly insurance costs in dollars',
+      step: 25,
+      unit: '$',
       isAdvanced: true,
       useSlider: true,
-      getMin: () => 0.1,
-      getMax: () => 2,
+      getMin: () => 0,
+      getMax: () => {
+        const maxValue = this.propertyData.price ? (this.propertyData.price * 0.02) / 12 : 2000;
+        return Math.round(maxValue / 25) * 25; // Round to nearest $25
+      },
     },
     {
       id: 'propertyTaxes',
@@ -206,9 +230,10 @@ class UserParams {
       useSlider: true,
       getMin: () => 0,
       getMax: () => {
-        return this.propertyData.monthlyPropertyTaxes
+        const maxValue = this.propertyData.monthlyPropertyTaxes
             ? this.propertyData.monthlyPropertyTaxes * 2
             : 0.05 * (this.propertyData.price ?? 0);
+        return Math.round(maxValue / 100) * 100; // Round to nearest $100
       },
       isErrorValue: (value: number) => value === 0,
       getErrorMessage: () => 
@@ -225,7 +250,10 @@ class UserParams {
       isAdvanced: true,
       useSlider: true,
       getMin: () => 0,
-      getMax: () => (this.propertyData.hoaFees ?? 0) * 2, // 2x current HOA fees
+      getMax: () => {
+        const maxValue = (this.propertyData.hoaFees ?? 0) * 2; // 2x current HOA fees
+        return Math.round(maxValue / 10) * 10; // Round to nearest $10
+      },
     },
   ];
   }

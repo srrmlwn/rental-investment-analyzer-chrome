@@ -13,8 +13,8 @@ export interface CalculationInputs {
   
   // Operating Expenses
   propertyTaxes: number;  // Annual property taxes
-  insuranceRate: number;
-  maintenanceRate: number;
+  insuranceCost: number;  // Monthly insurance cost in dollars
+  maintenanceCost: number;  // Monthly maintenance cost in dollars
   vacancyRate: number;
   managementRate: number;
   hoaFees: number;  // Monthly HOA fees
@@ -38,22 +38,23 @@ function getPropertyTaxes(propertyData: PropertyData) {
 
 // Create initial calculation inputs from extracted property data
 export function createInitialInputs(propertyData: PropertyData): CalculationInputs {
+  const rentEstimate = getRentEstimate(propertyData);
+  
   return {
     // Listing-specific values
     purchasePrice: propertyData.price || 0,
-    rentEstimate: getRentEstimate(propertyData),
+    rentEstimate: rentEstimate,
     propertyTaxes: getPropertyTaxes(propertyData),
     hoaFees: propertyData.hoaFees || 0,
-    // Use defaults from DEFAULT_CONFIG_VALUES for other values
-    closingCosts: DEFAULT_CONFIG_VALUES.closingCosts,
+    closingCosts: propertyData.price ? propertyData.price * 0.03 : 0,
     rehabCosts: DEFAULT_CONFIG_VALUES.rehabCosts,
     afterRepairValue: propertyData.price || 0, 
     downPaymentPercentage: DEFAULT_CONFIG_VALUES.downPaymentPercentage,
     interestRate: DEFAULT_CONFIG_VALUES.interestRate,
     loanTerm: DEFAULT_CONFIG_VALUES.loanTerm,
     managementRate: DEFAULT_CONFIG_VALUES.managementRate,
-    maintenanceRate: DEFAULT_CONFIG_VALUES.maintenanceRate,
-    insuranceRate: DEFAULT_CONFIG_VALUES.insuranceRate,
+    maintenanceCost: Math.round((rentEstimate * 0.01) / 25) * 25, // Round to nearest $25
+    insuranceCost: Math.round((rentEstimate * 0.005) / 25) * 25, // Round to nearest $25
     vacancyRate: DEFAULT_CONFIG_VALUES.vacancyRate,
     otherIncome: DEFAULT_CONFIG_VALUES.otherIncome
   };
