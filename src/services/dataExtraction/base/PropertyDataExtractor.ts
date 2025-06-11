@@ -27,7 +27,7 @@ export abstract class PropertyDataExtractor<T> {
     }
 
     protected logExtractionError(field: string, error: string): void {
-        console.error(`❌ Failed to extract ${field}:`, error);
+        console.log(`❌ Failed to extract ${field}:`, error);
     }
 
     protected safeParseInt(value: string | null | undefined): number | null {

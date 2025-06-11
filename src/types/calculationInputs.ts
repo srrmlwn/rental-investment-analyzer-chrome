@@ -27,13 +27,22 @@ export interface CalculationInputs {
 import { PropertyData } from './propertyData';
 import { DEFAULT_CONFIG_VALUES } from '@/constants/userParams';
 
+function getRentEstimate(propertyData: PropertyData) {
+  let rentPerUnit = propertyData.rentZestimate || propertyData.hudRentEstimate || 0;
+  return rentPerUnit * (propertyData.units ?? 1);
+}
+
+function getPropertyTaxes(propertyData: PropertyData) {
+  return (propertyData.price ?? 0) * (propertyData.propertyTaxRate ?? 0) / (12 * 100);
+}
+
 // Create initial calculation inputs from extracted property data
 export function createInitialInputs(propertyData: PropertyData): CalculationInputs {
   return {
     // Listing-specific values
     purchasePrice: propertyData.price || 0,
-    rentEstimate: propertyData.rentZestimate || propertyData.hudRentEstimate || 0,
-    propertyTaxes: propertyData.monthlyPropertyTaxes || 0,
+    rentEstimate: getRentEstimate(propertyData),
+    propertyTaxes: getPropertyTaxes(propertyData),
     hoaFees: propertyData.hoaFees || 0,
     // Use defaults from DEFAULT_CONFIG_VALUES for other values
     closingCosts: DEFAULT_CONFIG_VALUES.closingCosts,

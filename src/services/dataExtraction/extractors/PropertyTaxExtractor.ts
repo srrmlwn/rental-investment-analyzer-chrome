@@ -1,7 +1,6 @@
 import { PropertyDataExtractor } from '../base/PropertyDataExtractor';
 import { TAX_SELECTORS } from '../selectors/taxSelectors';
 import { PRICE_SELECTORS } from '../selectors/priceSelectors';
-import { ERROR_MESSAGES } from '@/constants/selectors';
 import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export interface PropertyTaxData {
@@ -12,23 +11,9 @@ export interface PropertyTaxData {
 export class PropertyTaxExtractor extends PropertyDataExtractor<PropertyTaxData> {
     protected extractFromJson(property: ZillowPropertyJson): PropertyTaxData | null {
         // Try to get the rate directly from propertyTaxRate first
-        if (typeof property.propertyTaxRate === 'number') {
-            const rate = property.propertyTaxRate;
-            const monthlyAmount = property.taxAnnualAmount ? Math.round(property.taxAnnualAmount / 12) : null;
-            return { rate, monthlyAmount };
-        }
-
-        // Fallback to calculating rate from annual tax and price
-        const annualTax = property.taxAnnualAmount;
-        const price = property.price;
-
-        if (typeof annualTax === 'number' && typeof price === 'number' && price > 0) {
-            const rate = (annualTax / price) * 100;
-            const monthlyAmount = Math.round(annualTax / 12);
-            return { rate, monthlyAmount };
-        }
-
-        return null;
+        const rate = property.propertyTaxRate;
+        const monthlyAmount = property.price * (property.propertyTaxRate ?? 0) / 12;
+        return {rate, monthlyAmount};
     }
 
     protected async extractFromDOM(): Promise<PropertyTaxData | null> {

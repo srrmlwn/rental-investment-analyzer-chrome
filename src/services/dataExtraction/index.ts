@@ -80,7 +80,7 @@ export class DataExtractionService {
             };
 
             if (propertyData.zipCode && propertyData.bedrooms) {
-                let rentalData = await hudDataService.getRentalData(propertyData.zipCode, propertyData.bedrooms) as HUDRentalData | null;
+                let rentalData = hudDataService.getRentalData(propertyData.zipCode, propertyData.bedrooms) as HUDRentalData | null;
                 propertyData.hudRentEstimate = rentalData?.rent;
                 console.log('Extracted rent from HUD data: ' + JSON.stringify(rentalData));
             }
