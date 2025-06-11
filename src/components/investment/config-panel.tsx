@@ -3,16 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
-import { SlidersHorizontal, ChevronDown, Home, Banknote, TrendingUp, Calculator } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, Home, Banknote, TrendingUp, Calculator, AlertTriangle } from 'lucide-react';
 import { CalculationInputs } from '@/types/calculationInputs';
 import { ConfigCategory, CONFIG_CATEGORIES, ConfigParameter } from '@/types/configTypes';
 import { UserParams } from '@/constants/userParams';
 import { cn } from '@/lib/utils';
+import { PropertyData } from '@/types/propertyData';
 
 interface ConfigPanelProps {
   onConfigChange?: (config: CalculationInputs) => void;
   inputs: CalculationInputs;
   userParams: UserParams;
+  propertyData?: PropertyData;
   className?: string;
 }
 
@@ -23,7 +25,7 @@ const CATEGORY_ICONS = {
   [CONFIG_CATEGORIES.OPERATING_EXPENSES]: Calculator,
 } as const;
 
-export function ConfigPanel({ onConfigChange, inputs, userParams, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, className }: ConfigPanelProps) {
   // Initialize all sections as expanded
   const [expandedSections, setExpandedSections] = useState<Record<ConfigCategory, boolean>>(
     Object.values(CONFIG_CATEGORIES).reduce((acc, category) => ({
@@ -94,6 +96,10 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     const min = param.getMin();
     const max = param.getMax();
 
+    // Check for validation errors
+    const hasValidationError = param.isErrorValue && param.isErrorValue(value, propertyData);
+    const validationMessage = param.getErrorMessage && param.getErrorMessage(value, propertyData);
+
     const handleSliderChange = (newValue: number[]) => {
       handleConfigChange(param.id, newValue[0]);
     };
@@ -101,7 +107,18 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     return (
       <div className={cn("space-y-2", error && "border-red-500")}>
         <div className="flex justify-between items-center">
-          <Label className="text-sm font-medium">{param.label}</Label>
+          <div className="flex items-center gap-1">
+            <Label className="text-sm font-medium">{param.label}</Label>
+            {hasValidationError && (
+              <div className="group relative">
+                <AlertTriangle className="h-4 w-4 text-amber-500 cursor-help" />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                  {validationMessage}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+            )}
+          </div>
           <span className="text-sm font-bold text-blue-600">
             {formatValue(value, param.unit)}
           </span>

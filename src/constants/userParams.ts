@@ -124,6 +124,9 @@ class UserParams {
       useSlider: true,
       getMin: () => 0,
       getMax: () => !this.propertyData.rentZestimate ? 15000 : this.propertyData.rentZestimate * 2,
+      isErrorValue: (value: number) => value === 0,
+      getErrorMessage: (value: number) => 
+        "No rent estimate found. Please enter the expected monthly rent for this property.",
     },
     {
       id: 'vacancyRate',
@@ -207,6 +210,9 @@ class UserParams {
             ? this.propertyData.monthlyPropertyTaxes * 2
             : 0.05 * (this.propertyData.price ?? 0);
       },
+      isErrorValue: (value: number) => value === 0,
+      getErrorMessage: (value: number) => 
+        "Property taxes not found. Please enter the annual property tax amount.",
     },
     {
       id: 'hoaFees',

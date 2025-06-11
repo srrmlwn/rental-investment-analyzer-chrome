@@ -1,4 +1,5 @@
 import { CalculationInputs } from './calculationInputs';
+import { PropertyData } from './propertyData';
 
 // Configuration parameter definition for UI
 export type ConfigParameterType = 'percentage' | 'currency' | 'number';
@@ -27,4 +28,8 @@ export interface ConfigParameter {
   // Dynamic getter methods for min/max constraints
   getMin(): number;
   getMax(): number;
+  
+  // Validation functions for error detection
+  isErrorValue?(value: number, propertyData?: PropertyData): boolean;
+  getErrorMessage?(value: number, propertyData?: PropertyData): string;
 } 

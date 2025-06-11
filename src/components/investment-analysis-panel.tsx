@@ -270,6 +270,7 @@ export function InvestmentAnalysisPanel() {
               inputs={calculationInputs}
               onConfigChange={setCalculationInputs}
               userParams={userParams}
+              propertyData={propertyData}
             />
           )}
         </div>
