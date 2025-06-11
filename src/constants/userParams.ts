@@ -123,7 +123,7 @@ class UserParams {
       unit: '$',
       useSlider: true,
       getMin: () => 0,
-      getMax: () => !this.propertyData.rentZestimate ? 15000 : this.propertyData.rentZestimate * 2,
+      getMax: () => !this.propertyData.rentZestimate ? 0.03 * (this.propertyData.price ?? 0) : this.propertyData.rentZestimate * 2,
       isErrorValue: (value: number) => value === 0,
       getErrorMessage: () => 
         "No rent estimate found. Please enter the expected monthly rent for this property.",

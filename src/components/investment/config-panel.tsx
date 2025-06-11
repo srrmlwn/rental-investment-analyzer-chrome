@@ -96,12 +96,51 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
     const min = param.getMin();
     const max = param.getMax();
 
+    // State for inline editing
+    const [isEditing, setIsEditing] = useState(false);
+    const [inputValue, setInputValue] = useState(value.toString());
+
     // Check for validation errors
     const hasValidationError = param.isErrorValue && param.isErrorValue(value);
     const validationMessage = param.getErrorMessage && param.getErrorMessage();
 
+    // Update input value when value changes externally
+    useEffect(() => {
+      if (!isEditing) {
+        setInputValue(value.toString());
+      }
+    }, [value, isEditing]);
+
     const handleSliderChange = (newValue: number[]) => {
-      handleConfigChange(param.id, newValue[0]);
+      const newValueNumber = newValue[0];
+      handleConfigChange(param.id, newValueNumber);
+      if (!isEditing) {
+        setInputValue(newValueNumber.toString()); // Sync input only when not editing
+      }
+    };
+
+    // Input handlers for inline editing
+    const handleInputBlur = () => {
+      const numericValue = parseFloat(inputValue);
+      if (!isNaN(numericValue)) {
+        // Clamp to min/max range
+        const clampedValue = Math.max(min, Math.min(max, numericValue));
+        handleConfigChange(param.id, clampedValue);
+        setInputValue(clampedValue.toString());
+      } else {
+        // Reset to current value if invalid
+        setInputValue(value.toString());
+      }
+      setIsEditing(false);
+    };
+
+    const handleInputKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleInputBlur();
+      } else if (e.key === 'Escape') {
+        setInputValue(value.toString());
+        setIsEditing(false);
+      }
     };
 
     return (
@@ -119,9 +158,31 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
               </div>
             )}
           </div>
-          <span className="text-sm font-bold text-blue-600">
-            {formatValue(value, param.unit)}
-          </span>
+          
+          {/* Editable current value */}
+          <div className="relative">
+            {isEditing ? (
+              <input
+                type="number"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                step={param.step ?? 1}
+                min={min}
+                max={max}
+                className="w-20 px-2 py-1 text-sm font-bold text-blue-600 border border-blue-300 rounded focus:border-blue-500 focus:outline-none text-right"
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+              >
+                {formatValue(value, param.unit)}
+              </button>
+            )}
+          </div>
         </div>
         <Slider
           value={[value]}
