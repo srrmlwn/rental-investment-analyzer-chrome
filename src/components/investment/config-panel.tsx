@@ -35,11 +35,26 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localInputs, setLocalInputs] = useState<CalculationInputs>(inputs);
+  
+  // State for inline editing - moved to component level
+  const [editingParam, setEditingParam] = useState<string | null>(null);
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   // Update local inputs when props change
   useEffect(() => {
     setLocalInputs(inputs);
   }, [inputs]);
+
+  // Update input values when local inputs change
+  useEffect(() => {
+    const newInputValues: Record<string, string> = {};
+    Object.keys(localInputs).forEach(key => {
+      if (!editingParam || editingParam !== key) {
+        newInputValues[key] = localInputs[key as keyof CalculationInputs].toString();
+      }
+    });
+    setInputValues(prev => ({ ...prev, ...newInputValues }));
+  }, [localInputs, editingParam]);
 
   const handleConfigChange = (key: keyof CalculationInputs, value: number) => {
     const param = userParams.getParameterByKey(key);
@@ -95,27 +110,18 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
     const value = localInputs[param.id];
     const min = param.getMin();
     const max = param.getMax();
-
-    // State for inline editing
-    const [isEditing, setIsEditing] = useState(false);
-    const [inputValue, setInputValue] = useState(value.toString());
+    const isEditing = editingParam === param.id;
+    const inputValue = inputValues[param.id] || value.toString();
 
     // Check for validation errors
     const hasValidationError = param.isErrorValue && param.isErrorValue(value);
     const validationMessage = param.getErrorMessage && param.getErrorMessage();
 
-    // Update input value when value changes externally
-    useEffect(() => {
-      if (!isEditing) {
-        setInputValue(value.toString());
-      }
-    }, [value, isEditing]);
-
     const handleSliderChange = (newValue: number[]) => {
       const newValueNumber = newValue[0];
       handleConfigChange(param.id, newValueNumber);
       if (!isEditing) {
-        setInputValue(newValueNumber.toString()); // Sync input only when not editing
+        setInputValues(prev => ({ ...prev, [param.id]: newValueNumber.toString() }));
       }
     };
 
@@ -126,21 +132,30 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
         // Clamp to min/max range
         const clampedValue = Math.max(min, Math.min(max, numericValue));
         handleConfigChange(param.id, clampedValue);
-        setInputValue(clampedValue.toString());
+        setInputValues(prev => ({ ...prev, [param.id]: clampedValue.toString() }));
       } else {
         // Reset to current value if invalid
-        setInputValue(value.toString());
+        setInputValues(prev => ({ ...prev, [param.id]: value.toString() }));
       }
-      setIsEditing(false);
+      setEditingParam(null);
     };
 
     const handleInputKeyDown = (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         handleInputBlur();
       } else if (e.key === 'Escape') {
-        setInputValue(value.toString());
-        setIsEditing(false);
+        setInputValues(prev => ({ ...prev, [param.id]: value.toString() }));
+        setEditingParam(null);
       }
+    };
+
+    const handleInputChange = (newValue: string) => {
+      setInputValues(prev => ({ ...prev, [param.id]: newValue }));
+    };
+
+    const handleStartEditing = () => {
+      setEditingParam(param.id);
+      setInputValues(prev => ({ ...prev, [param.id]: value.toString() }));
     };
 
     return (
@@ -165,7 +180,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
               <input
                 type="number"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => handleInputChange(e.target.value)}
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown}
                 step={param.step ?? 1}
@@ -176,7 +191,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
               />
             ) : (
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={handleStartEditing}
                 className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
               >
                 {formatValue(value, param.unit)}
