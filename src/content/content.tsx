@@ -153,6 +153,12 @@ const debouncedInject = debounce(() => {
   const currentUrl = window.location.href;
   const isNowOnListingPage = isListingPage();
   
+  // Check if sidebar is open and we're not on a listing page
+  if (!isNowOnListingPage && sharedState.isSidebarOpen) {
+    console.log('[RIA Debug] Not on listing page and sidebar is open, closing sidebar...');
+    sharedState.setSidebarOpen(false);
+  }
+  
   // Only reinject if:
   // 1. URL has changed AND we're on a listing page, or
   // 2. We've just entered a listing page
@@ -161,6 +167,10 @@ const debouncedInject = debounce(() => {
     lastUrl = currentUrl;
     isCurrentlyOnListingPage = isNowOnListingPage;
     cleanup = injectContainers();
+  } else if (currentUrl !== lastUrl) {
+    // Update URL tracking even if we're not on a listing page
+    lastUrl = currentUrl;
+    isCurrentlyOnListingPage = isNowOnListingPage;
   }
 }, 500); // 500ms debounce
 
@@ -200,6 +210,28 @@ const urlObserver = new MutationObserver(() => {
 });
 
 urlObserver.observe(document, { subtree: true, childList: true });
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', () => {
+  console.log('[RIA Debug] Popstate event detected');
+  debouncedInject();
+});
+
+// Handle pushstate/replacestate (SPA navigation)
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function(...args) {
+  originalPushState.apply(history, args);
+  console.log('[RIA Debug] PushState detected');
+  debouncedInject();
+};
+
+history.replaceState = function(...args) {
+  originalReplaceState.apply(history, args);
+  console.log('[RIA Debug] ReplaceState detected');
+  debouncedInject();
+};
 
 // Cleanup on page unload
 window.addEventListener('unload', () => {
