@@ -93,11 +93,6 @@ export class DataExtractionService {
             throw error;
         }
     }
-
-    // Method to clear the property JSON cache if needed
-    clearCache(): void {
-        this.propertyJsonExtractor.clearCache();
-    }
 }
 
 export default DataExtractionService; 

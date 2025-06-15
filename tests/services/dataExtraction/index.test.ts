@@ -32,7 +32,7 @@ describe('DataExtractionService', () => {
     });
 
     afterEach(() => {
-        service.clearCache();
+        // No need to clear cache anymore - removed caching from PropertyJsonExtractor
     });
 
     test('extracts property data from listing1.html', async () => {

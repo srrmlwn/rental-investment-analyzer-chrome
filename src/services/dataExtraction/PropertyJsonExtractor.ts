@@ -1,13 +1,7 @@
 import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export class PropertyJsonExtractor {
-    private cachedProperty: ZillowPropertyJson | null = null;
-
     async getPropertyJson(): Promise<ZillowPropertyJson | null> {
-        if (this.cachedProperty) {
-            return this.cachedProperty;
-        }
-
         try {
             const scriptTag = document.querySelector('script#__NEXT_DATA__');
             if (!scriptTag?.textContent) {
@@ -26,10 +20,10 @@ export class PropertyJsonExtractor {
             // Find the property data in gdpClientCache
             for (const value of Object.values(gdpClientCache)) {
                 if (value && typeof value === 'object' && 'property' in value) {
-                    this.cachedProperty = value.property as ZillowPropertyJson;
+                    const property = value.property as ZillowPropertyJson;
                     console.log('Successfully extracted property JSON');
-                    console.log('Property details:', JSON.stringify(this.cachedProperty, null, 2));
-                    return this.cachedProperty;
+                    console.log('Property details:', JSON.stringify(property, null, 2));
+                    return property;
                 }
             }
             
@@ -39,9 +33,5 @@ export class PropertyJsonExtractor {
             console.error('Error extracting property JSON:', error);
             return null;
         }
-    }
-
-    clearCache(): void {
-        this.cachedProperty = null;
     }
 } 
