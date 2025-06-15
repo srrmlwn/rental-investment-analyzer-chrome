@@ -127,51 +127,32 @@ interface ConfigParameter {
 }
 ```
 
-## Data Flow
+## Data Flow & State Management
 
-1. **Property Data Extraction**
-   ```
-   Zillow Page → DataExtractionService → PropertyData → createInitialInputs() → CalculationInputs
-   ```
-   - DataExtractionService scrapes listing data
-   - Maps to PropertyData interface
-   - createInitialInputs() creates fresh inputs with:
-     - Listing-specific values (price, rent, taxes, HOA)
-     - Default values from DEFAULT_CONFIG_VALUES
+### Content Script Architecture
+The content script (`src/content/content.tsx`) manages the extension's lifecycle and state:
 
-2. **Parameter Management**
-   ```
-   UserParams → ConfigParameter[] → ConfigPanel → CalculationInputs
-   ```
-   - UserParams manages parameter definitions
-   - Provides min/max constraints
-   - Handles parameter categorization
-   - Validates input values
+1. **Initialization**: Injects React components into Zillow pages
+2. **SPA Navigation Detection**: Monitors navigation using multiple strategies:
+   - URL change detection with listing ID extraction
+   - MutationObserver for DOM changes
+   - History API interception (pushState/replaceState)
+   - Popstate event handling for browser back/forward
+3. **Forced Page Reload**: When navigating to new listings, forces a full page reload to get fresh `__NEXT_DATA__`
+4. **State Synchronization**: Uses custom events to notify components of state changes
 
-3. **Metrics Calculation**
-   ```
-   PropertyData + CalculationInputs → Calculator → CalculatedMetrics
-   ```
-   - Calculator combines property data and user inputs
-   - Computes investment metrics
-   - Updates UI in real-time
+### SPA Navigation Handling
+Due to Zillow's SPA architecture, the `__NEXT_DATA__` script tag doesn't update when navigating between listings. The extension implements a forced reload strategy:
 
-## State Management
+1. **Navigation Detection**: When URL changes, extract listing ID and compare with previous
+2. **Reload Trigger**: If listing ID changes, force a full page reload with `ria_force_reload=1` parameter
+3. **Auto-Open Sidebar**: If sidebar was open, add `ria_auto_open=1` parameter to reopen after reload
+4. **URL Cleanup**: Remove parameters after reload to prevent infinite loops
 
-### 1. UserParams
-- Manages parameter definitions and constraints
-- Provides methods for:
-  - Getting parameters by category
-  - Getting basic/advanced parameters
-  - Validating input values
-- Uses property data for dynamic min/max values
-
-### 2. Component State
-- InvestmentAnalysisPanel manages:
-  - Property data (from DataExtractionService)
-  - Calculation inputs (from ConfigPanel)
-  - Calculated metrics (from Calculator)
-- Updates trigger re-renders with new calculations
+### Timing & Performance
+- **Debounce**: 500ms debounce prevents excessive processing during rapid navigation
+- **Auto-Open Delay**: 1 second delay ensures page is fully loaded before opening sidebar
+- **Event-Driven**: No polling - uses MutationObserver and History API for real-time detection
 
 ## Key Features
 

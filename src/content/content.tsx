@@ -127,31 +127,99 @@ function debounce<T extends (...args: any[]) => any>(
 
 // Add utility to check if we're on a listing page
 function isListingPage(): boolean {
-  return (
-    window.location.href.includes('zillow.com/homedetails/') &&
-    (
-      document.querySelector('[data-testid="home-details-summary"]') ||
-      document.querySelector('[data-testid="home-details-price"]') ||
-      document.querySelector('.ds-home-details-chip') ||
-      document.querySelector('.ds-price') ||
-      document.querySelector('.ds-bed-bath-living-area-container')
-    ) !== null
-  );
+  return window.location.href.includes('zillow.com/homedetails/');
+}
+
+// Extract listing ID from Zillow URL
+function extractListingId(url: string): string | null {
+  const match = url.match(/\/homedetails\/[^\/]+\/(\d+)/);
+  return match ? match[1] : null;
+}
+
+// Check if we need to force a reload for fresh __NEXT_DATA__
+function checkAndForceReload() {
+  const currentListingId = extractListingId(window.location.href);
+  
+  if (!currentListingId) {
+    console.log('[RIA Debug] Not on a listing page, skipping reload check');
+    return;
+  }
+  
+  // Check if we've already reloaded for this URL to prevent infinite loops
+  if (window.location.search.includes('ria_force_reload=1')) {
+    console.log('[RIA Debug] Already reloaded once for this URL, skipping');
+    return;
+  }
+  
+  console.log('[RIA Debug] Current listing ID:', currentListingId);
+  
+  // Force reload to get fresh __NEXT_DATA__
+  console.log('[RIA Debug] Forcing reload for fresh __NEXT_DATA__');
+  const newUrl = new URL(window.location.href);
+  newUrl.searchParams.set('ria_force_reload', '1');
+  
+  // If sidebar is open, add auto-open parameter
+  if (sharedState.isSidebarOpen) {
+    newUrl.searchParams.set('ria_auto_open', '1');
+    console.log('[RIA Debug] Sidebar is open, will auto-open after reload');
+  }
+  
+  window.location.href = newUrl.toString();
 }
 
 // Initial injection
 console.log('[RIA Debug] Starting initial injection...');
+
+// Check if we should auto-open sidebar after reload
+const urlParams = new URLSearchParams(window.location.search);
+const shouldAutoOpen = urlParams.get('ria_auto_open') === '1';
+const wasForceReload = urlParams.get('ria_force_reload') === '1';
+
+// Clean up URL parameters
+if (shouldAutoOpen || wasForceReload) {
+  const newUrl = new URL(window.location.href);
+  newUrl.searchParams.delete('ria_auto_open');
+  newUrl.searchParams.delete('ria_force_reload');
+  window.history.replaceState({}, '', newUrl.toString());
+  console.log('[RIA Debug] Cleaned up URL parameters');
+}
+
 let cleanup = injectContainers();
+
+// Auto-open sidebar if requested
+if (shouldAutoOpen) {
+  console.log('[RIA Debug] Auto-opening sidebar after reload');
+  setTimeout(() => {
+    sharedState.setSidebarOpen(true);
+  }, 1000); // Small delay to ensure page is fully loaded
+}
+
 console.log('[RIA Debug] Initial injection complete');
 
 // Track last URL to prevent unnecessary reinjections
 let lastUrl = window.location.href;
 let isCurrentlyOnListingPage = isListingPage();
+let lastListingId = extractListingId(window.location.href);
 
 // Debounced injection function
 const debouncedInject = debounce(() => {
   const currentUrl = window.location.href;
   const isNowOnListingPage = isListingPage();
+  const currentListingId = extractListingId(currentUrl);
+  
+  console.log('[RIA Debug] URL change detected:', {
+    currentUrl,
+    isNowOnListingPage,
+    currentListingId,
+    lastListingId
+  });
+  
+  // Check if we've navigated to a new listing page
+  if (isNowOnListingPage && currentListingId && currentListingId !== lastListingId) {
+    console.log('[RIA Debug] New listing detected, checking if reload needed');
+    checkAndForceReload();
+    return; // Don't continue with injection, let reload handle it
+  }
   
   // Check if sidebar is open and we're not on a listing page
   if (!isNowOnListingPage && sharedState.isSidebarOpen) {
@@ -166,13 +234,15 @@ const debouncedInject = debounce(() => {
     console.log('[RIA Debug] Page change detected, reinjecting...');
     lastUrl = currentUrl;
     isCurrentlyOnListingPage = isNowOnListingPage;
+    lastListingId = currentListingId;
     cleanup = injectContainers();
   } else if (currentUrl !== lastUrl) {
     // Update URL tracking even if we're not on a listing page
     lastUrl = currentUrl;
     isCurrentlyOnListingPage = isNowOnListingPage;
+    lastListingId = currentListingId;
   }
-}, 500); // 500ms debounce
+}, 250); // 250ms debounce
 
 // Handle SPA navigation
 const observer = new MutationObserver((mutations) => {

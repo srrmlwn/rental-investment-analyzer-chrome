@@ -129,9 +129,6 @@ tests/
 ├── resources/                  # HTML fixtures
 └── services/                   # Service tests
 
-src/test/
-├── extractSampleData.ts        # Manual testing utility
-└── services/                   # Unit tests
 ```
 
 ## Development Commands
