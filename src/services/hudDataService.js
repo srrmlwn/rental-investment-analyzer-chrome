@@ -13,11 +13,19 @@ class HudDataService {
      * Initialize the service by loading HUD data
      */
     async initialize() {
-        if (this.initialized) return;
+        if (this.initialized) {
+            return;
+        }
 
         try {
             // Load HUD data from the bundled JSON file
-            const response = await fetch(chrome.runtime.getURL('data/hud_rental_data.json'));
+            const dataUrl = chrome.runtime.getURL('data/hud_rental_data.json');
+            const response = await fetch(dataUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             this.hudData = await response.json();
             this.initialized = true;
             console.log('HUD data service initialized successfully');
@@ -45,6 +53,11 @@ class HudDataService {
         const cacheKey = `${normalizedZip}-${bedrooms}`;
         if (this.cache.has(cacheKey)) {
             return this.cache.get(cacheKey);
+        }
+
+        // Check if HUD data is loaded
+        if (!this.hudData) {
+            return null;
         }
 
         // Get data from HUD dataset

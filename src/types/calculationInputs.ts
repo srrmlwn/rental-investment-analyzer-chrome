@@ -36,7 +36,7 @@ function getPropertyTaxes(propertyData: PropertyData) {
   return (propertyData.price ?? 0) * (propertyData.propertyTaxRate ?? 0) / (12 * 100);
 }
 
-// Create initial calculation inputs from extracted property data
+// Create initial calculation inputs fromi extracted property data
 export function createInitialInputs(propertyData: PropertyData): CalculationInputs {
   const rentEstimate = getRentEstimate(propertyData);
   
