@@ -28,12 +28,14 @@ export function calculateInvestmentMetrics(
 ): CalculatedMetrics {
   // 1. Calculate total investment
   const downPayment = (inputs.purchasePrice * inputs.downPaymentPercentage) / 100;
+  console.log('Total investment', downPayment, inputs.closingCosts, inputs.rehabCosts);
   const totalInvestment = downPayment + inputs.closingCosts + inputs.rehabCosts;
 
   // 2. Calculate loan amount and monthly mortgage
   const loanAmount = inputs.purchasePrice - downPayment;
   const monthlyRate = inputs.interestRate / 100 / 12;
   const numPayments = inputs.loanTerm * 12;
+  console.log('Monthly mortgage', loanAmount, monthlyRate, numPayments, inputs.interestRate);
   const monthlyMortgage =
     (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
     (Math.pow(1 + monthlyRate, numPayments) - 1);
@@ -44,7 +46,7 @@ export function calculateInvestmentMetrics(
   const monthlyMaintenance = inputs.maintenanceCost;  // Use monthly maintenance cost directly
   const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
   const monthlyHoaFees = inputs.hoaFees;  // Use actual HOA fees
-
+  console.log('Monthly expenses', monthlyMortgage, monthlyPropertyTax, monthlyInsurance, monthlyMaintenance, monthlyManagement, monthlyHoaFees);
   const totalMonthlyExpenses =
     monthlyMortgage +
     monthlyPropertyTax +
@@ -56,32 +58,32 @@ export function calculateInvestmentMetrics(
   // 4. Calculate effective income
   const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
   const effectiveGrossIncome = effectiveMonthlyRent + inputs.otherIncome;
-
+  console.log('Effective income', effectiveMonthlyRent, inputs.otherIncome, effectiveGrossIncome);
   // 5. Calculate cash flow
   const monthlyCashFlow = effectiveGrossIncome - totalMonthlyExpenses;
   const annualCashFlow = monthlyCashFlow * 12;
-
+  console.log('Cash flow', monthlyCashFlow, annualCashFlow);
   // 6. Calculate NOI (Net Operating Income)
   const annualNOI = (effectiveGrossIncome * 12) - 
     ((monthlyPropertyTax + monthlyInsurance + monthlyMaintenance + 
       monthlyManagement + monthlyHoaFees) * 12);
-
+  console.log('NOI', annualNOI);
   // 7. Calculate property value (use ARV if available, otherwise purchase price)
   const propertyValue = inputs.afterRepairValue || inputs.purchasePrice;
-
+  console.log('Property value', propertyValue);
   // 8. Calculate advanced metrics
   const capRate = (annualNOI / propertyValue) * 100;
   const cashOnCashReturn = (annualCashFlow / totalInvestment) * 100;
   const debtServiceCoverageRatio = annualNOI / (monthlyMortgage * 12);
-  
+  console.log('Debt service coverage ratio', debtServiceCoverageRatio);
   // 9. Calculate appreciation and ROI
   const appreciation = propertyValue - inputs.purchasePrice;
   const returnOnInvestment = ((annualCashFlow + appreciation) / totalInvestment) * 100;
-  
+  console.log('Appreciation', appreciation, returnOnInvestment);
   // 10. Calculate break even and operating ratios
   const breakEvenYears = annualCashFlow > 0 ? totalInvestment / annualCashFlow : Infinity;
   const operatingExpenseRatio = (totalMonthlyExpenses * 12) / (effectiveGrossIncome * 12) * 100;
-
+  console.log('Break even years', breakEvenYears, operatingExpenseRatio);
   return {
     // Basic Investment Metrics
     monthlyMortgage,

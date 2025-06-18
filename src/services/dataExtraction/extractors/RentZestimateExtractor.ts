@@ -5,9 +5,9 @@ import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export class RentZestimateExtractor extends PropertyDataExtractor<number> {
     protected extractFromJson(property: ZillowPropertyJson): number | null {
-        if (property.rentZestimate?.value !== undefined) {
-            this.logExtractionSuccess('JSON', property.rentZestimate.value);
-            return property.rentZestimate.value;
+        if (property.rentZestimate !== undefined) {
+            this.logExtractionSuccess('JSON', property.rentZestimate);
+            return property.rentZestimate;
         }
         return null;
     }

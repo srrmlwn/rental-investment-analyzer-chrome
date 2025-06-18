@@ -5,9 +5,9 @@ import { ZillowPropertyJson } from '@/types/zillowPropertyJson';
 
 export class HoaFeesExtractor extends PropertyDataExtractor<number> {
     protected extractFromJson(property: ZillowPropertyJson): number | null {
-        if (property.monthlyHoaFee?.value !== undefined) {
-            this.logExtractionSuccess('JSON', property.monthlyHoaFee.value);
-            return property.monthlyHoaFee.value;
+        if (property.monthlyHoaFee !== undefined) {
+            this.logExtractionSuccess('JSON', property.monthlyHoaFee);
+            return property.monthlyHoaFee;
         }
         return null;
     }

@@ -19,20 +19,11 @@ export interface ZillowPropertyJson {
     longitude: number;
     units?: number;  // Number of units for multi-family properties
     description?: string;  // Property description
+    rentZestimate?: number;
+    monthlyHoaFee?: number;
+    zestimate?: number;
 
     // Complex objects that need to be accessed carefully
-    rentZestimate: {
-        value?: number;
-        // Add other fields if needed
-    };
-    monthlyHoaFee: {
-        value?: number;
-        // Add other fields if needed
-    };
-    zestimate: {
-        value?: number;
-        // Add other fields if needed
-    };
     resoFacts: {
         bedrooms?: number;
         bathrooms?: number;
