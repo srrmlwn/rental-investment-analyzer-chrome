@@ -127,6 +127,15 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
 
     // Input handlers for inline editing
     const handleInputBlur = () => {
+      // Handle empty string as 0
+      if (inputValue === '') {
+        const defaultValue = Math.max(min, 0); // Use 0 or minimum value
+        handleConfigChange(param.id, defaultValue);
+        setInputValues(prev => ({ ...prev, [param.id]: defaultValue.toString() }));
+        setEditingParam(null);
+        return;
+      }
+      
       const numericValue = parseFloat(inputValue);
       if (!isNaN(numericValue)) {
         // Clamp to min/max range
