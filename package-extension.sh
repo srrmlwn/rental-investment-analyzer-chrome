@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Packaging Rental Investment Analyzer Extension"
+echo "Packaging DealWise Extension"
 echo "=============================================="
 
 # Set variables

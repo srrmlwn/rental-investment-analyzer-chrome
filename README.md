@@ -1,14 +1,14 @@
-# Rental Investment Analyzer Chrome Extension
+# DealWise Chrome Extension
 
-A Chrome extension that analyzes rental investment properties on Zillow, providing real-time cash flow analysis, cap rates, and other investment metrics.
+A Chrome extension that provides smart rental deal analysis for Zillow properties, offering real-time cash flow analysis, cap rates, and other investment metrics to help you make informed investment decisions.
 
 ## Features
 
-- **Real-time Analysis**: Instantly analyze any Zillow property listing
+- **Smart Deal Analysis**: Instantly analyze any Zillow property listing for investment potential
 - **Investment Metrics**: Calculate cash flow, cap rate, cash-on-cash return, and more
 - **Customizable Parameters**: Adjust down payment, interest rates, maintenance costs, etc.
 - **Property Data Extraction**: Automatically extracts property details from Zillow
-- **Investment Dashboard**: Clean, professional interface for investment analysis
+- **Investment Dashboard**: Clean, professional interface for deal analysis
 
 ## Installation (Without Chrome Web Store)
 
@@ -29,7 +29,7 @@ A Chrome extension that analyzes rental investment properties on Zillow, providi
 
 4. **Verify Installation**:
    - Navigate to any Zillow property listing
-   - You should see the "Rental Investment Analyzer" panel on the right side
+   - You should see the "DealWise" panel on the right side
 
 ### Method 2: Using the Installer Script (macOS/Linux)
 
@@ -50,8 +50,8 @@ A Chrome extension that analyzes rental investment properties on Zillow, providi
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/rental-investment-analyzer-chrome.git
-   cd rental-investment-analyzer-chrome
+   git clone https://github.com/yourusername/dealwise-chrome.git
+   cd dealwise-chrome
    ```
 
 2. **Install Dependencies** (if building from source):

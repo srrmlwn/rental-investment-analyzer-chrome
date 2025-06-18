@@ -1,7 +1,7 @@
 {
-  "name": "rental-investment-analyzer-chrome",
+  "name": "dealwise-chrome",
   "version": "0.1.0",
-  "description": "Chrome extension to analyze rental investment properties on Zillow",
+  "description": "DealWise - The Rental Investment Analyzer",
   "main": "src/background/background.ts",
   "scripts": {
     "test": "jest",

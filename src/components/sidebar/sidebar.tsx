@@ -73,7 +73,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="ria-header">
         <div className="flex items-center gap-2">
           <Calculator className="w-6 h-6 text-slate-50" />
-          <h2>Rental Investment Analyzer</h2>
+          <h2>DealWise - The Rental Investment Analyzer</h2>
         </div>
         <button
           onClick={onClose}

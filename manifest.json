@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Rental Investment Analyzer",
+  "name": "DealWise",
   "version": "0.1.0",
-  "description": "Analyze rental investment properties on Zillow",
+  "description": "The Rental Investment Analyzer",
   "permissions": [
     "storage",
     "activeTab"

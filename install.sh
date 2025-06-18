@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Rental Investment Analyzer Extension Installer"
+echo "DealWise Extension Installer"
 echo "=============================================="
 
 # Check if Chrome is installed
