@@ -1,5 +1,4 @@
 // Background script for DealWise
-import { DataExtractionService } from '../services/dataExtraction';
 // @ts-ignore - Import JavaScript module
 import hudDataService from '../services/hudDataService.js';
 

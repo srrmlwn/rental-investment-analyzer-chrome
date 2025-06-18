@@ -9,9 +9,7 @@
     "dev": "webpack --mode development --watch",
     "lint": "eslint src/**/*.{js,ts,tsx}",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,css,html}\"",
-    "generate-icons": "node scripts/generate-icons.js",
     "convert-hud-data": "node scripts/convert-hud-data.js",
-    "prebuild": "npm run generate-icons",
     "type-check": "tsc --noEmit",
     "prepare": "husky install",
     "extract-samples": "tsx tests/extractSampleData.ts"
@@ -67,7 +65,6 @@
     "postcss-loader": "^8.1.1",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "sharp": "^0.33.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.3.4",
