@@ -111,7 +111,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
     const min = param.getMin();
     const max = param.getMax();
     const isEditing = editingParam === param.id;
-    const inputValue = inputValues[param.id] || value.toString();
+    const inputValue = inputValues[param.id] !== undefined ? inputValues[param.id] : value.toString();
 
     // Check for validation errors
     const hasValidationError = param.isErrorValue && param.isErrorValue(value);
@@ -137,6 +137,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
       }
       
       const numericValue = parseFloat(inputValue);
+      
       if (!isNaN(numericValue)) {
         // Clamp to min/max range
         const clampedValue = Math.max(min, Math.min(max, numericValue));
@@ -230,13 +231,11 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, 
   };
 
   const toggleSection = (category: ConfigCategory) => {
-    console.log('[RIA Debug] Toggle section clicked for:', category);
     setExpandedSections(prev => {
       const newState = {
         ...prev,
         [category]: !prev[category]
       };
-      console.log('[RIA Debug] New expanded sections state:', newState);
       return newState;
     });
   };
