@@ -25,7 +25,7 @@ const CATEGORY_ICONS = {
   [CONFIG_CATEGORIES.OPERATING_EXPENSES]: Calculator,
 } as const;
 
-export function ConfigPanel({ onConfigChange, inputs, userParams, propertyData, className }: ConfigPanelProps) {
+export function ConfigPanel({ onConfigChange, inputs, userParams, className }: ConfigPanelProps) {
   // Initialize all sections as expanded
   const [expandedSections, setExpandedSections] = useState<Record<ConfigCategory, boolean>>(
     Object.values(CONFIG_CATEGORIES).reduce((acc, category) => ({
