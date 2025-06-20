@@ -3,10 +3,7 @@
   "name": "DealWise",
   "version": "0.1.0",
   "description": "The Rental Investment Analyzer",
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
+  "permissions": [],
   "host_permissions": [
     "https://*.zillow.com/*"
   ],
