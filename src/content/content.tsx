@@ -44,9 +44,11 @@ function App() {
       <div id="ria-sidebar-container" className="ria-sidebar-container">
         <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} />
       </div>
-      <div id="ria-floating-btn-container" className="ria-floating-btn-container">
-        <FloatingButton onClick={handleFloatingButtonClick} />
-      </div>
+      {!isSidebarOpen && (
+        <div id="ria-floating-btn-container" className="ria-floating-btn-container">
+          <FloatingButton onClick={handleFloatingButtonClick} />
+        </div>
+      )}
     </>
   );
 }
