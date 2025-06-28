@@ -53,8 +53,8 @@ export function createInitialInputs(propertyData: PropertyData): CalculationInpu
     interestRate: DEFAULT_CONFIG_VALUES.interestRate,
     loanTerm: DEFAULT_CONFIG_VALUES.loanTerm,
     managementRate: DEFAULT_CONFIG_VALUES.managementRate,
-    maintenanceCost: Math.round((rentEstimate * 0.01) / 25) * 25, // Round to nearest $25
-    insuranceCost: Math.round((rentEstimate * 0.005) / 25) * 25, // Round to nearest $25
+    maintenanceCost: Math.round((rentEstimate * 0.01) / 25) * 25 || DEFAULT_CONFIG_VALUES.maintenanceCost, // Round to nearest $25
+    insuranceCost: Math.round((rentEstimate * 0.005) / 25) * 25 || DEFAULT_CONFIG_VALUES.insuranceCost, // Round to nearest $25
     vacancyRate: DEFAULT_CONFIG_VALUES.vacancyRate,
     otherIncome: DEFAULT_CONFIG_VALUES.otherIncome
   };

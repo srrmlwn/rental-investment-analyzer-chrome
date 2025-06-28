@@ -4,10 +4,13 @@ import { CalculationInputs, createInitialInputs } from "@/types/calculationInput
 import { CalculatedMetrics } from "@/types/calculatedMetrics"
 import { calculateInvestmentMetrics } from "../services/calculator"
 import { DataExtractionService } from "@/services/dataExtraction"
-import { DollarSign, Percent, TrendingUp, Home, ChevronDown } from "lucide-react"
+import { DollarSign, Percent, TrendingUp, Home, ChevronDown, Calculator } from "lucide-react"
 import { UserParams } from "@/constants/userParams"
 import { Button } from "./ui/button"
 import { PropertyData } from "../types/propertyData"
+import { CopyButton } from './ui/copy-button';
+import { ExportService } from '../services/exportService';
+import { cn } from '../utils/cn';
 
 // Helper function to format currency values
 const formatCurrency = (value?: number) => {
@@ -49,7 +52,9 @@ const getPropertyDataLabel = (key: keyof PropertyData): string => {
     monthlyPropertyTaxes: 'Monthly Property Tax',
     propertyTaxRate: 'Property Tax Rate',
     hoaFees: 'Monthly HOA Fees',
-    units: 'Number of Units'
+    units: 'Number of Units',
+    address: 'Property Address',
+    url: 'Zillow URL'
   };
   return labels[key];
 };
@@ -86,6 +91,7 @@ export function InvestmentAnalysisPanel() {
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
   const [isCompact, setIsCompact] = useState(false);
   const metricsRef = useRef<HTMLDivElement>(null);
+  const [exportService] = useState(() => new ExportService());
 
   // Extract property data and initialize calculation inputs on mount
   useEffect(() => {
@@ -139,6 +145,25 @@ export function InvestmentAnalysisPanel() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleCopyCSV = async (): Promise<boolean> => {
+    if (!calculationInputs || !calculations || !propertyData) {
+      return false;
+    }
+
+    try {
+      const csvContent = exportService.generateCSV({
+        propertyData,
+        calculationInputs,
+        calculatedMetrics: calculations
+      });
+
+      return await exportService.copyToClipboard(csvContent);
+    } catch (error) {
+      console.error('Failed to generate CSV:', error);
+      return false;
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -163,63 +188,89 @@ export function InvestmentAnalysisPanel() {
     'hudRentEstimate',
   ];
 
-  const renderMetrics = (isCompact: boolean) => (
-    <div 
-      ref={metricsRef}
-      className={`sticky top-0 z-50 transition-all duration-200 bg-white ${
-        isCompact 
-          ? 'bg-white/95 backdrop-blur-sm shadow-md' 
-          : ''
-      }`}
-    >
-      <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${isCompact ? 'gap-2' : ''}`}>
-        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
-          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
-            <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
-            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Monthly Cash Flow</span>
-          </div>
-          <div
-            className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
-              calculations.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            ${calculations.monthlyCashFlow >= 0 ? "+" : ""}
-            {Math.round(calculations.monthlyCashFlow).toLocaleString()}
-          </div>
-        </div>
+  const renderMetrics = (isCompact: boolean) => {
+    if (!calculations) return null;
 
-        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
-          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
-            <Percent className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-blue-600`} />
-            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cap Rate</span>
-          </div>
-          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-blue-600`}>
-            {calculations.capRate.toFixed(1)}%
-          </div>
+    return (
+      <div 
+        ref={metricsRef}
+        className={cn(
+          "bg-white rounded-lg p-4 border shadow-sm transition-all duration-300",
+          isCompact && "p-2"
+        )}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className={cn(
+            "font-semibold text-gray-900 flex items-center gap-2",
+            isCompact ? "text-sm" : "text-lg"
+          )}>
+            <Calculator className={cn("text-green-600", isCompact ? "w-4 h-4" : "w-5 h-5")} />
+            Investment Analysis
+          </h3>
+          <CopyButton 
+            onCopy={handleCopyCSV}
+            tooltip="Copy analysis as CSV"
+            className="ml-2"
+          />
         </div>
+        
+        <div className={cn(
+          "grid gap-3",
+          isCompact ? "grid-cols-2 gap-2" : "grid-cols-2 md:grid-cols-4 gap-3"
+        )}>
+          <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'} flex flex-col justify-between min-h-[80px]`}>
+            <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+              <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-blue-600`} />
+              <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Monthly Cash Flow</span>
+            </div>
+            <div
+              className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
+                calculations.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              ${calculations.monthlyCashFlow >= 0 ? "+" : ""}
+              {Math.round(calculations.monthlyCashFlow).toLocaleString()}
+            </div>
+          </div>
 
-        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
-          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
-            <TrendingUp className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-purple-600`} />
-            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cash-on-Cash</span>
+          <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'} flex flex-col justify-between min-h-[80px]`}>
+            <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+              <Percent className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+              <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cap Rate</span>
+            </div>
+            <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-green-600`}>
+              {calculations.capRate.toFixed(1)}%
+            </div>
           </div>
-          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-purple-600`}>
-            {calculations.cashOnCashReturn.toFixed(1)}%
-          </div>
-        </div>
 
-        <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'}`}>
-          <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
-            <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-orange-600`} />
-            <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Total Cash Needed</span>
+          <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'} flex flex-col justify-between min-h-[80px]`}>
+            <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+              <TrendingUp className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-purple-600`} />
+              <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Cash-on-Cash</span>
+            </div>
+            <div
+              className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold ${
+                calculations.cashOnCashReturn >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {calculations.cashOnCashReturn >= 0 ? "+" : ""}
+              {calculations.cashOnCashReturn.toFixed(1)}%
+            </div>
           </div>
-          <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-orange-600`}>
-            ${Math.round(calculations.totalInvestment).toLocaleString()}
+
+          <div className={`bg-white rounded-lg border shadow-sm ${isCompact ? 'p-2' : 'p-4'} flex flex-col justify-between min-h-[80px]`}>
+            <div className={`flex items-center gap-2 ${isCompact ? 'mb-0' : 'mb-1'}`}>
+              <DollarSign className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-orange-600`} />
+              <span className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Total Cash Needed</span>
+            </div>
+            <div className={`${isCompact ? 'text-sm' : 'text-2xl'} font-bold text-green-600`}>
+              ${Math.round(calculations.totalInvestment).toLocaleString()}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex flex-col h-full">

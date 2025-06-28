@@ -1,150 +1,124 @@
-# DealWise Chrome Extension
+# DealWise - Rental Investment Analyzer
 
-A Chrome extension that provides smart rental deal analysis for Zillow properties, offering real-time cash flow analysis, cap rates, and other investment metrics to help you make informed investment decisions.
+A Chrome extension that provides real-time investment analysis for rental properties on Zillow. Transform your Zillow browsing into smart investment analysis with instant financial insights.
 
-## Features
+## 🚀 Features
 
-- **Smart Deal Analysis**: Instantly analyze any Zillow property listing for investment potential
-- **Investment Metrics**: Calculate cash flow, cap rate, cash-on-cash return, and more
-- **Customizable Parameters**: Adjust down payment, interest rates, maintenance costs, etc.
-- **Property Data Extraction**: Automatically extracts property details from Zillow
-- **Investment Dashboard**: Clean, professional interface for deal analysis
+- **Real-time Analysis**: Get instant cash flow, cap rate, and ROI calculations
+- **Smart Data Extraction**: Automatically pulls property details from Zillow listings
+- **Customizable Parameters**: Adjust mortgage rates, down payments, and more
+- **Professional Interface**: Clean, intuitive sidebar with DealWise branding
+- **Local Processing**: All calculations happen locally - your data stays private
 
-## Installation (Without Chrome Web Store)
+## 📦 Installation
 
-### Method 1: Manual Installation (Recommended)
+### From Chrome Web Store (Recommended)
+1. Visit the Chrome Web Store
+2. Search for "DealWise - Rental Investment Analyzer"
+3. Click "Add to Chrome"
+4. Navigate to any Zillow property listing to start analyzing
 
-1. **Download the Extension**:
-   - Download the ZIP file from the releases or clone this repository
-   - Extract the ZIP file to a folder on your computer
+### Manual Installation (Development)
+1. Clone this repository
+2. Run `npm install` to install dependencies
+3. Run `npm run build` to build the extension
+4. Load the `dist` folder as an unpacked extension in Chrome
 
-2. **Enable Developer Mode**:
-   - Open Chrome and navigate to `chrome://extensions/`
-   - Toggle on "Developer mode" in the top right corner
+## 🎯 How to Use
 
-3. **Load the Extension**:
-   - Click "Load unpacked" button
-   - Select the folder containing the extension files
-   - The extension should now appear in your extensions list
+1. **Navigate to Zillow**: Go to any Zillow property listing
+2. **Activate DealWise**: Click the floating green button in the bottom-right corner
+3. **View Analysis**: See instant investment metrics in the sidebar
+4. **Customize Parameters**: Adjust investment criteria to match your strategy
+5. **Make Decisions**: Use the metrics to evaluate investment potential
 
-4. **Verify Installation**:
-   - Navigate to any Zillow property listing
-   - You should see the "DealWise" panel on the right side
+## 📊 Investment Metrics
 
-### Method 2: Using the Installer Script (macOS/Linux)
+- **Monthly Cash Flow**: Primary metric with color coding (green/red)
+- **Cap Rate**: Property return independent of financing
+- **Cash-on-Cash Return**: Return on actual cash invested
+- **Total Cash Needed**: Complete investment requirement
 
-1. **Download and Run**:
-   ```bash
-   # Make the installer executable
-   chmod +x install.sh
-   
-   # Run the installer
-   ./install.sh
-   ```
+## 🛠️ Development
 
-2. **Follow the Prompts**:
-   - The script will guide you through the installation process
-   - Follow the on-screen instructions to complete setup
+### Prerequisites
+- Node.js 16+
+- npm or yarn
+- Chrome browser
 
-### Method 3: From Source Code
-
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/yourusername/dealwise-chrome.git
-   cd dealwise-chrome
-   ```
-
-2. **Install Dependencies** (if building from source):
-   ```bash
-   npm install
-   npm run build
-   ```
-
-3. **Load in Chrome**:
-   - Follow Method 1 steps 2-4 above
-
-## Usage
-
-1. **Navigate to Zillow**: Go to any property listing on Zillow.com
-2. **Open the Extension**: The investment analysis panel will appear on the right side
-3. **Review Metrics**: See key investment metrics like:
-   - Monthly Cash Flow
-   - Cap Rate
-   - Cash-on-Cash Return
-   - Total Cash Needed
-4. **Customize Parameters**: Click "Advanced Settings" to adjust:
-   - Down payment percentage
-   - Interest rates
-   - Maintenance costs
-   - Insurance costs
-   - Property management fees
-5. **Analyze**: The metrics will update in real-time as you adjust parameters
-
-## Key Metrics Explained
-
-- **Monthly Cash Flow**: Net income after all expenses
-- **Cap Rate**: Net Operating Income / Property Value
-- **Cash-on-Cash Return**: Annual Cash Flow / Total Investment
-- **Total Cash Needed**: Down payment + closing costs + rehab costs
-
-## Troubleshooting
-
-### Extension Not Loading
-- Ensure Developer mode is enabled in Chrome extensions
-- Try refreshing the Zillow page
-- Check that all extension files are present in the folder
-
-### No Data Appearing
-- Make sure you're on a valid Zillow property listing page
-- Refresh the page and try again
-- Check the browser console for any error messages
-
-### Extension Disappears After Restart
-- This is normal for unpacked extensions
-- You'll need to reload the extension after Chrome updates or restarts
-- Consider using the installer script for easier reinstallation
-
-## Development
-
-### Building from Source
+### Setup
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/rental-investment-analyzer-chrome.git
+cd rental-investment-analyzer-chrome
+
 # Install dependencies
 npm install
 
 # Build the extension
 npm run build
 
-# Watch for changes (development)
+# Development mode with watch
 npm run dev
+
+# Run tests
+npm test
 ```
 
 ### Project Structure
 ```
 src/
 ├── components/          # React components
+│   ├── sidebar/        # Sidebar and floating button
+│   ├── investment/     # Investment analysis components
+│   └── ui/            # Shared UI components
 ├── services/           # Business logic
+│   ├── calculator.ts   # Investment calculations
+│   └── dataExtraction/ # Property data extraction
 ├── types/             # TypeScript definitions
-└── constants/         # Configuration
+├── constants/         # Configuration
+└── utils/            # Helper functions
 ```
 
-## Security Note
+### Key Technologies
+- **React 18+** with TypeScript
+- **Tailwind CSS** for styling
+- **Chrome Extension Manifest V3**
+- **Webpack 5** for building
 
-⚠️ **Important**: This extension runs in developer mode, which means:
-- Chrome may show security warnings
-- The extension needs to be reloaded after Chrome updates
-- Users should only install extensions from trusted sources
+## 📚 Documentation
 
-## Support
+- [Technical Architecture](docs/architecture/tech-architecture.md)
+- [Product Specifications](docs/specs/product-specs.md)
+- [Task Breakdown](docs/tasks/task-breakdown.md)
+- [Chrome Web Store Description](docs/chrome-webstore-description.md)
 
-For issues or questions:
-1. Check the troubleshooting section above
-2. Review the browser console for error messages
-3. Create an issue in the GitHub repository
+## 🤝 Contributing
 
-## License
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-[Your License Here]
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+- **Email**: dealwise.contact@gmail.com
+- **Issues**: [GitHub Issues](https://github.com/your-username/rental-investment-analyzer-chrome/issues)
+- **Documentation**: See the `docs/` folder for comprehensive guides
+
+## 🙏 Acknowledgments
+
+- Built for real estate investors by real estate investors
+- Special thanks to the Chrome Extension development community
+- Inspired by the need for better investment analysis tools
 
 ---
 
-**Note**: This extension is not published on the Chrome Web Store and is intended for personal use or sharing with trusted individuals. 
+**DealWise** - Making real estate investment analysis simple and accessible.
+
+*Last Updated: December 2024* 

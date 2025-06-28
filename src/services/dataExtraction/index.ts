@@ -9,74 +9,85 @@ import { UnitsExtractor } from './extractors/UnitsExtractor';
 import { PropertyData, HUDRentalData } from '@/types/propertyData';
 import { PropertyJsonExtractor } from './PropertyJsonExtractor';
 import hudDataService from "@/services/hudDataService";
+import { AddressExtractor } from './extractors/AddressExtractor';
 
 export class DataExtractionService {
     private propertyJsonExtractor: PropertyJsonExtractor;
-
-    private extractors: {
-        price: PriceExtractor;
-        propertyTax: PropertyTaxExtractor;
-        bedBath: BedBathExtractor;
-        propertyType: PropertyTypeExtractor;
-        zipCode: ZipCodeExtractor;
-        rentZestimate: RentZestimateExtractor;
-        hoaFees: HoaFeesExtractor;
-        units: UnitsExtractor;
-    };
+    private priceExtractor: PriceExtractor;
+    private bedBathExtractor: BedBathExtractor;
+    private propertyTypeExtractor: PropertyTypeExtractor;
+    private rentZestimateExtractor: RentZestimateExtractor;
+    private propertyTaxExtractor: PropertyTaxExtractor;
+    private hoaFeesExtractor: HoaFeesExtractor;
+    private zipCodeExtractor: ZipCodeExtractor;
+    private unitsExtractor: UnitsExtractor;
+    private addressExtractor: AddressExtractor;
 
     constructor() {
         this.propertyJsonExtractor = new PropertyJsonExtractor();
-        this.extractors = {
-            price: new PriceExtractor(),
-            propertyTax: new PropertyTaxExtractor(),
-            bedBath: new BedBathExtractor(),
-            propertyType: new PropertyTypeExtractor(),
-            zipCode: new ZipCodeExtractor(),
-            rentZestimate: new RentZestimateExtractor(),
-            hoaFees: new HoaFeesExtractor(),
-            units: new UnitsExtractor()
-        };
+        this.priceExtractor = new PriceExtractor();
+        this.bedBathExtractor = new BedBathExtractor();
+        this.propertyTypeExtractor = new PropertyTypeExtractor();
+        this.rentZestimateExtractor = new RentZestimateExtractor();
+        this.propertyTaxExtractor = new PropertyTaxExtractor();
+        this.hoaFeesExtractor = new HoaFeesExtractor();
+        this.zipCodeExtractor = new ZipCodeExtractor();
+        this.unitsExtractor = new UnitsExtractor();
+        this.addressExtractor = new AddressExtractor();
     }
 
     async extractPropertyData(): Promise<PropertyData> {
         console.log('Starting property data extraction...');
 
         try {
-            // Extract property JSON once
-            const property = await this.propertyJsonExtractor.getPropertyJson();
+            // Extract JSON data first
+            const propertyJson = await this.propertyJsonExtractor.getPropertyJson();
             
-            // Extract all data in parallel using the same property JSON
+            // Extract all property data
             const [
                 price,
-                propertyTax,
                 bedBath,
                 propertyType,
-                zipCode,
                 rentZestimate,
+                propertyTax,
                 hoaFees,
-                units
+                zipCode,
+                units,
+                address
             ] = await Promise.all([
-                this.extractors.price.extract(property),
-                this.extractors.propertyTax.extract(property),
-                this.extractors.bedBath.extract(property),
-                this.extractors.propertyType.extract(property),
-                this.extractors.zipCode.extract(property),
-                this.extractors.rentZestimate.extract(property),
-                this.extractors.hoaFees.extract(property),
-                this.extractors.units.extract(property)
+                this.priceExtractor.extract(propertyJson),
+                this.bedBathExtractor.extract(propertyJson),
+                this.propertyTypeExtractor.extract(propertyJson),
+                this.rentZestimateExtractor.extract(propertyJson),
+                this.propertyTaxExtractor.extract(propertyJson),
+                this.hoaFeesExtractor.extract(propertyJson),
+                this.zipCodeExtractor.extract(propertyJson),
+                this.unitsExtractor.extract(propertyJson),
+                this.addressExtractor.extract(propertyJson)
             ]);
 
+            // Get HUD rental estimate if Zestimate is not available
+            let hudRentEstimate: number | undefined;
+            if (!rentZestimate && zipCode && bedBath?.bedrooms) {
+                hudRentEstimate = await this.getHudRentalEstimate(zipCode, bedBath.bedrooms);
+            }
+
+            // Get current URL
+            const url = window.location.href;
+
             const propertyData: PropertyData = {
-                price: price ?? undefined,
-                propertyTaxRate: propertyTax?.rate ?? undefined,
-                monthlyPropertyTaxes: propertyTax?.monthlyAmount ?? undefined,
-                bedrooms: bedBath?.bedrooms ?? undefined,
-                bathrooms: bedBath?.bathrooms ?? undefined,
-                propertyType: propertyType ?? undefined,
-                zipCode: zipCode ?? undefined,
-                rentZestimate: rentZestimate ?? undefined,
-                hoaFees: hoaFees ?? undefined,
-                units: units ?? undefined
+                price: price || 0,
+                propertyType: propertyType || 'Single Family',
+                bedrooms: bedBath?.bedrooms || undefined,
+                bathrooms: bedBath?.bathrooms || undefined,
+                units: units || undefined,
+                zipCode: zipCode || undefined,
+                rentZestimate: rentZestimate || undefined,
+                hudRentEstimate: hudRentEstimate,
+                propertyTaxRate: propertyTax?.rate || undefined,
+                hoaFees: hoaFees || undefined,
+                address: address || undefined,
+                url: url
             };
 
             console.log('About to extract rent from HUD data', propertyData.zipCode, propertyData.bedrooms);
@@ -89,9 +100,15 @@ export class DataExtractionService {
             return propertyData;
 
         } catch (error) {
-            console.error('Error extracting property data:', error);
-            throw error;
+            console.error('❌ Error extracting property data:', error);
+            throw new Error('Failed to extract property data');
         }
+    }
+
+    private async getHudRentalEstimate(zipCode: string, bedrooms: number): Promise<number | undefined> {
+        // Implementation of getHudRentalEstimate method
+        // This is a placeholder and should be implemented based on your specific requirements
+        return undefined;
     }
 }
 

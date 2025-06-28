@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Calculator, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvestmentAnalysisPanel } from '../investment-analysis-panel';
+import { DealWiseIcon } from '../ui/dealwise-icon';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(480); // Default width
+  const [sidebarWidth, setSidebarWidth] = useState(400); // Wider default width
 
   // Load saved width from localStorage on mount
   useEffect(() => {
@@ -23,7 +24,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   // Save width to localStorage when it changes
   useEffect(() => {
-    if (sidebarWidth >= 320 && sidebarWidth <= 800) {
+    const minWidth = 300;
+    const maxWidth = Math.max(1200, window.innerWidth * 0.8);
+    if (sidebarWidth >= minWidth && sidebarWidth <= maxWidth) {
       localStorage.setItem('ria-sidebar-width', sidebarWidth.toString());
     }
   }, [sidebarWidth]);
@@ -39,7 +42,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = startX - e.clientX;
-      const newWidth = Math.min(Math.max(startWidth + deltaX, 320), 800);
+      const minWidth = 400; // Minimum width
+      const maxWidth = Math.max(1200, window.innerWidth * 0.8); // At least 80% of screen width, minimum 1200px
+      const newWidth = Math.min(Math.max(startWidth + deltaX, minWidth), maxWidth);
       setSidebarWidth(newWidth);
     };
 
@@ -72,7 +77,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       />
       <div className="ria-header">
         <div className="flex items-center gap-2">
-          <Calculator className="w-6 h-6 text-slate-50" />
+          <DealWiseIcon className="w-6 h-6" />
           <h2>DealWise - The Rental Investment Analyzer</h2>
         </div>
         <button

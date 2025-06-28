@@ -1,470 +1,216 @@
-# Rental Investment Analyzer - Technical Architecture
+# DealWise Technical Architecture
 
 ## Overview
-The Rental Investment Analyzer is a Chrome extension that helps real estate investors analyze rental properties directly on Zillow listings. The extension provides real-time investment metrics and allows users to customize their analysis parameters.
 
-## Core Components
+DealWise is a Chrome extension built with React and TypeScript that provides real-time rental investment analysis on Zillow property listings. The extension extracts property data, calculates financial metrics, and provides a customizable interface for real estate investors.
 
-### 1. Content Script (`content.tsx`)
-- Injects the React application into Zillow listing pages
-- Handles page navigation and reinjection
-- Manages the extension's lifecycle on the page
-- Uses MutationObserver to detect SPA navigation
-- Extracts property data using DataExtractionService
+## Technology Stack
 
-### 2. Investment Analysis Panel (`investment-analysis-panel.tsx`)
-- Main component for displaying investment analysis
-- Layout Structure:
-  1. Key Metrics (sticky at top)
-     - Stays visible while scrolling
-     - Transitions to compact view when scrolled
-     - Monthly Cash Flow (green/red)
-     - Cap Rate (blue)
-     - Cash-on-Cash Return (purple)
-     - Annual Cash Flow (green/red)
-  2. Scrollable Content
-     - Property Information
-       - Expandable section
-       - Property details
-       - Rental estimates
-     - Investment Parameters
-       - Quick adjustments
-       - Advanced settings
-- Features:
-  - Sticky metrics with smooth transitions
-  - Independent scrollable content
-  - Responsive grid layout
-  - Real-time updates
-  - Error handling
-- State Management:
-  - Property data
-  - Calculation inputs
-  - Calculated metrics
-  - Compact view state
-  - Property info expansion state
+### Frontend
+- **React 18+**: Component-based UI architecture
+- **TypeScript 5+**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **Shadcn/ui**: Component library for consistent design
 
-### 3. Config Panel (`config-panel.tsx`)
-- Displays and manages user input fields
-- Two sections:
-  1. Quick Adjustments
-     - Purchase Price
-     - Down Payment
-     - Interest Rate
-     - Loan Term
-     - Property Management
-  2. Advanced Settings
-     - Closing Costs
-     - Rehab Costs
-     - After Repair Value
-     - Vacancy Rate
-     - Other Income
-     - Maintenance Rate
-     - Insurance Rate
-- Uses UserParams for parameter management
-- Real-time validation and updates
+### Build Tools
+- **Webpack 5**: Module bundling and optimization
+- **Babel**: JavaScript transpilation
+- **PostCSS**: CSS processing and optimization
 
-## Data Model
+### Chrome Extension
+- **Manifest V3**: Latest Chrome extension manifest
+- **Content Scripts**: Page injection and DOM manipulation
+- **Background Scripts**: Extension lifecycle management
+- **Chrome Storage API**: Data persistence
 
-### 1. Property Data (`src/types/propertyData.ts`)
+## Architecture Components
+
+### 1. Content Script (`src/content/content.tsx`)
+The main entry point that injects the React application into Zillow pages.
+
+**Key Features:**
+- React app injection with container management
+- URL change detection and navigation handling
+- Modal context awareness
+- State management for sidebar visibility
+
+**State Management:**
 ```typescript
-interface PropertyData {
-  price: number;
-  propertyType: string;
-  bedrooms: number;
-  bathrooms: number;
-  zipCode: string;
-  rentZestimate?: number;
-  propertyTaxes?: number;
-  hoaFees?: number;
-}
+let sharedState = {
+  isSidebarOpen: boolean,
+  setSidebarOpen: (isOpen: boolean) => void
+};
 ```
 
-### 2. Calculation Inputs (`src/types/calculationInputs.ts`)
-```typescript
-interface CalculationInputs {
-  // Purchase Parameters
-  purchasePrice: number;
-  closingCosts: number;
-  rehabCosts: number;
-  afterRepairValue: number;
-  
-  // Loan Parameters
-  downPaymentPercentage: number;
-  interestRate: number;
-  loanTerm: number;
-  
-  // Operating Expenses
-  managementRate: number;
-  maintenanceRate: number;
-  insuranceRate: number;
-  propertyTaxes: number;
-  hoaFees: number;
-  vacancyRate: number;
-  
-  // Income Parameters
-  rentEstimate: number;
-  otherIncome: number;
-}
-```
+### 2. Sidebar Component (`src/components/sidebar/sidebar.tsx`)
+The main investment analysis interface displayed as a resizable sidebar.
 
-### 3. Config Parameter (`src/types/configTypes.ts`)
-```typescript
-type ConfigParameterType = 'percentage' | 'currency' | 'number';
-type ConfigCategory = 'Purchase' | 'Loan' | 'Income' | 'Operating';
+**Features:**
+- Resizable width (400px - 90vw)
+- Drag handle for manual resizing
+- Responsive design for different screen sizes
+- Investment analysis panel integration
 
-interface ConfigParameter {
-  id: string;
-  label: string;
-  category: ConfigCategory;
-  type: ConfigParameterType;
-  description: string;
-  step?: number;
-  unit?: string;
-  isAdvanced?: boolean;
-  useSlider: boolean;
-  getMin: () => number;
-  getMax: () => number;
-}
-```
+### 3. Floating Button (`src/components/sidebar/floating-button.tsx`)
+Quick access button that appears when sidebar is closed.
 
-## Data Flow & State Management
+**Features:**
+- Animated pulsing effect
+- Hover animations and scale effects
+- DealWise icon integration
+- Modal-aware positioning
 
-### Content Script Architecture
-The content script (`src/content/content.tsx`) manages the extension's lifecycle and state:
+### 4. Investment Analysis Panel (`src/components/investment-analysis-panel.tsx`)
+Core analysis interface displaying property metrics and calculations.
 
-1. **Initialization**: Injects React components into Zillow pages
-2. **SPA Navigation Detection**: Monitors navigation using multiple strategies:
-   - URL change detection with listing ID extraction
-   - MutationObserver for DOM changes
-   - History API interception (pushState/replaceState)
-   - Popstate event handling for browser back/forward
-3. **Forced Page Reload**: When navigating to new listings, forces a full page reload to get fresh `__NEXT_DATA__`
-4. **State Synchronization**: Uses custom events to notify components of state changes
+**Components:**
+- Property data display
+- Investment metrics (cash flow, cap rate, cash-on-cash return)
+- Configuration panel for user parameters
+- Real-time calculation updates
 
-### SPA Navigation Handling
-Due to Zillow's SPA architecture, the `__NEXT_DATA__` script tag doesn't update when navigating between listings. The extension implements a forced reload strategy:
+### 5. Configuration Panel (`src/components/investment/config-panel.tsx`)
+User-configurable parameters for investment analysis.
 
-1. **Navigation Detection**: When URL changes, extract listing ID and compare with previous
-2. **Reload Trigger**: If listing ID changes, force a full page reload with `ria_force_reload=1` parameter
-3. **Auto-Open Sidebar**: If sidebar was open, add `ria_auto_open=1` parameter to reopen after reload
-4. **URL Cleanup**: Remove parameters after reload to prevent infinite loops
-
-### Timing & Performance
-- **Debounce**: 500ms debounce prevents excessive processing during rapid navigation
-- **Auto-Open Delay**: 1 second delay ensures page is fully loaded before opening sidebar
-- **Event-Driven**: No polling - uses MutationObserver and History API for real-time detection
-
-## Key Features
-
-### 1. Real-time Analysis
-- Instant metric updates as users adjust inputs
-- Color-coded metrics for quick interpretation
-- Responsive layout for all screen sizes
-
-### 2. Parameter Management
-- Dynamic min/max values based on property data
-- Categorized parameters (basic/advanced)
-- Input validation with user feedback
-- Automatic reset on new listings
-
-### 3. Error Handling
-- Graceful handling of missing property data
-- Input validation with user feedback
-- Fallback UI states for loading/errors
-
-## Technical Decisions
-
-### 1. React + TypeScript
-- Type safety for data models
-- Component-based architecture
-- Efficient state management
-
-### 2. Tailwind CSS + Shadcn UI
-- Utility-first styling
-- Responsive design
-- Consistent visual language
-- Accessible components
-
-### 3. Chrome Extension Architecture
-- Content script injection
-- SPA navigation handling
-- Cross-origin communication
-
-## Project Structure
-```
-rental-investment-analyzer/
-├── src/
-│   ├── manifest.json           # Chrome extension manifest
-│   ├── content/               # Content scripts
-│   │   ├── content.tsx        # Main content script
-│   │   └── styles.css         # Content styles
-│   ├── components/            # React components
-│   │   ├── investment/        # Investment analysis
-│   │   │   ├── config-panel.tsx
-│   │   │   └── investment-analysis-panel.tsx
-│   │   ├── ui/               # Shared UI components
-│   │   │   ├── slider.tsx
-│   │   │   ├── card.tsx
-│   │   │   └── ...
-│   │   └── sidebar/          # Sidebar components
-│   ├── constants/            # Constants and configs
-│   │   └── userParams.ts     # Parameter definitions
-│   ├── types/               # TypeScript types
-│   │   ├── propertyData.ts
-│   │   ├── calculationInputs.ts
-│   │   └── configTypes.ts
-│   └── services/            # Business logic
-│       ├── calculator.ts     # Investment calculations
-│       └── dataExtractionService.ts  # Zillow page parsing
-```
-
-## Component Architecture
-
-### 1. Content Script Layer
-```javascript
-// content.js
-class ZillowContentScript {
-    constructor() {
-        this.sidebar = new SidebarManager();
-        this.dataExtractionService = new DataExtractionService();
-        this.propertyAnalyzer = new PropertyAnalyzer();
-    }
-
-    async initialize() {
-        // Inject sidebar
-        // Extract property data
-        // Perform initial analysis
-    }
-}
-```
-
-### 2. Data Extraction Layer
-```javascript
-// dataExtractionService.js
-class DataExtractionService {
-    async extractPropertyData() {
-        return {
-            price: this.extractPrice(),
-            bedrooms: this.extractBedrooms(),
-            bathrooms: this.extractBathrooms(),
-            propertyType: this.extractPropertyType(),
-            // ... other properties
-        };
-    }
-
-    async getRentalEstimate() {
-        // Try Zestimate first
-        // Fallback to HUD data
-    }
-}
-```
-
-### 3. Business Logic Layer
-```javascript
-// propertyAnalyzer.js
-class PropertyAnalyzer {
-    calculateCashFlow(propertyData, config) {
-        const monthlyRent = this.getMonthlyRent(propertyData);
-        const monthlyExpenses = this.calculateMonthlyExpenses(propertyData, config);
-        const monthlyMortgage = this.calculateMortgage(propertyData, config);
-        
-        return {
-            monthly: monthlyRent - monthlyExpenses - monthlyMortgage,
-            annual: (monthlyRent - monthlyExpenses - monthlyMortgage) * 12
-        };
-    }
-}
-```
-
-### 4. Configuration Management
-```javascript
-// configManager.js
-class ConfigManager {
-    async getDefaultConfig() {
-        return chrome.storage.sync.get('defaultConfig');
-    }
-
-    async saveDefaultConfig(config) {
-        return chrome.storage.sync.set({ defaultConfig: config });
-    }
-}
-```
-
-## Data Management
-
-### 1. HUD Data Integration
-- **Data Format**: JSON (processed from CSV/Excel)
-- **Storage**: Bundled with extension
-- **Structure**:
-  ```javascript
-  {
-    "zip_codes": {
-      "12345": {
-        "average_rent": 2000,
-        "bedroom_breakdown": {
-          "1": 1500,
-          "2": 2000,
-          "3": 2500,
-          "4": 3000
-        },
-        "last_updated": "2024-03-01"
-      }
-      // ... other zip codes
-    }
-  }
-  ```
-- **Processing**:
-  - CSV/Excel data will be pre-processed into optimized JSON
-  - Data will be indexed by zip code for fast lookups
-  - Include bedroom-specific rental data where available
-  - Include last updated date for data freshness
-
-### 2. Data Flow Updates
-```
-Get Rental Estimate
-→ Try Zestimate
-→ If Unavailable → Lookup HUD Data by Zip Code
-→ Update UI with Source
-```
-
-### 3. Performance Optimizations
-- Pre-process HUD data into optimized JSON format
-- Index data by zip code for O(1) lookups
-- Load data lazily when needed
-- Cache frequently accessed zip codes
+**Parameters:**
+- Purchase price and down payment
+- Loan terms (interest rate, loan term)
+- Operating expenses (management, maintenance, insurance)
+- Rental income adjustments
 
 ## Data Flow
 
-1. **Page Load**
-   ```
-   Zillow Page Load
-   → Content Script Initializes
-   → Inject Sidebar
-   → Extract Property Data
-   → Get Rental Estimate
-   → Calculate Cash Flow
-   → Update UI
-   ```
+### 1. Property Data Extraction
+```
+Zillow Page → PropertyDataExtractor → PropertyData Interface
+```
 
-2. **Configuration Update**
-   ```
-   User Updates Config
-   → Update Local State
-   → Recalculate Cash Flow
-   → Update UI
-   → (If Save as Default) → Save to Chrome Storage
-   ```
+**Extractors:**
+- `PriceExtractor`: Purchase price from listing
+- `BedBathExtractor`: Bedroom and bathroom count
+- `PropertyTaxExtractor`: Annual property taxes
+- `HoaFeesExtractor`: HOA fees if applicable
+- `RentZestimateExtractor`: Rental estimates from Zillow
+- `ZipCodeExtractor`: Property location data
 
-3. **Rental Estimate Flow**
-   ```
-   Get Rental Estimate
-   → Try Zestimate
-   → If Unavailable → Lookup HUD Data by Zip Code
-   → Update UI with Source
-   ```
+### 2. Investment Calculations
+```
+PropertyData + UserParameters → Calculator Service → CalculatedMetrics
+```
 
-## API Integration
+**Key Metrics:**
+- Monthly Cash Flow
+- Cap Rate
+- Cash-on-Cash Return
+- Total Cash Needed
 
-### 1. Chrome Storage API
-- Used for: Default configurations
-- Scope: Sync storage for user preferences
-- Structure:
-  ```javascript
-  {
-    defaultConfig: {
-      downPayment: 20,
-      mortgageRate: 6.5,
-      propertyManagement: 10,
-      maintenance: 1,
-      vacancyRate: 10
-    }
-  }
-  ```
+### 3. State Management
+```
+User Input → ConfigManager → Chrome Storage → UI Updates
+```
 
-## Security Considerations
+## UI/UX Architecture
 
-1. **Data Handling**
-   - No sensitive data storage
-   - All calculations done client-side
-   - Minimal data persistence (only user preferences)
+### Design System
+- **Color Scheme**: DealWise green (#47A779) with supporting colors
+- **Typography**: System fonts with consistent sizing
+- **Spacing**: Tailwind CSS utility classes
+- **Animations**: Smooth transitions and hover effects
 
-2. **API Security**
-   - API keys stored in extension
-   - Rate limiting implemented
-   - Error handling for API failures
+### Responsive Design
+- **Desktop**: Full sidebar with resizing capabilities
+- **Tablet**: Adaptive sidebar width
+- **Mobile**: Full-width sidebar with touch-friendly controls
 
-3. **Content Security**
-   - Strict CSP in manifest
-   - Sanitized DOM manipulation
-   - Isolated storage
+### Accessibility
+- **Keyboard Navigation**: Tab order and focus management
+- **Screen Readers**: ARIA labels and semantic HTML
+- **Color Contrast**: WCAG compliant color combinations
+- **Touch Targets**: Minimum 44px touch targets
+
+## Chrome Extension Specifics
+
+### Manifest V3 Configuration
+```json
+{
+  "manifest_version": 3,
+  "permissions": ["storage", "activeTab"],
+  "content_scripts": [{
+    "matches": ["*://*.zillow.com/*"],
+    "js": ["content.js"],
+    "css": ["styles.css"]
+  }]
+}
+```
+
+### Content Script Injection
+- **Target Pages**: Zillow property listings
+- **Injection Method**: DOM manipulation with React root
+- **Cleanup**: Proper unmounting and container removal
+- **Navigation**: URL change detection and reinjection
+
+### Storage Management
+- **Chrome Storage**: User preferences and configuration
+- **Data Persistence**: Automatic saving of user parameters
+- **Real-time Updates**: Instant recalculation on parameter changes
 
 ## Performance Considerations
 
-1. **Optimizations**
-   - Lazy loading of sidebar
-   - Debounced calculations
-   - Cached API responses
-   - Efficient DOM updates
+### Bundle Optimization
+- **Code Splitting**: Lazy loading of components
+- **Tree Shaking**: Unused code elimination
+- **Minification**: Production build optimization
+- **Asset Optimization**: Image and icon compression
 
-2. **Resource Usage**
-   - Minimal memory footprint
-   - Efficient event listeners
-   - Cleanup on page unload
+### Runtime Performance
+- **Debounced Updates**: Prevent excessive recalculations
+- **Memoization**: React.memo for expensive components
+- **Efficient Rendering**: Minimal re-renders
+- **Memory Management**: Proper cleanup and garbage collection
 
 ## Testing Strategy
 
-1. **Unit Tests**
-   - Business logic
-   - Data extraction
-   - Configuration management
-   - Utility functions
+### Unit Testing
+- **Jest**: Test framework with jsdom environment
+- **Component Testing**: Individual component behavior
+- **Service Testing**: Business logic validation
+- **Utility Testing**: Helper function coverage
 
-2. **Integration Tests**
-   - End-to-end flows
-   - API integration
-   - Storage operations
+### Integration Testing
+- **Data Extraction**: End-to-end property data extraction
+- **Calculation Accuracy**: Financial metric validation
+- **User Interactions**: Complete user workflow testing
+- **Chrome API**: Extension-specific functionality
 
-3. **UI Tests**
-   - Sidebar rendering
-   - User interactions
-   - Responsive design
+## Security Considerations
 
-## Development Workflow
+### Content Security Policy
+- **No eval()**: Safe JavaScript execution
+- **Resource Restrictions**: Limited external resource access
+- **Data Privacy**: Local processing only
+- **Permission Minimization**: Minimal required permissions
 
-1. **Local Development**
-   - Chrome extension development mode
-   - Hot reloading
-   - DevTools debugging
+### Data Handling
+- **Local Storage**: No external data transmission
+- **Input Validation**: Sanitized user inputs
+- **Error Boundaries**: Graceful error handling
+- **Secure Communication**: Safe message passing
 
-2. **Build Process**
-   - Webpack for bundling
-   - Babel for transpilation
-   - ESLint for code quality
-   - Jest for testing
+## Future Architecture Considerations
 
-3. **Deployment**
-   - Chrome Web Store submission
-   - Version management
-   - Update process
+### Scalability
+- **Component Modularity**: Easy feature additions
+- **Service Layer**: Extensible business logic
+- **Plugin Architecture**: Potential for extensions
+- **API Integration**: Future external service support
 
-## Next Steps
+### Maintainability
+- **Type Safety**: Comprehensive TypeScript coverage
+- **Documentation**: Inline code documentation
+- **Code Standards**: Consistent formatting and patterns
+- **Version Control**: Semantic versioning and changelog
 
-1. **Immediate**
-   - Set up project structure
-   - Create manifest.json
-   - Implement basic sidebar
-   - Set up build process
-   - Process HUD data into JSON format
+---
 
-2. **After Sample HTML**
-   - Implement data extraction
-   - Create selectors
-   - Test parsing logic
-   - Implement HUD data lookup
-   - Refine architecture if needed
-
-3. **Following**
-   - Implement business logic
-   - Add configuration management
-   - Set up testing
-   - Prepare for deployment 
+*Last Updated: December 2024*
+*Architecture Version: 1.0* 

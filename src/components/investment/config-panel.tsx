@@ -39,6 +39,9 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
   // State for inline editing - moved to component level
   const [editingParam, setEditingParam] = useState<string | null>(null);
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  
+  // Track which parameters have been modified from their default values
+  const [modifiedParams, setModifiedParams] = useState<Set<string>>(new Set());
 
   // Update local inputs when props change
   useEffect(() => {
@@ -75,6 +78,18 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
       const newInputs = { ...localInputs, [key]: value };
       setLocalInputs(newInputs);
       setErrors(prev => ({ ...prev, [key]: '' }));
+      
+      // Check if the value is different from the default
+      const defaultValue = userParams.getDefaultValue(key);
+      if (value !== defaultValue) {
+        setModifiedParams(prev => new Set(prev).add(key));
+      } else {
+        setModifiedParams(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(key);
+          return newSet;
+        });
+      }
       
       // Notify parent of change
       if (onConfigChange) {
@@ -196,13 +211,18 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
                 step={param.step ?? 1}
                 min={min}
                 max={max}
-                className="w-20 px-2 py-1 text-sm font-bold text-blue-600 border border-blue-300 rounded focus:border-blue-500 focus:outline-none text-right"
+                className="w-20 px-2 py-1 text-sm font-bold text-green-600 border border-green-300 rounded focus:border-green-500 focus:outline-none text-right"
                 autoFocus
               />
             ) : (
               <button
                 onClick={handleStartEditing}
-                className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                className={cn(
+                  "text-sm font-bold px-2 py-1 rounded transition-colors",
+                  modifiedParams.has(param.id) 
+                    ? "text-blue-600 hover:text-blue-800 hover:bg-blue-50" 
+                    : "text-black hover:text-gray-800 hover:bg-gray-50"
+                )}
               >
                 {formatValue(value, param.unit)}
               </button>
@@ -257,7 +277,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
           className="w-full flex justify-between items-center hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
         >
           <h4 className="font-semibold flex items-center gap-2">
-            <Icon className="h-4 w-4 text-blue-600" />
+            <Icon className="h-4 w-4 text-green-600" />
             {category}
           </h4>
           <ChevronDown className={cn(
@@ -282,10 +302,10 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
   };
 
   return (
-    <Card className={cn("border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50", className)}>
+    <Card className={cn("border-2 border-green-200 bg-gradient-to-r from-green-50 to-lime-50", className)}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <SlidersHorizontal className="h-5 w-5 text-blue-600" />
+          <SlidersHorizontal className="h-5 w-5 text-green-600" />
           Investment Parameters
         </CardTitle>
       </CardHeader>

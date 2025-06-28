@@ -5,11 +5,11 @@ import { PropertyData } from '@/types/propertyData';
 export const DEFAULT_CONFIG_VALUES = {
   closingCosts: 3, // 3% default
   rehabCosts: 0,
-  downPaymentPercentage: 20, // 20% default
-  interestRate: 7.5, // 7.5% default
+  downPaymentPercentage: 25, // 25% default
+  interestRate: 6.95, // 6.95% default
   loanTerm: 30, // 30 years default
   managementRate: 10, // 10% default
-  maintenanceCost: 200, // $200 monthly maintenance default
+  maintenanceCost: 100, // $100 monthly maintenance default
   insuranceCost: 100, // $100 monthly insurance default
   vacancyRate: 10, // 10% default
   otherIncome: 0
@@ -273,7 +273,29 @@ class UserParams {
   }
 
   public getParameterByKey(key: keyof CalculationInputs): ConfigParameter | undefined {
-    return this.configParams.find((param: ConfigParameter) => param.id === key);
+    return this.configParams.find(param => param.id === key);
+  }
+
+  public getDefaultValue(key: keyof CalculationInputs): number {
+    // If the property exists in DEFAULT_CONFIG_VALUES, return that default
+    if (key in DEFAULT_CONFIG_VALUES) {
+      return DEFAULT_CONFIG_VALUES[key as keyof typeof DEFAULT_CONFIG_VALUES];
+    }
+    
+    // For properties not in DEFAULT_CONFIG_VALUES (extracted from listing), return current value
+    switch (key) {
+      case 'purchasePrice':
+      case 'afterRepairValue':
+        return this.propertyData.price ?? 0;
+      case 'rentEstimate':
+        return this.propertyData.rentZestimate ?? 0;
+      case 'propertyTaxes':
+        return (this.propertyData.price ?? 0) * (this.propertyData.propertyTaxRate ?? 0) / (12 * 100);
+      case 'hoaFees':
+        return this.propertyData.hoaFees ?? 0;
+      default:
+        return 0;
+    }
   }
 
   // Update property data (called when new property is selected)

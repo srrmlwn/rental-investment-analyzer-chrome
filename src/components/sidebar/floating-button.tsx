@@ -1,4 +1,4 @@
-import { Calculator } from 'lucide-react';
+import { DealWiseIcon } from '@/components/ui/dealwise-icon';
 import { cn } from '@/lib/utils';
 
 interface FloatingButtonProps {
@@ -13,7 +13,7 @@ export function FloatingButton({ onClick, className }: FloatingButtonProps) {
       className={cn('ria-floating-btn', className)}
       aria-label="Open Investment Analyzer"
     >
-      <Calculator className="w-6 h-6" />
+      <DealWiseIcon className="w-8 h-8" />
     </button>
   );
 } 

@@ -3,10 +3,6 @@ export interface ZillowPropertyJson {
     // Core property fields
     zpid: number;
     price: number;
-    streetAddress: string;
-    city: string;
-    state: string;
-    zipcode: string;
     bedrooms: number;
     bathrooms: number;
     yearBuilt: number;
@@ -23,6 +19,17 @@ export interface ZillowPropertyJson {
     monthlyHoaFee?: number;
     zestimate?: number;
 
+    // Address object structure
+    address: {
+        streetAddress: string;
+        city: string;
+        state: string;
+        zipcode: string;
+        neighborhood?: string | null;
+        community?: string | null;
+        subdivision?: string | null;
+    };
+
     // Complex objects that need to be accessed carefully
     resoFacts: {
         bedrooms?: number;
@@ -38,5 +45,5 @@ export interface ZillowPropertyJson {
     };
 
     // Additional fields that might be present
-    [key: string]: any;
+    [key: string]: any; 
 } 
