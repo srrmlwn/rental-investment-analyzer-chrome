@@ -12,7 +12,8 @@
     "convert-hud-data": "node scripts/convert-hud-data.js",
     "type-check": "tsc --noEmit",
     "prepare": "husky install",
-    "extract-samples": "tsx tests/extractSampleData.ts"
+    "extract-samples": "tsx tests/extractSampleData.ts",
+    "package": "chmod +x package-extension.sh && ./package-extension.sh"
   },
   "keywords": [
     "chrome-extension",
