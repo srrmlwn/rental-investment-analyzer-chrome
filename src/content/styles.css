@@ -834,18 +834,18 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 100%;
-  height: 100%;
+  width: 500px; /* Only cover sidebar width */
+  height: 100vh;
   pointer-events: none;
   z-index: 2147483647;
 }
 
 .ria-floating-btn-container {
   position: fixed;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 2rem;
+  right: 2rem;
+  width: 5rem;
+  height: 5rem;
   pointer-events: none;
   z-index: 2147483646;
 }
