@@ -38,10 +38,11 @@ const calculateSectionSummary = (category: string, inputs: CalculationInputs): s
     }
     
     case CONFIG_CATEGORIES.OPERATING_EXPENSES: {
-      const monthlyPropertyTax = inputs.propertyTaxes / 12;
+      const monthlyPropertyTax = inputs.propertyTaxes;
       const monthlyInsurance = inputs.insuranceCost;
       const monthlyMaintenance = inputs.maintenanceCost;
-      const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
+      const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
+      const monthlyManagement = (effectiveMonthlyRent * inputs.managementRate / 100);
       const monthlyHoaFees = inputs.hoaFees;
       
       const totalMonthlyExpenses = monthlyPropertyTax + monthlyInsurance + 
@@ -68,7 +69,7 @@ describe('Config Panel Section Summaries', () => {
     loanTerm: 30,
     
     // Operating Expenses
-    propertyTaxes: 3600, // Annual
+    propertyTaxes: 300, // Monthly (was 3600 annual, now 300 monthly)
     insuranceCost: 100, // Monthly
     maintenanceCost: 100, // Monthly
     vacancyRate: 10,
@@ -116,17 +117,18 @@ describe('Config Panel Section Summaries', () => {
 
   test('Operating Expenses section shows total monthly expenses (excluding mortgage)', () => {
     const summary = calculateSectionSummary(CONFIG_CATEGORIES.OPERATING_EXPENSES, mockInputs);
-    expect(summary).toBe('(Monthly Expenses: $950)');
+    expect(summary).toBe('(Monthly Expenses: $925)');
     
     // Verify calculation includes all expense components (excluding mortgage)
-    const monthlyPropertyTax = 3600 / 12; // 300
+    const monthlyPropertyTax = 300; // Already monthly in mockInputs
     const monthlyInsurance = 100;
     const monthlyMaintenance = 100;
-    const monthlyManagement = (2500 * 10 / 100); // 250
+    const effectiveMonthlyRent = 2500 * (1 - 10 / 100); // 2250 (after 10% vacancy)
+    const monthlyManagement = (effectiveMonthlyRent * 10 / 100); // 225
     const monthlyHoaFees = 200;
     
-    const expectedExpenses = 300 + 100 + 100 + 250 + 200; // 950
-    expect(expectedExpenses).toBe(950);
+    const expectedExpenses = 300 + 100 + 100 + 225 + 200; // 925
+    expect(expectedExpenses).toBe(925);
   });
 
   test('Summary updates when inputs change', () => {

@@ -62,12 +62,12 @@ const calculateSectionSummary = (category: ConfigCategory, inputs: CalculationIn
     }
     
     case CONFIG_CATEGORIES.OPERATING_EXPENSES: {
-      const monthlyPropertyTax = inputs.propertyTaxes / 12;
+      const monthlyPropertyTax = inputs.propertyTaxes;
       const monthlyInsurance = inputs.insuranceCost;
       const monthlyMaintenance = inputs.maintenanceCost;
-      const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
+      const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
+      const monthlyManagement = (effectiveMonthlyRent * inputs.managementRate / 100);
       const monthlyHoaFees = inputs.hoaFees;
-      
       const totalMonthlyExpenses = monthlyPropertyTax + monthlyInsurance + 
                                   monthlyMaintenance + monthlyManagement + monthlyHoaFees;
       return `(Monthly Expenses: ${formatCurrency(totalMonthlyExpenses)})`;

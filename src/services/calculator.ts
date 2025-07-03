@@ -41,10 +41,11 @@ export function calculateInvestmentMetrics(
     (Math.pow(1 + monthlyRate, numPayments) - 1);
 
   // 3. Calculate monthly expenses
-  const monthlyPropertyTax = inputs.propertyTaxes / 12;  // Use actual property taxes
+  const monthlyPropertyTax = inputs.propertyTaxes;  // Already monthly property taxes
   const monthlyInsurance = inputs.insuranceCost;  // Use monthly insurance cost directly
   const monthlyMaintenance = inputs.maintenanceCost;  // Use monthly maintenance cost directly
-  const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
+  const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
+  const monthlyManagement = (effectiveMonthlyRent * inputs.managementRate / 100);
   const monthlyHoaFees = inputs.hoaFees;  // Use actual HOA fees
   console.log('Monthly expenses', monthlyMortgage, monthlyPropertyTax, monthlyInsurance, monthlyMaintenance, monthlyManagement, monthlyHoaFees);
   const totalMonthlyExpenses =
@@ -56,7 +57,6 @@ export function calculateInvestmentMetrics(
     monthlyHoaFees;
 
   // 4. Calculate effective income
-  const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
   const effectiveGrossIncome = effectiveMonthlyRent + inputs.otherIncome;
   console.log('Effective income', effectiveMonthlyRent, inputs.otherIncome, effectiveGrossIncome);
   // 5. Calculate cash flow

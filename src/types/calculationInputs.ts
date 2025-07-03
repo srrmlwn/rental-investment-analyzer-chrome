@@ -12,7 +12,7 @@ export interface CalculationInputs {
   loanTerm: number;
   
   // Operating Expenses
-  propertyTaxes: number;  // Annual property taxes
+  propertyTaxes: number;  // Monthly property taxes
   insuranceCost: number;  // Monthly insurance cost in dollars
   maintenanceCost: number;  // Monthly maintenance cost in dollars
   vacancyRate: number;
