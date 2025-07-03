@@ -16,7 +16,7 @@ const calculateSectionSummary = (category: string, inputs: CalculationInputs): s
     case CONFIG_CATEGORIES.PURCHASE_AND_REHAB: {
       const downPayment = (inputs.purchasePrice * inputs.downPaymentPercentage) / 100;
       const totalInvestment = downPayment + inputs.closingCosts + inputs.rehabCosts;
-      return `(Total Investment: ${formatCurrency(totalInvestment)})`;
+      return `(Total Cash Needed: ${formatCurrency(totalInvestment)})`;
     }
     
     case CONFIG_CATEGORIES.FINANCING: {
@@ -80,9 +80,9 @@ describe('Config Panel Section Summaries', () => {
     otherIncome: 100, // Monthly
   };
 
-  test('Purchase and Rehab section shows total investment', () => {
+  test('Purchase and Rehab section shows total cash needed', () => {
     const summary = calculateSectionSummary(CONFIG_CATEGORIES.PURCHASE_AND_REHAB, mockInputs);
-    expect(summary).toBe('(Total Investment: $99,000)');
+    expect(summary).toBe('(Total Cash Needed: $99,000)');
     
     // Verify calculation: down payment (75k) + closing costs (9k) + rehab (15k) = 99k
     const expectedDownPayment = (300000 * 25) / 100; // 75,000
