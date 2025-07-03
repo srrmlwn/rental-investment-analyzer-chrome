@@ -264,7 +264,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
                 step={param.step ?? 1}
                 min={min}
                 max={max}
-                className="w-20 px-2 py-1 text-sm font-bold text-green-600 border border-green-300 rounded focus:border-green-500 focus:outline-none text-right"
+                className="w-32 px-2 py-1 text-sm font-bold text-green-600 border border-green-300 rounded focus:border-green-500 focus:outline-none text-right"
                 autoFocus
               />
             ) : (
