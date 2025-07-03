@@ -27,6 +27,7 @@ DealWise is a Chrome extension that provides real-time rental investment analysi
 - ✅ Resizable sidebar with drag handle
 - ✅ Responsive design for different screen sizes
 - ✅ DealWise icon integration throughout UI
+- ✅ Section-wise summary metrics in investment parameters
 
 #### Data & Calculations
 - ✅ Property data extraction (price, beds, baths, taxes, HOA)

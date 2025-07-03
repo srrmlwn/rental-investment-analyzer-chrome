@@ -25,6 +25,59 @@ const CATEGORY_ICONS = {
   [CONFIG_CATEGORIES.OPERATING_EXPENSES]: Calculator,
 } as const;
 
+// Helper function to calculate section summaries
+const calculateSectionSummary = (category: ConfigCategory, inputs: CalculationInputs): string => {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  switch (category) {
+    case CONFIG_CATEGORIES.PURCHASE_AND_REHAB: {
+      const downPayment = (inputs.purchasePrice * inputs.downPaymentPercentage) / 100;
+      const totalInvestment = downPayment + inputs.closingCosts + inputs.rehabCosts;
+      return `(Total Cash Needed: ${formatCurrency(totalInvestment)})`;
+    }
+    
+    case CONFIG_CATEGORIES.FINANCING: {
+      const downPayment = (inputs.purchasePrice * inputs.downPaymentPercentage) / 100;
+      const loanAmount = inputs.purchasePrice - downPayment;
+      const monthlyRate = inputs.interestRate / 100 / 12;
+      const numPayments = inputs.loanTerm * 12;
+      const monthlyMortgage = loanAmount > 0 && monthlyRate > 0 && numPayments > 0
+        ? (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) /
+          (Math.pow(1 + monthlyRate, numPayments) - 1)
+        : 0;
+      return `(Monthly Payment: ${formatCurrency(monthlyMortgage)})`;
+    }
+    
+    case CONFIG_CATEGORIES.OPERATING_INCOME: {
+      const effectiveMonthlyRent = inputs.rentEstimate * (1 - inputs.vacancyRate / 100);
+      const effectiveGrossIncome = effectiveMonthlyRent + inputs.otherIncome;
+      return `(Monthly Income: ${formatCurrency(effectiveGrossIncome)})`;
+    }
+    
+    case CONFIG_CATEGORIES.OPERATING_EXPENSES: {
+      const monthlyPropertyTax = inputs.propertyTaxes / 12;
+      const monthlyInsurance = inputs.insuranceCost;
+      const monthlyMaintenance = inputs.maintenanceCost;
+      const monthlyManagement = (inputs.rentEstimate * inputs.managementRate / 100);
+      const monthlyHoaFees = inputs.hoaFees;
+      
+      const totalMonthlyExpenses = monthlyPropertyTax + monthlyInsurance + 
+                                  monthlyMaintenance + monthlyManagement + monthlyHoaFees;
+      return `(Monthly Expenses: ${formatCurrency(totalMonthlyExpenses)})`;
+    }
+    
+    default:
+      return '';
+  }
+};
+
 export function ConfigPanel({ onConfigChange, inputs, userParams, className }: ConfigPanelProps) {
   // Initialize all sections as expanded
   const [expandedSections, setExpandedSections] = useState<Record<ConfigCategory, boolean>>(
@@ -264,6 +317,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     const Icon = CATEGORY_ICONS[category];
     const isExpanded = expandedSections[category];
     const parameters = userParams.getAllParameters().filter((param: ConfigParameter) => param.category === category);
+    const sectionSummary = calculateSectionSummary(category, localInputs);
 
     if (parameters.length === 0) return null;
 
@@ -276,10 +330,17 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
           }}
           className="w-full flex justify-between items-center hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
         >
-          <h4 className="font-semibold flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Icon className="h-4 w-4 text-green-600" />
-            {category}
-          </h4>
+            <h4 className="font-semibold">
+              {category}
+            </h4>
+            {sectionSummary && (
+              <span className="text-xs text-gray-600 font-normal ml-2">
+                {sectionSummary}
+              </span>
+            )}
+          </div>
           <ChevronDown className={cn(
             "h-4 w-4 text-gray-500 transition-transform duration-200",
             isExpanded && "transform rotate-180"

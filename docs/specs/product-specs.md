@@ -91,24 +91,29 @@ DealWise is a Chrome extension that transforms Zillow browsing into smart invest
 1. **Purchase Parameters**
    - Purchase price and closing costs
    - Rehab costs and after repair value
+   - **Summary**: Total Investment (down payment + closing costs + rehab costs)
 
 2. **Loan Parameters**
    - Down payment percentage
    - Interest rate and loan term
+   - **Summary**: Monthly Mortgage Payment (calculated using standard amortization)
 
 3. **Operating Expenses**
    - Property management rate
    - Maintenance and insurance rates
    - Property taxes and HOA fees
    - Vacancy rate considerations
+   - **Summary**: Total Monthly Expenses (taxes + insurance + maintenance + management + HOA)
 
 4. **Income Parameters**
    - Rent estimates and adjustments
    - Additional income sources
+   - **Summary**: Effective Monthly Income (rent adjusted for vacancy + other income)
 
 **User Experience:**
 - Interactive sliders with real-time feedback
-- Category-based organization
+- Category-based organization with section summaries
+- Real-time summary updates as parameters change
 - Basic and advanced parameter views
 - Persistent user preferences
 
