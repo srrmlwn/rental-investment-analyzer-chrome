@@ -136,7 +136,14 @@ class UserParams {
         useSlider: true,
         getMin: () => 0,
         getMax: () => {
-          const maxValue = !this.propertyData.rentZestimate ? 0.03 * (this.propertyData.price ?? 0) : this.propertyData.rentZestimate * 2;
+          var maxValue = 0;
+          if (this.propertyData.rentZestimate) {
+            maxValue = this.propertyData.rentZestimate * Math.max(4, this.propertyData.units ?? 1);
+          } else if (this.propertyData.hudRentEstimate) {
+            maxValue = this.propertyData.hudRentEstimate * Math.max(4, this.propertyData.units ?? 1);
+          } else {
+            maxValue = 0.03 * (this.propertyData.price ?? 0);
+          }
           return Math.round(maxValue / 1) * 1; // Round to nearest $1
         },
         isErrorValue: (value: number) => value === 0,

@@ -207,10 +207,10 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
       const numericValue = parseFloat(inputValue);
       
       if (!isNaN(numericValue)) {
-        // Clamp to min/max range
-        const clampedValue = Math.max(min, Math.min(max, numericValue));
-        handleConfigChange(param.id, clampedValue);
-        setInputValues(prev => ({ ...prev, [param.id]: clampedValue.toString() }));
+        // Accept user input, but ensure it's at least the minimum
+        const acceptedValue = Math.max(min, numericValue);
+        handleConfigChange(param.id, acceptedValue);
+        setInputValues(prev => ({ ...prev, [param.id]: acceptedValue.toString() }));
       } else {
         // Reset to current value if invalid
         setInputValues(prev => ({ ...prev, [param.id]: value.toString() }));
@@ -263,7 +263,7 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
                 onKeyDown={handleInputKeyDown}
                 step={param.step ?? 1}
                 min={min}
-                max={max}
+                max={Math.max(max, value)} // Dynamic max that adjusts to current value
                 className="w-32 px-2 py-1 text-sm font-bold text-green-600 border border-green-300 rounded focus:border-green-500 focus:outline-none text-right"
                 autoFocus
               />
@@ -286,13 +286,13 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
           value={[value]}
           onValueChange={handleSliderChange}
           min={min}
-          max={max}
+          max={Math.max(max, value)} // Dynamic max that adjusts to current value
           step={param.step ?? 1}
           className="w-full"
         />
         <div className="flex justify-between text-xs text-gray-500">
           <span>{formatValue(min, param.unit)}</span>
-          <span>{formatValue(max, param.unit)}</span>
+          <span>{formatValue(Math.max(max, value), param.unit)}</span>
         </div>
         {error && (
           <p className="text-xs text-red-500 mt-1">
