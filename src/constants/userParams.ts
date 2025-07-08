@@ -137,10 +137,11 @@ class UserParams {
         getMin: () => 0,
         getMax: () => {
           var maxValue = 0;
+          var unitMultiplier = this.propertyData.units ? this.propertyData.units * 4 : 4;
           if (this.propertyData.rentZestimate) {
-            maxValue = this.propertyData.rentZestimate * Math.max(4, this.propertyData.units ?? 1);
+            maxValue = this.propertyData.rentZestimate * Math.max(4, unitMultiplier);
           } else if (this.propertyData.hudRentEstimate) {
-            maxValue = this.propertyData.hudRentEstimate * Math.max(4, this.propertyData.units ?? 1);
+            maxValue = this.propertyData.hudRentEstimate * Math.max(4, unitMultiplier);
           } else {
             maxValue = 0.03 * (this.propertyData.price ?? 0);
           }

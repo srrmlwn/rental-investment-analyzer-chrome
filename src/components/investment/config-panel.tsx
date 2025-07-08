@@ -117,13 +117,17 @@ export function ConfigPanel({ onConfigChange, inputs, userParams, className }: C
     if (!param) return;
 
     try {
-      if (value < param.getMin() || value > param.getMax()) {
+      // Use dynamic max that adjusts to current value, similar to UI
+      const min = param.getMin();
+      const originalMax = param.getMax();
+      const currentValue = localInputs[key];
+      const dynamicMax = Math.max(originalMax, currentValue);
+      
+      if (value < min) {
         throw new Error(
-          `Invalid value for ${param.label}: must be between ${
+          `Invalid value for ${param.label}: must be at least ${
             param.type === 'currency' ? '$' : ''
-          }${param.getMin().toLocaleString()} and ${
-            param.type === 'currency' ? '$' : ''
-          }${param.getMax().toLocaleString()}`
+          }${min.toLocaleString()}`
         );
       }
 

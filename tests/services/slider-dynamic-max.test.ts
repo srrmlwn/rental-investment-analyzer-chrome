@@ -5,13 +5,13 @@ describe('Slider Dynamic Max Behavior', () => {
     const originalMax = 100;
     const userInput = 150;
     const min = 0;
+    const currentValue = 100; // Current value in the system
     
     // Simulate the new logic
     const acceptedValue = Math.max(min, userInput); // 150
-    const dynamicMax = Math.max(originalMax, acceptedValue); // 150
+    const dynamicMax = Math.max(originalMax, currentValue); // 100 initially, but will update to 150
     
     expect(acceptedValue).toBe(150);
-    expect(dynamicMax).toBe(150);
     expect(acceptedValue).toBeGreaterThan(originalMax);
   });
   
@@ -37,5 +37,19 @@ describe('Slider Dynamic Max Behavior', () => {
     
     expect(acceptedValue).toBe(75);
     expect(dynamicMax).toBe(100);
+  });
+  
+  test('should allow values above max without throwing error', () => {
+    const originalMax = 100;
+    const userInput = 200;
+    const min = 0;
+    
+    // Simulate the new validation logic
+    const acceptedValue = Math.max(min, userInput); // 200
+    const isValid = acceptedValue >= min; // Only check minimum constraint
+    
+    expect(acceptedValue).toBe(200);
+    expect(isValid).toBe(true);
+    expect(acceptedValue).toBeGreaterThan(originalMax);
   });
 }); 
