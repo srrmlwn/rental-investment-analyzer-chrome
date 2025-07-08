@@ -41,7 +41,10 @@ function App() {
 
   return (
     <>
-      <div id="ria-sidebar-container" className="ria-sidebar-container">
+      <div 
+        id="ria-sidebar-container" 
+        className={`ria-sidebar-container ${isSidebarOpen ? 'has-open-sidebar' : ''}`}
+      >
         <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} />
       </div>
       {!isSidebarOpen && (

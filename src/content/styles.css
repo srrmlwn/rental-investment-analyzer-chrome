@@ -840,6 +840,14 @@
   z-index: 2147483647;
 }
 
+/* When sidebar is closed, make container completely transparent to pointer events */
+.ria-sidebar-container:not(.has-open-sidebar) {
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .ria-floating-btn-container {
   position: fixed;
   bottom: 2rem;
